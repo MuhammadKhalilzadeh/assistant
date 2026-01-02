@@ -1,4 +1,4 @@
-import 'package:assistant/presentation/pages/splash/index.dart';
+import 'package:assistant/presentation/pages/introduction/index.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const SplashPage(),
+      home: const RegisterPage(),
     );
   }
 }
