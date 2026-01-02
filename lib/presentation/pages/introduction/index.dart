@@ -63,16 +63,13 @@ class _RegisterPageState extends State<RegisterPage> {
               child: CustomButton(
                 text: 'Continue',
                 onPressed: () {
-                  final nickname = _nicknameController.text;
-                  if (nickname.isNotEmpty) {
-                    // Navigate to Gmail connection page
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const GmailConnectionPage(),
-                      ),
-                    );
-                  }
+                  // Navigate to Gmail connection page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const GmailConnectionPage(),
+                    ),
+                  );
                 },
               ),
             ),

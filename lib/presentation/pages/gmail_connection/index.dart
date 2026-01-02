@@ -1,6 +1,7 @@
 import 'package:assistant/presentation/constants/ui.dart';
 import 'package:assistant/presentation/widgets/buttons/custom_button.dart';
 import 'package:assistant/services/auth_service.dart';
+import 'package:assistant/presentation/pages/dashboard/index.dart';
 import 'package:flutter/material.dart';
 
 class GmailConnectionPage extends StatefulWidget {
@@ -24,18 +25,11 @@ class _GmailConnectionPageState extends State<GmailConnectionPage> {
       final user = await _authService.signInWithGoogle();
       
       if (mounted && user != null) {
-        // Navigate to next page or show success
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gmail connected successfully!'),
-            backgroundColor: Colors.green,
-          ),
+        // Navigate to Dashboard
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Dashboard()),
         );
-        
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => HomePage()),
-        // );
       }
     } catch (e) {
       if (mounted) {
@@ -130,11 +124,11 @@ class _GmailConnectionPageState extends State<GmailConnectionPage> {
                 onPressed: _isConnecting
                     ? null
                     : () {
-                        // Navigate to next page or handle skip
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => HomePage()),
-                        // );
+                        // Navigate to Dashboard
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Dashboard()),
+                        );
                       },
               ),
             ),
