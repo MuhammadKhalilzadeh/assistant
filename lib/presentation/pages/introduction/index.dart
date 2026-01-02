@@ -1,6 +1,7 @@
 import 'package:assistant/presentation/constants/ui.dart';
 import 'package:assistant/presentation/widgets/textfields/custom_text_field.dart';
 import 'package:assistant/presentation/widgets/buttons/custom_button.dart';
+import 'package:assistant/presentation/pages/gmail_connection/index.dart';
 import 'package:flutter/material.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -64,7 +65,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 onPressed: () {
                   final nickname = _nicknameController.text;
                   if (nickname.isNotEmpty) {
-                    // Process nickname
+                    // Navigate to Gmail connection page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const GmailConnectionPage(),
+                      ),
+                    );
                   }
                 },
               ),
