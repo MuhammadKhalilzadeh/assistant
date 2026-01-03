@@ -1,5 +1,6 @@
 import 'package:assistant/presentation/widgets/bottom_navigation_bar/custom_bottom_navigation_bar.dart';
 import 'package:assistant/presentation/widgets/cards/custom_sleep_duration_tracker_card.dart';
+import 'package:assistant/presentation/widgets/cards/custom_steps_tracker_card.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
@@ -69,6 +70,12 @@ class _HomeTab extends StatelessWidget {
               CustomSleepDurationTrackerCard(
                 onTap: () {
                   // Navigate to sleep details (future)
+                },
+              ),
+              SizedBox(height: paddingValue),
+              CustomStepsTrackerCard(
+                onTap: () {
+                  // Navigate to steps details (future)
                 },
               ),
             ],
