@@ -1,4 +1,5 @@
 import 'package:assistant/presentation/widgets/bottom_navigation_bar/custom_bottom_navigation_bar.dart';
+import 'package:assistant/presentation/widgets/cards/custom_sleep_duration_tracker_card.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
@@ -55,7 +56,26 @@ class _HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center();
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double paddingValue = (screenWidth * 0.04).clamp(16.0, 24.0);
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(paddingValue),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CustomSleepDurationTrackerCard(
+                onTap: () {
+                  // Navigate to sleep details (future)
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
