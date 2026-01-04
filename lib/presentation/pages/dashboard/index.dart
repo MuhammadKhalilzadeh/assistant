@@ -2,6 +2,7 @@ import 'package:assistant/presentation/widgets/bottom_navigation_bar/custom_bott
 import 'package:assistant/presentation/widgets/cards/custom_general_inbox_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_sleep_duration_tracker_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_steps_tracker_card.dart';
+import 'package:assistant/presentation/widgets/cards/custom_water_intake_card.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
@@ -73,6 +74,17 @@ class _HomeTab extends StatelessWidget {
                 servicesCount: 2,
                 onTap: () {
                   // Navigate to inbox (future)
+                },
+              ),
+              SizedBox(height: paddingValue),
+              CustomWaterIntakeCard(
+                currentIntake: 0,
+                goalIntake: 3000,
+                onTap: () {
+                  // Navigate to water intake details (future)
+                },
+                onAddPressed: () {
+                  // Add water intake (future)
                 },
               ),
               SizedBox(height: paddingValue),
