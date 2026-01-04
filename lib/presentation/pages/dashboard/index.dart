@@ -1,4 +1,5 @@
 import 'package:assistant/presentation/widgets/bottom_navigation_bar/custom_bottom_navigation_bar.dart';
+import 'package:assistant/presentation/widgets/cards/custom_general_inbox_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_sleep_duration_tracker_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_steps_tracker_card.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +68,14 @@ class _HomeTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              CustomGeneralInboxCard(
+                unreadCount: 37,
+                servicesCount: 2,
+                onTap: () {
+                  // Navigate to inbox (future)
+                },
+              ),
+              SizedBox(height: paddingValue),
               CustomSleepDurationTrackerCard(
                 onTap: () {
                   // Navigate to sleep details (future)
