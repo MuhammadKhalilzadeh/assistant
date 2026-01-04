@@ -2,6 +2,7 @@ import 'package:assistant/presentation/widgets/bottom_navigation_bar/custom_bott
 import 'package:assistant/presentation/widgets/cards/custom_general_inbox_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_sleep_duration_tracker_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_steps_tracker_card.dart';
+import 'package:assistant/presentation/widgets/cards/custom_todos_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_water_intake_card.dart';
 import 'package:flutter/material.dart';
 
@@ -69,6 +70,17 @@ class _HomeTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              CustomTodosCard(
+                totalTodos: 5,
+                completedTodos: 2,
+                onTap: () {
+                  // Navigate to todos list (future)
+                },
+                onAddPressed: () {
+                  // Add new todo (future)
+                },
+              ),
+              SizedBox(height: paddingValue),
               CustomGeneralInboxCard(
                 unreadCount: 37,
                 servicesCount: 2,
