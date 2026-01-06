@@ -1,10 +1,10 @@
-import 'package:assistant/presentation/constants/ui.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
-/// A custom bottom navigation bar widget
+/// A modern custom bottom navigation bar widget
 /// 
 /// This widget provides a flexible and reusable bottom navigation bar
-/// with customizable items and styling.
+/// with customizable items and modern styling.
 class CustomBottomNavigationBar extends StatelessWidget {
   /// Current selected index
   final int currentIndex;
@@ -26,22 +26,38 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        color: AppTheme.surfaceColor,
+        boxShadow: AppTheme.cardShadow,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(AppTheme.borderRadiusLarge),
+          topRight: Radius.circular(AppTheme.borderRadiusLarge),
+        ),
       ),
-      child: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: onTap,
-        items: items,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: primaryColor,
-        unselectedItemColor: Colors.grey,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(AppTheme.borderRadiusLarge),
+          topRight: Radius.circular(AppTheme.borderRadiusLarge),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: currentIndex,
+          onTap: onTap,
+          items: items,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: AppTheme.surfaceColor,
+          selectedItemColor: AppTheme.primaryColor,
+          unselectedItemColor: AppTheme.textSecondary,
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w400,
+            fontSize: 12,
+          ),
+          elevation: 0,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+        ),
       ),
     );
   }

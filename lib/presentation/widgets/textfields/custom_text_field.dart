@@ -1,4 +1,4 @@
-import 'package:assistant/presentation/constants/ui.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 /// A reusable custom text field widget
@@ -70,7 +70,6 @@ class _CustomTextFieldState extends State<CustomTextField>
     with SingleTickerProviderStateMixin {
   late FocusNode _focusNode;
   late AnimationController _animationController;
-  late Animation<double> _animation;
   bool _isFocused = false;
 
   @override
@@ -82,11 +81,6 @@ class _CustomTextFieldState extends State<CustomTextField>
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
-    );
-    
-    _animation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
     );
   }
 
@@ -128,74 +122,71 @@ class _CustomTextFieldState extends State<CustomTextField>
               fontSize: 16,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppTheme.spacingSM),
         ],
         LayoutBuilder(
           builder: (context, constraints) {
             return Stack(
               children: [
-                TextFormField(
-                  controller: widget.controller,
-                  obscureText: widget.obscureText,
-                  keyboardType: widget.keyboardType,
-                  validator: widget.validator,
-                  maxLines: widget.maxLines,
-                  enabled: widget.enabled,
-                  onChanged: widget.onChanged,
-                  onFieldSubmitted: widget.onSubmitted,
-                  focusNode: _focusNode,
-                  style: const TextStyle(
-                    color: Colors.white,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: widget.hint,
-                    hintStyle: const TextStyle(
-                      color: Colors.white,
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+                    border: Border.all(
+                      color: _isFocused
+                          ? Colors.white.withValues(alpha: 0.5)
+                          : Colors.white.withValues(alpha: 0.2),
+                      width: _isFocused ? 2 : 1,
                     ),
-                    prefixIcon: widget.prefixIcon != null 
-                        ? Icon(
-                            widget.prefixIcon,
-                            color: Colors.white,
-                          ) 
+                    boxShadow: _isFocused
+                        ? [
+                            BoxShadow(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
                         : null,
-                    suffixIcon: widget.suffixIcon,
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    focusedErrorBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    filled: true,
-                    fillColor: widget.enabled ? primaryColor : Colors.grey.shade100,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
+                  ),
+                  child: TextFormField(
+                    controller: widget.controller,
+                    obscureText: widget.obscureText,
+                    keyboardType: widget.keyboardType,
+                    validator: widget.validator,
+                    maxLines: widget.maxLines,
+                    enabled: widget.enabled,
+                    onChanged: widget.onChanged,
+                    onFieldSubmitted: widget.onSubmitted,
+                    focusNode: _focusNode,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
                     ),
-                  ),
-                ),
-                // Thin bottom border (always visible)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    height: 1,
-                    color: Colors.white,
-                  ),
-                ),
-                // Animated thick bottom border (when focused)
-                Positioned(
-                  left: 0,
-                  bottom: 0,
-                  child: AnimatedBuilder(
-                    animation: _animation,
-                    builder: (context, child) {
-                      return Container(
-                        height: _isFocused ? 3 : 0,
-                        width: constraints.maxWidth * _animation.value,
-                        color: Colors.white,
-                      );
-                    },
+                    decoration: InputDecoration(
+                      hintText: widget.hint,
+                      hintStyle: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 16,
+                      ),
+                      prefixIcon: widget.prefixIcon != null 
+                          ? Icon(
+                              widget.prefixIcon,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ) 
+                          : null,
+                      suffixIcon: widget.suffixIcon,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      filled: false,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.spacingMD,
+                        vertical: AppTheme.spacingMD,
+                      ),
+                    ),
                   ),
                 ),
               ],

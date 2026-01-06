@@ -1,4 +1,4 @@
-import 'package:assistant/presentation/constants/ui.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 /// A reusable steps tracker card widget
@@ -69,7 +69,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? primaryColor;
+    final Color bgColor = backgroundColor ?? AppTheme.primaryColor;
     final Color fgColor = foregroundColor ?? Colors.white;
     // White with 50% opacity for progress fill
     final Color progColor = progressColor ?? 
@@ -84,8 +84,12 @@ class CustomStepsTrackerCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            color: bgColor,
+            gradient: backgroundColor == null
+                ? AppTheme.primaryGradient
+                : null,
+            color: backgroundColor,
             borderRadius: BorderRadius.circular(borderRadius),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: Padding(
             padding: EdgeInsets.all(responsivePadding.clamp(16.0, 24.0)),

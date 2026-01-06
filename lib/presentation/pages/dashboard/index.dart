@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/widgets/bottom_navigation_bar/custom_bottom_navigation_bar.dart';
 import 'package:assistant/presentation/widgets/cards/custom_calendar_events_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_calorie_intake_card.dart';
@@ -74,12 +75,23 @@ class _HomeTab extends StatelessWidget {
     final double paddingValue = (screenWidth * 0.04).clamp(16.0, 24.0);
 
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(paddingValue),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppTheme.backgroundColor,
+              AppTheme.surfaceColor,
+            ],
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(paddingValue),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               // Productivity Section
               CustomTodosCard(
                 totalTodos: 5,
@@ -186,7 +198,8 @@ class _HomeTab extends StatelessWidget {
                 onTap: () {},
                 onStartPressed: () {},
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -199,6 +212,52 @@ class _JarvisTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center();
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppTheme.backgroundColor,
+            AppTheme.surfaceColor,
+          ],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                gradient: AppTheme.primaryGradient,
+                shape: BoxShape.circle,
+                boxShadow: AppTheme.elevatedShadow,
+              ),
+              child: const Icon(
+                Icons.auto_awesome,
+                size: 50,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: AppTheme.spacingLG),
+            Text(
+              'Jarvis Assistant',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: AppTheme.spacingSM),
+            Text(
+              'Your AI assistant is ready to help',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

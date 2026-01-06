@@ -1,4 +1,4 @@
-import 'package:assistant/presentation/constants/ui.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 enum WeatherCondition { sunny, cloudy, rainy, stormy, snowy, partlyCloudy }
@@ -65,7 +65,7 @@ class CustomWeatherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? primaryColor;
+    final Color bgColor = backgroundColor ?? AppTheme.primaryColor;
     final Color fgColor = foregroundColor ?? Colors.white;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double responsivePadding = screenWidth * 0.05;
@@ -77,8 +77,12 @@ class CustomWeatherCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            color: bgColor,
+            gradient: backgroundColor == null
+                ? AppTheme.secondaryGradient
+                : null,
+            color: backgroundColor,
             borderRadius: BorderRadius.circular(borderRadius),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: Padding(
             padding: EdgeInsets.all(responsivePadding.clamp(16.0, 24.0)),
@@ -113,7 +117,7 @@ class CustomWeatherCard extends StatelessWidget {
         color: fgColor,
         borderRadius: BorderRadius.circular(containerRadius),
       ),
-      child: Icon(_weatherIcon, color: backgroundColor ?? primaryColor, size: iconSize),
+      child: Icon(_weatherIcon, color: backgroundColor ?? AppTheme.primaryColor, size: iconSize),
     );
   }
 

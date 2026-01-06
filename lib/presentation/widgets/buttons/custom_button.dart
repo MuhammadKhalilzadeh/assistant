@@ -1,11 +1,11 @@
-import 'package:assistant/presentation/constants/ui.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
-/// A reusable custom button widget
+/// A modern, reusable custom button widget
 /// 
 /// This widget provides a consistent styling and behavior for buttons
-/// throughout the application, aligned with the app's design theme.
-class CustomButton extends StatelessWidget {
+/// throughout the application, aligned with the app's modern design theme.
+class CustomButton extends StatefulWidget {
   /// The text displayed on the button
   final String text;
   
@@ -38,6 +38,9 @@ class CustomButton extends StatelessWidget {
   
   /// Font weight
   final FontWeight fontWeight;
+  
+  /// Whether to use gradient background
+  final bool useGradient;
 
   const CustomButton({
     super.key,
@@ -49,61 +52,145 @@ class CustomButton extends StatelessWidget {
     this.isLoading = false,
     this.backgroundColor,
     this.textColor,
-    this.borderRadius = 12,
+    this.borderRadius = AppTheme.borderRadiusMedium,
     this.fontSize = 16,
     this.fontWeight = FontWeight.w600,
+    this.useGradient = false,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final bool isButtonEnabled = enabled && onPressed != null && !isLoading;
-    final Color buttonBackgroundColor = backgroundColor ?? Colors.white;
-    final Color buttonTextColor = textColor ?? primaryColor;
+  State<CustomButton> createState() => _CustomButtonState();
+}
 
-    return SizedBox(
-      width: width,
-      child: ElevatedButton(
-        onPressed: isButtonEnabled ? onPressed : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: buttonBackgroundColor,
-          foregroundColor: buttonTextColor,
-          disabledBackgroundColor: buttonBackgroundColor.withValues(alpha: 0.5),
-          disabledForegroundColor: buttonTextColor.withValues(alpha: 0.5),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-        ),
-        child: isLoading
-            ? SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(buttonTextColor),
+class _CustomButtonState extends State<CustomButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    _animationController.forward();
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    _animationController.reverse();
+  }
+
+  void _handleTapCancel() {
+    _animationController.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isButtonEnabled = widget.enabled &&
+        widget.onPressed != null &&
+        !widget.isLoading;
+    final Color buttonBackgroundColor =
+        widget.backgroundColor ?? AppTheme.surfaceColor;
+    final Color buttonTextColor =
+        widget.textColor ?? AppTheme.primaryColor;
+
+    return GestureDetector(
+      onTapDown: isButtonEnabled ? _handleTapDown : null,
+      onTapUp: isButtonEnabled ? _handleTapUp : null,
+      onTapCancel: isButtonEnabled ? _handleTapCancel : null,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: SizedBox(
+          width: widget.width,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: isButtonEnabled ? widget.onPressed : null,
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: widget.useGradient && isButtonEnabled
+                      ? AppTheme.primaryGradient
+                      : null,
+                  color: widget.useGradient
+                      ? null
+                      : (isButtonEnabled
+                          ? buttonBackgroundColor
+                          : buttonBackgroundColor.withValues(alpha: 0.5)),
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+                  boxShadow: isButtonEnabled
+                      ? [
+                          BoxShadow(
+                            color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : null,
                 ),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    Icon(
-                      icon,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(
-                    text,
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: fontWeight,
-                    ),
-                  ),
-                ],
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spacingLG,
+                  vertical: AppTheme.spacingMD,
+                ),
+                child: widget.isLoading
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            widget.useGradient
+                                ? AppTheme.textOnPrimary
+                                : buttonTextColor,
+                          ),
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (widget.icon != null) ...[
+                            Icon(
+                              widget.icon,
+                              size: 20,
+                              color: widget.useGradient
+                                  ? AppTheme.textOnPrimary
+                                  : buttonTextColor,
+                            ),
+                            const SizedBox(width: AppTheme.spacingSM),
+                          ],
+                          Text(
+                            widget.text,
+                            style: TextStyle(
+                              fontSize: widget.fontSize,
+                              fontWeight: widget.fontWeight,
+                              color: widget.useGradient
+                                  ? AppTheme.textOnPrimary
+                                  : (isButtonEnabled
+                                      ? buttonTextColor
+                                      : buttonTextColor.withValues(alpha: 0.5)),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
               ),
+            ),
+          ),
+        ),
       ),
     );
   }

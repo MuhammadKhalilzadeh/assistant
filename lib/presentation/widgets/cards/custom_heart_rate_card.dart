@@ -1,4 +1,4 @@
-import 'package:assistant/presentation/constants/ui.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class CustomHeartRateCard extends StatelessWidget {
@@ -31,7 +31,7 @@ class CustomHeartRateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? primaryColor;
+    final Color bgColor = backgroundColor ?? AppTheme.primaryColor;
     final Color fgColor = foregroundColor ?? Colors.white;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double responsivePadding = screenWidth * 0.05;
@@ -43,8 +43,12 @@ class CustomHeartRateCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            color: bgColor,
+            gradient: backgroundColor == null
+                ? AppTheme.primaryGradient
+                : null,
+            color: backgroundColor,
             borderRadius: BorderRadius.circular(borderRadius),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: Padding(
             padding: EdgeInsets.all(responsivePadding.clamp(16.0, 24.0)),
