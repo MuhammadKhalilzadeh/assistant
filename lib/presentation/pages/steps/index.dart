@@ -55,13 +55,16 @@ class StepsPage extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Steps',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Steps',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -91,10 +94,10 @@ class StepsPage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: AppTheme.spacingLG),
           SizedBox(
-            width: screenWidth * 0.5,
-            height: screenWidth * 0.5,
+            width: (screenWidth * 0.5).clamp(150.0, 250.0),
+            height: (screenWidth * 0.5).clamp(150.0, 250.0),
             child: CustomPaint(
               painter: _StepsProgressPainter(progress),
               child: Center(
@@ -102,7 +105,7 @@ class StepsPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.directions_walk, color: Colors.white, size: 32),
-                    const SizedBox(height: 8),
+                    SizedBox(height: AppTheme.spacingSM),
                     Text(
                       _formatNumber(steps),
                       style: const TextStyle(
@@ -123,7 +126,7 @@ class StepsPage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMD),
           Text(
             progress >= 1.0
                 ? 'Goal achieved! Keep it up!'
@@ -150,11 +153,10 @@ class StepsPage extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem(Icons.straighten, '${distance.toStringAsFixed(1)} km', 'Distance'),
-          _buildStatItem(Icons.local_fire_department, '$calories', 'Calories'),
-          _buildStatItem(Icons.timer, '${(todaySteps?.steps ?? 0) ~/ 100} min', 'Active'),
+          Expanded(child: _buildStatItem(Icons.straighten, '${distance.toStringAsFixed(1)} km', 'Distance')),
+          Expanded(child: _buildStatItem(Icons.local_fire_department, '$calories', 'Calories')),
+          Expanded(child: _buildStatItem(Icons.timer, '${(todaySteps?.steps ?? 0) ~/ 100} min', 'Active')),
         ],
       ),
     );
@@ -164,7 +166,7 @@ class StepsPage extends StatelessWidget {
     return Column(
       children: [
         Icon(icon, color: Colors.white, size: 24),
-        const SizedBox(height: 8),
+        SizedBox(height: AppTheme.spacingSM),
         Text(
           value,
           style: const TextStyle(
@@ -216,7 +218,7 @@ class StepsPage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: AppTheme.spacingMD),
         Container(
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
@@ -241,7 +243,7 @@ class StepsPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: AppTheme.spacingSM),
                   Text(
                     entry.key,
                     style: TextStyle(

@@ -73,13 +73,16 @@ class HeartRatePage extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Heart Rate',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Heart Rate',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -109,7 +112,7 @@ class HeartRatePage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: AppTheme.spacingLG),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -118,55 +121,61 @@ class HeartRatePage extends StatelessWidget {
                 color: _getZoneColor(zone),
                 size: 48,
               ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '$bpm',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 64,
-                          fontWeight: FontWeight.bold,
-                          height: 1,
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 8, left: 4),
-                        child: Text(
-                          'BPM',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w300,
+              SizedBox(width: AppTheme.spacingMD),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '$bpm',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: (screenWidth * 0.15).clamp(40.0, 64.0),
+                              fontWeight: FontWeight.bold,
+                              height: 1,
+                            ),
                           ),
-                        ),
+                          Padding(
+                            padding: EdgeInsets.only(bottom: AppTheme.spacingSM, left: AppTheme.spacingXS),
+                            child: const Text(
+                              'BPM',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingSM + AppTheme.spacingXS, vertical: AppTheme.spacingXS),
                     decoration: BoxDecoration(
                       color: _getZoneColor(zone).withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      zoneLabel,
-                      style: TextStyle(
-                        color: _getZoneColor(zone),
-                        fontWeight: FontWeight.w600,
+                      child: Text(
+                        zoneLabel,
+                        style: TextStyle(
+                          color: _getZoneColor(zone),
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
           if (record != null) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingMD),
             Text(
               'Last updated ${_formatTimeAgo(record.recordedAt)}',
               style: TextStyle(
@@ -189,11 +198,10 @@ class HeartRatePage extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem(Icons.bedtime, '$resting', 'Resting'),
-          _buildStatItem(Icons.favorite, '${latest?.bpm ?? 0}', 'Current'),
-          _buildStatItem(Icons.trending_up, '${(latest?.bpm ?? 0) + 20}', 'Max Today'),
+          Expanded(child: _buildStatItem(Icons.bedtime, '$resting', 'Resting')),
+          Expanded(child: _buildStatItem(Icons.favorite, '${latest?.bpm ?? 0}', 'Current')),
+          Expanded(child: _buildStatItem(Icons.trending_up, '${(latest?.bpm ?? 0) + 20}', 'Max Today')),
         ],
       ),
     );
@@ -203,7 +211,7 @@ class HeartRatePage extends StatelessWidget {
     return Column(
       children: [
         Icon(icon, color: Colors.white, size: 24),
-        const SizedBox(height: 8),
+        SizedBox(height: AppTheme.spacingSM),
         Text(
           value,
           style: const TextStyle(
@@ -250,9 +258,9 @@ class HeartRatePage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
           ...zones.map((zone) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: EdgeInsets.only(bottom: AppTheme.spacingSM),
             child: Row(
               children: [
                 Container(
@@ -263,7 +271,7 @@ class HeartRatePage extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
                 Expanded(
                   child: Text(
                     zone.$3,
@@ -304,9 +312,9 @@ class HeartRatePage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...records.take(10).map((record) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
+          margin: EdgeInsets.only(bottom: AppTheme.spacingSM),
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
@@ -319,7 +327,7 @@ class HeartRatePage extends StatelessWidget {
                 color: _getZoneColor(record.zone),
                 size: 20,
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
               Expanded(
                 child: Text(
                   '${record.bpm} BPM',
@@ -330,7 +338,7 @@ class HeartRatePage extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingSM, vertical: 2),
                 decoration: BoxDecoration(
                   color: _getZoneColor(record.zone).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
@@ -344,7 +352,7 @@ class HeartRatePage extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
               Text(
                 _formatTimeAgo(record.recordedAt),
                 style: TextStyle(

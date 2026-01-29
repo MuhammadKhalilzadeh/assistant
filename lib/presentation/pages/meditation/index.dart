@@ -170,13 +170,16 @@ class _MeditationPageState extends State<MeditationPage>
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Meditation',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Meditation',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -203,11 +206,12 @@ class _MeditationPageState extends State<MeditationPage>
               animation: _breathController,
               builder: (context, child) {
                 final scale = 0.8 + (_breathController.value * 0.4);
+                final breathSize = (screenWidth * 0.3).clamp(80.0, 120.0);
                 return Transform.scale(
                   scale: scale,
                   child: Container(
-                    width: screenWidth * 0.3,
-                    height: screenWidth * 0.3,
+                    width: breathSize,
+                    height: breathSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white.withValues(alpha: 0.2),
@@ -227,8 +231,8 @@ class _MeditationPageState extends State<MeditationPage>
             )
           else
             SizedBox(
-              width: screenWidth * 0.4,
-              height: screenWidth * 0.4,
+              width: (screenWidth * 0.4).clamp(120.0, 200.0),
+              height: (screenWidth * 0.4).clamp(120.0, 200.0),
               child: CustomPaint(
                 painter: _MeditationProgressPainter(progress),
                 child: Center(
@@ -240,7 +244,7 @@ class _MeditationPageState extends State<MeditationPage>
                         color: Colors.white,
                         size: 32,
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppTheme.spacingSM),
                       Text(
                         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
                         style: const TextStyle(
@@ -255,12 +259,12 @@ class _MeditationPageState extends State<MeditationPage>
                 ),
               ),
             ),
-          const SizedBox(height: 24),
+          SizedBox(height: AppTheme.spacingLG),
           GestureDetector(
             onTap: _isRunning ? _pauseSession : _startSession,
             child: Container(
-              width: 72,
-              height: 72,
+              width: (screenWidth * 0.18).clamp(56.0, 80.0),
+              height: (screenWidth * 0.18).clamp(56.0, 80.0),
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
@@ -303,16 +307,16 @@ class _MeditationPageState extends State<MeditationPage>
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppTheme.spacingSM,
+            runSpacing: AppTheme.spacingSM,
             children: MeditationType.values.map((type) {
               final isSelected = type == _selectedType;
               return GestureDetector(
                 onTap: () => setState(() => _selectedType = type),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingSM + AppTheme.spacingXS, vertical: AppTheme.spacingSM),
                   decoration: BoxDecoration(
                     color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -325,7 +329,7 @@ class _MeditationPageState extends State<MeditationPage>
                         color: isSelected ? AppTheme.accentColor : Colors.white,
                         size: 18,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: AppTheme.spacingXS),
                       Text(
                         _getTypeName(type),
                         style: TextStyle(
@@ -363,9 +367,11 @@ class _MeditationPageState extends State<MeditationPage>
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
+          Wrap(
+            spacing: AppTheme.spacingSM,
+            runSpacing: AppTheme.spacingSM,
+            alignment: WrapAlignment.center,
             children: _durations.map((duration) {
               final isSelected = duration == _selectedDuration;
               return GestureDetector(
@@ -374,7 +380,7 @@ class _MeditationPageState extends State<MeditationPage>
                   _remainingSeconds = duration * 60;
                 }),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMD, vertical: AppTheme.spacingSM),
                   decoration: BoxDecoration(
                     color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -404,11 +410,10 @@ class _MeditationPageState extends State<MeditationPage>
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem(Icons.timer, '${todayMinutes}m', 'Today'),
-          _buildStatItem(Icons.local_fire_department, '$streak', 'Streak'),
-          _buildStatItem(Icons.self_improvement, '${todayMinutes ~/ 5}', 'Sessions'),
+          Expanded(child: _buildStatItem(Icons.timer, '${todayMinutes}m', 'Today')),
+          Expanded(child: _buildStatItem(Icons.local_fire_department, '$streak', 'Streak')),
+          Expanded(child: _buildStatItem(Icons.self_improvement, '${todayMinutes ~/ 5}', 'Sessions')),
         ],
       ),
     );
@@ -418,7 +423,7 @@ class _MeditationPageState extends State<MeditationPage>
     return Column(
       children: [
         Icon(icon, color: Colors.white, size: 24),
-        const SizedBox(height: 8),
+        SizedBox(height: AppTheme.spacingSM),
         Text(
           value,
           style: const TextStyle(
@@ -456,9 +461,9 @@ class _MeditationPageState extends State<MeditationPage>
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...completedSessions.map((session) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
+          margin: EdgeInsets.only(bottom: AppTheme.spacingSM),
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
@@ -467,7 +472,7 @@ class _MeditationPageState extends State<MeditationPage>
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(AppTheme.spacingSM + 2),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
@@ -478,7 +483,7 @@ class _MeditationPageState extends State<MeditationPage>
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

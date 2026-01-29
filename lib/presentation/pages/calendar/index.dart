@@ -160,13 +160,16 @@ class _CalendarPageState extends State<CalendarPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Calendar',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Calendar',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -197,10 +200,9 @@ class _CalendarPageState extends State<CalendarPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMD),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: days.map((day) => _buildDayItem(day)).toList(),
+            children: days.map((day) => Expanded(child: _buildDayItem(day))).toList(),
           ),
         ],
       ),
@@ -219,8 +221,7 @@ class _CalendarPageState extends State<CalendarPage> {
     return GestureDetector(
       onTap: () => setState(() => _selectedDate = date),
       child: Container(
-        width: 40,
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: EdgeInsets.symmetric(vertical: AppTheme.spacingSM),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
@@ -235,7 +236,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: AppTheme.spacingXS),
             Text(
               '${date.day}',
               style: TextStyle(
@@ -246,7 +247,7 @@ class _CalendarPageState extends State<CalendarPage> {
             ),
             if (eventsCount > 0)
               Container(
-                margin: const EdgeInsets.only(top: 4),
+                margin: EdgeInsets.only(top: AppTheme.spacingXS),
                 width: 6,
                 height: 6,
                 decoration: BoxDecoration(
@@ -271,7 +272,7 @@ class _CalendarPageState extends State<CalendarPage> {
               size: 64,
               color: Colors.white.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingMD),
             Text(
               'No events scheduled',
               style: TextStyle(
@@ -279,7 +280,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 fontSize: 18,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppTheme.spacingSM),
             Text(
               'Tap + to add an event',
               style: TextStyle(
@@ -303,7 +304,7 @@ class _CalendarPageState extends State<CalendarPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...events.map((event) => _buildEventItem(event, padding)),
       ],
     );
@@ -318,7 +319,7 @@ class _CalendarPageState extends State<CalendarPage> {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: AppTheme.spacingSM + AppTheme.spacingXS),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
@@ -362,7 +363,7 @@ class _CalendarPageState extends State<CalendarPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: AppTheme.spacingMD),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,6 +375,8 @@ class _CalendarPageState extends State<CalendarPage> {
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         if (event.location != null)
                           Row(
@@ -383,7 +386,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                 size: 14,
                                 color: Colors.white.withValues(alpha: 0.6),
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: AppTheme.spacingXS),
                               Expanded(
                                 child: Text(
                                   event.location!,

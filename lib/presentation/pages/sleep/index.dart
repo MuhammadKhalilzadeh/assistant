@@ -198,13 +198,16 @@ class _SleepPageState extends State<SleepPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Sleep',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Sleep',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -228,7 +231,7 @@ class _SleepPageState extends State<SleepPage> {
               size: 48,
               color: Colors.white.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
             Text(
               'No sleep data yet',
               style: TextStyle(
@@ -236,7 +239,7 @@ class _SleepPageState extends State<SleepPage> {
                 fontSize: 16,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppTheme.spacingSM),
             Text(
               'Tap + to log your sleep',
               style: TextStyle(
@@ -270,20 +273,22 @@ class _SleepPageState extends State<SleepPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '$hoursInt',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 64,
-                  fontWeight: FontWeight.bold,
-                  height: 1,
+          SizedBox(height: AppTheme.spacingMD),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '$hoursInt',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 64,
+                    fontWeight: FontWeight.bold,
+                    height: 1,
+                  ),
                 ),
-              ),
               const Text(
                 'h ',
                 style: TextStyle(
@@ -311,9 +316,10 @@ class _SleepPageState extends State<SleepPage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          ),
+          SizedBox(height: AppTheme.spacingMD),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMD, vertical: AppTheme.spacingSM),
             decoration: BoxDecoration(
               color: _getQualityColor(lastNight.quality).withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(20),
@@ -326,12 +332,11 @@ class _SleepPageState extends State<SleepPage> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMD),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildTimeInfo(Icons.bedtime, 'Bedtime', _formatTime(lastNight.bedTime)),
-              _buildTimeInfo(Icons.wb_sunny, 'Wake up', _formatTime(lastNight.wakeTime)),
+              Expanded(child: _buildTimeInfo(Icons.bedtime, 'Bedtime', _formatTime(lastNight.bedTime))),
+              Expanded(child: _buildTimeInfo(Icons.wb_sunny, 'Wake up', _formatTime(lastNight.wakeTime))),
             ],
           ),
         ],
@@ -343,7 +348,7 @@ class _SleepPageState extends State<SleepPage> {
     return Column(
       children: [
         Icon(icon, color: Colors.white, size: 24),
-        const SizedBox(height: 4),
+        SizedBox(height: AppTheme.spacingXS),
         Text(
           time,
           style: const TextStyle(
@@ -379,14 +384,14 @@ class _SleepPageState extends State<SleepPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...records.take(7).map((record) {
           final hours = record.durationHours;
           final hoursInt = hours.floor();
           final minutes = ((hours - hoursInt) * 60).round();
 
           return Container(
-            margin: const EdgeInsets.only(bottom: 8),
+            margin: EdgeInsets.only(bottom: AppTheme.spacingSM),
             padding: EdgeInsets.all(padding),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.1),
@@ -402,7 +407,7 @@ class _SleepPageState extends State<SleepPage> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

@@ -141,13 +141,16 @@ class _WorkoutPageState extends State<WorkoutPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Workout',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Workout',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -173,7 +176,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
             color: Colors.white,
             size: 48,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppTheme.spacingSM),
           Text(
             _getWorkoutTypeName(_selectedType),
             style: TextStyle(
@@ -181,17 +184,20 @@ class _WorkoutPageState extends State<WorkoutPage> {
               fontSize: 16,
             ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 64,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'monospace',
+          SizedBox(height: AppTheme.spacingLG),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: (screenWidth * 0.15).clamp(40.0, 64.0),
+                fontWeight: FontWeight.bold,
+                fontFamily: 'monospace',
+              ),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: AppTheme.spacingLG),
           GestureDetector(
             onTap: _isRunning ? _stopWorkout : _startWorkout,
             child: Container(
@@ -239,10 +245,10 @@ class _WorkoutPageState extends State<WorkoutPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppTheme.spacingSM,
+            runSpacing: AppTheme.spacingSM,
             children: WorkoutType.values.map((type) {
               final isSelected = type == _selectedType;
               return GestureDetector(
@@ -250,7 +256,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                     ? null
                     : () => setState(() => _selectedType = type),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingSM + AppTheme.spacingXS, vertical: AppTheme.spacingSM),
                   decoration: BoxDecoration(
                     color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -263,7 +269,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                         color: isSelected ? AppTheme.primaryColor : Colors.white,
                         size: 18,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: AppTheme.spacingXS),
                       Text(
                         _getWorkoutTypeName(type),
                         style: TextStyle(
@@ -292,11 +298,10 @@ class _WorkoutPageState extends State<WorkoutPage> {
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem(Icons.timer, '${minutes}m', 'Active'),
-          _buildStatItem(Icons.sports, '$sessions', 'Workouts'),
-          _buildStatItem(Icons.local_fire_department, '${minutes * 8}', 'Calories'),
+          Expanded(child: _buildStatItem(Icons.timer, '${minutes}m', 'Active')),
+          Expanded(child: _buildStatItem(Icons.sports, '$sessions', 'Workouts')),
+          Expanded(child: _buildStatItem(Icons.local_fire_department, '${minutes * 8}', 'Calories')),
         ],
       ),
     );
@@ -306,7 +311,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
     return Column(
       children: [
         Icon(icon, color: Colors.white, size: 24),
-        const SizedBox(height: 8),
+        SizedBox(height: AppTheme.spacingSM),
         Text(
           value,
           style: const TextStyle(
@@ -342,9 +347,9 @@ class _WorkoutPageState extends State<WorkoutPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...sessions.take(5).map((session) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
+          margin: EdgeInsets.only(bottom: AppTheme.spacingSM),
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
@@ -353,7 +358,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(AppTheme.spacingSM + 2),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
@@ -364,7 +369,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   size: 24,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

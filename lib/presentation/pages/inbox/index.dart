@@ -64,13 +64,16 @@ class _InboxPageState extends State<InboxPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Inbox',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Inbox',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -87,11 +90,10 @@ class _InboxPageState extends State<InboxPage> {
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem(Icons.mail, unread.toString(), 'Unread'),
-          _buildStatItem(Icons.inbox, total.toString(), 'Total'),
-          _buildStatItem(Icons.apps, services.toString(), 'Services'),
+          Expanded(child: _buildStatItem(Icons.mail, unread.toString(), 'Unread')),
+          Expanded(child: _buildStatItem(Icons.inbox, total.toString(), 'Total')),
+          Expanded(child: _buildStatItem(Icons.apps, services.toString(), 'Services')),
         ],
       ),
     );
@@ -101,14 +103,14 @@ class _InboxPageState extends State<InboxPage> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(AppTheme.spacingSM + AppTheme.spacingXS),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: Colors.white, size: 24),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: AppTheme.spacingSM),
         Text(
           value,
           style: const TextStyle(
@@ -150,33 +152,39 @@ class _InboxPageState extends State<InboxPage> {
         Row(
           children: [
             Icon(serviceIcon, color: Colors.white, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              service,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            SizedBox(width: AppTheme.spacingSM),
+            Expanded(
+              child: Text(
+                service,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '${messages.where((m) => !m.isRead).length} unread',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 12,
+            SizedBox(width: AppTheme.spacingSM),
+            Flexible(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingSM, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${messages.where((m) => !m.isRead).length} unread',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 12,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...messages.map((message) => _buildMessageItem(message, padding)),
         SizedBox(height: padding),
       ],
@@ -185,7 +193,7 @@ class _InboxPageState extends State<InboxPage> {
 
   Widget _buildMessageItem(InboxMessageModel message, double padding) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: AppTheme.spacingSM),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: message.isRead ? 0.1 : 0.2),
         borderRadius: BorderRadius.circular(16),
@@ -194,7 +202,7 @@ class _InboxPageState extends State<InboxPage> {
         ),
       ),
       child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: padding, vertical: 4),
+        contentPadding: EdgeInsets.symmetric(horizontal: padding, vertical: AppTheme.spacingXS),
         leading: CircleAvatar(
           backgroundColor: Colors.white.withValues(alpha: 0.2),
           child: Text(
@@ -234,7 +242,7 @@ class _InboxPageState extends State<InboxPage> {
               ),
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: AppTheme.spacingXS / 2),
             Text(
               message.preview,
               style: TextStyle(
@@ -259,7 +267,7 @@ class _InboxPageState extends State<InboxPage> {
             ),
             if (!message.isRead)
               Container(
-                margin: const EdgeInsets.only(top: 4),
+                margin: EdgeInsets.only(top: AppTheme.spacingXS),
                 width: 8,
                 height: 8,
                 decoration: const BoxDecoration(

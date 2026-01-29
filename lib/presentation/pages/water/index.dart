@@ -75,13 +75,16 @@ class _WaterPageState extends State<WaterPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Water Intake',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Water Intake',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -90,6 +93,8 @@ class _WaterPageState extends State<WaterPage> {
   }
 
   Widget _buildProgressRing(int current, double progress, double screenWidth, double padding) {
+    final ringSize = (screenWidth * 0.5).clamp(150.0, 250.0);
+
     return Container(
       padding: EdgeInsets.all(padding * 1.5),
       decoration: BoxDecoration(
@@ -100,8 +105,8 @@ class _WaterPageState extends State<WaterPage> {
       child: Column(
         children: [
           SizedBox(
-            width: screenWidth * 0.5,
-            height: screenWidth * 0.5,
+            width: ringSize,
+            height: ringSize,
             child: CustomPaint(
               painter: _WaterProgressPainter(progress),
               child: Center(
@@ -109,7 +114,7 @@ class _WaterPageState extends State<WaterPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.water_drop, color: Colors.white, size: 32),
-                    const SizedBox(height: 8),
+                    SizedBox(height: AppTheme.spacingSM),
                     Text(
                       '${current}ml',
                       style: const TextStyle(
@@ -130,7 +135,7 @@ class _WaterPageState extends State<WaterPage> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMD),
           Text(
             progress >= 1.0
                 ? 'Goal achieved! Great job!'
@@ -171,14 +176,16 @@ class _WaterPageState extends State<WaterPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          SizedBox(height: AppTheme.spacingMD),
+          Wrap(
+            spacing: AppTheme.spacingSM,
+            runSpacing: AppTheme.spacingSM,
+            alignment: WrapAlignment.center,
             children: amounts.map((item) {
               return GestureDetector(
                 onTap: () => _addWater(item.$1),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMD, vertical: AppTheme.spacingSM + AppTheme.spacingXS),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(16),
@@ -186,7 +193,7 @@ class _WaterPageState extends State<WaterPage> {
                   child: Column(
                     children: [
                       Icon(item.$2, color: Colors.white, size: 28),
-                      const SizedBox(height: 4),
+                      SizedBox(height: AppTheme.spacingXS),
                       Text(
                         '${item.$1}ml',
                         style: const TextStyle(
@@ -223,7 +230,7 @@ class _WaterPageState extends State<WaterPage> {
               size: 48,
               color: Colors.white.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
             Text(
               'No water logged today',
               style: TextStyle(
@@ -247,9 +254,9 @@ class _WaterPageState extends State<WaterPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...logs.map((log) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
+          margin: EdgeInsets.only(bottom: AppTheme.spacingSM),
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
@@ -258,7 +265,7 @@ class _WaterPageState extends State<WaterPage> {
           child: Row(
             children: [
               const Icon(Icons.water_drop, color: Colors.white, size: 20),
-              const SizedBox(width: 12),
+              SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
               Expanded(
                 child: Text(
                   '${log.amountMl}ml',

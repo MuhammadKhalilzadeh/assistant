@@ -185,13 +185,16 @@ class _CaloriesPageState extends State<CaloriesPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Calories',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Calories',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -225,7 +228,7 @@ class _CaloriesPageState extends State<CaloriesPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: AppTheme.spacingXS),
                   Text(
                     '$current / $_dailyGoal cal',
                     style: TextStyle(
@@ -236,7 +239,7 @@ class _CaloriesPageState extends State<CaloriesPage> {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMD, vertical: AppTheme.spacingSM),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -263,7 +266,7 @@ class _CaloriesPageState extends State<CaloriesPage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMD),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
@@ -299,11 +302,10 @@ class _CaloriesPageState extends State<CaloriesPage> {
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildMacroItem('Protein', '${totalProtein}g', Colors.blue),
-          _buildMacroItem('Carbs', '${totalCarbs}g', Colors.orange),
-          _buildMacroItem('Fat', '${totalFat}g', Colors.purple),
+          Expanded(child: _buildMacroItem('Protein', '${totalProtein}g', Colors.blue)),
+          Expanded(child: _buildMacroItem('Carbs', '${totalCarbs}g', Colors.orange)),
+          Expanded(child: _buildMacroItem('Fat', '${totalFat}g', Colors.purple)),
         ],
       ),
     );
@@ -330,7 +332,7 @@ class _CaloriesPageState extends State<CaloriesPage> {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: AppTheme.spacingSM),
         Text(
           value,
           style: const TextStyle(
@@ -365,7 +367,7 @@ class _CaloriesPageState extends State<CaloriesPage> {
               size: 48,
               color: Colors.white.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
             Text(
               'No meals logged today',
               style: TextStyle(
@@ -389,13 +391,13 @@ class _CaloriesPageState extends State<CaloriesPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...MealType.values.where((type) => groupedEntries.containsKey(type)).map((type) {
           final typeEntries = groupedEntries[type]!;
           final totalCalories = typeEntries.fold(0, (sum, e) => sum + e.calories);
 
           return Container(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: EdgeInsets.only(bottom: AppTheme.spacingSM + AppTheme.spacingXS),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
@@ -407,7 +409,7 @@ class _CaloriesPageState extends State<CaloriesPage> {
                   child: Row(
                     children: [
                       Icon(_getMealTypeIcon(type), color: Colors.white, size: 24),
-                      const SizedBox(width: 12),
+                      SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
                       Expanded(
                         child: Text(
                           _getMealTypeLabel(type),
@@ -428,7 +430,7 @@ class _CaloriesPageState extends State<CaloriesPage> {
                   ),
                 ),
                 ...typeEntries.map((entry) => Container(
-                  padding: EdgeInsets.symmetric(horizontal: padding, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: padding, vertical: AppTheme.spacingSM),
                   decoration: BoxDecoration(
                     border: Border(
                       top: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
@@ -436,13 +438,15 @@ class _CaloriesPageState extends State<CaloriesPage> {
                   ),
                   child: Row(
                     children: [
-                      const SizedBox(width: 36),
+                      SizedBox(width: AppTheme.spacingXL + AppTheme.spacingXS),
                       Expanded(
                         child: Text(
                           entry.foodName,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.9),
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Text(

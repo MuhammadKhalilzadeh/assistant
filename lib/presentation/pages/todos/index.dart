@@ -131,13 +131,16 @@ class _TodosPageState extends State<TodosPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Tasks',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Tasks',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -171,7 +174,7 @@ class _TodosPageState extends State<TodosPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: AppTheme.spacingXS),
                   Text(
                     '$completed of $total tasks completed',
                     style: TextStyle(
@@ -201,7 +204,7 @@ class _TodosPageState extends State<TodosPage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMD),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
@@ -227,7 +230,7 @@ class _TodosPageState extends State<TodosPage> {
               size: 64,
               color: Colors.white.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingMD),
             Text(
               'No tasks yet',
               style: TextStyle(
@@ -235,7 +238,7 @@ class _TodosPageState extends State<TodosPage> {
                 fontSize: 18,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppTheme.spacingSM),
             Text(
               'Tap + to add your first task',
               style: TextStyle(
@@ -259,7 +262,7 @@ class _TodosPageState extends State<TodosPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...todos.map((todo) => _buildTodoItem(todo, padding)),
       ],
     );
@@ -267,14 +270,14 @@ class _TodosPageState extends State<TodosPage> {
 
   Widget _buildTodoItem(TodoModel todo, double padding) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: AppTheme.spacingSM + AppTheme.spacingXS),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: padding, vertical: 8),
+        contentPadding: EdgeInsets.symmetric(horizontal: padding, vertical: AppTheme.spacingSM),
         leading: GestureDetector(
           onTap: () {
             _repository.toggleTodoComplete(todo.id);
@@ -306,6 +309,8 @@ class _TodosPageState extends State<TodosPage> {
             fontWeight: FontWeight.w500,
             decoration: todo.isCompleted ? TextDecoration.lineThrough : null,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         subtitle: todo.description != null
             ? Text(

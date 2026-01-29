@@ -137,13 +137,16 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Focus Timer',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Focus Timer',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -155,6 +158,8 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
     final minutes = _remainingSeconds ~/ 60;
     final seconds = _remainingSeconds % 60;
     final progress = 1 - (_remainingSeconds / (_selectedDuration * 60));
+    final timerSize = (screenWidth * 0.5).clamp(150.0, 250.0);
+    final timerFontSize = (screenWidth * 0.12).clamp(32.0, 48.0);
 
     return Container(
       padding: EdgeInsets.all(padding * 2),
@@ -166,14 +171,14 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
       child: Column(
         children: [
           SizedBox(
-            width: screenWidth * 0.5,
-            height: screenWidth * 0.5,
+            width: timerSize,
+            height: timerSize,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 SizedBox(
-                  width: screenWidth * 0.45,
-                  height: screenWidth * 0.45,
+                  width: timerSize * 0.9,
+                  height: timerSize * 0.9,
                   child: CircularProgressIndicator(
                     value: progress,
                     strokeWidth: 12,
@@ -184,13 +189,16 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'monospace',
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: timerFontSize,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'monospace',
+                        ),
                       ),
                     ),
                     Text(
@@ -229,36 +237,42 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: _durations.map((duration) {
-              final isSelected = duration == _selectedDuration;
-              return GestureDetector(
-                onTap: _isRunning
-                    ? null
-                    : () {
-                        setState(() {
-                          _selectedDuration = duration;
-                          _remainingSeconds = duration * 60;
-                        });
-                      },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: _durations.map((duration) {
+                final isSelected = duration == _selectedDuration;
+                return Padding(
+                  padding: EdgeInsets.only(right: AppTheme.spacingSM),
+                  child: GestureDetector(
+                    onTap: _isRunning
+                        ? null
+                        : () {
+                            setState(() {
+                              _selectedDuration = duration;
+                              _remainingSeconds = duration * 60;
+                            });
+                          },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMD, vertical: AppTheme.spacingSM),
                   decoration: BoxDecoration(
                     color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    '${duration}m',
-                    style: TextStyle(
-                      color: isSelected ? AppTheme.primaryColor : Colors.white,
-                      fontWeight: FontWeight.w600,
+                      child: Text(
+                        '${duration}m',
+                        style: TextStyle(
+                          color: isSelected ? AppTheme.primaryColor : Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),
@@ -274,7 +288,7 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
             onPressed: _resetTimer,
             icon: const Icon(Icons.refresh, color: Colors.white, size: 32),
           ),
-        const SizedBox(width: 16),
+        SizedBox(width: AppTheme.spacingMD),
         GestureDetector(
           onTap: _isRunning ? _pauseTimer : _startTimer,
           child: Container(
@@ -298,7 +312,7 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
             ),
           ),
         ),
-        const SizedBox(width: 48),
+        SizedBox(width: AppTheme.spacingXXL),
       ],
     );
   }
@@ -314,11 +328,10 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem(Icons.check_circle, sessionsToday.toString(), 'Sessions'),
-          _buildStatItem(Icons.timer, '${totalMinutes}m', 'Focus Time'),
-          _buildStatItem(Icons.local_fire_department, '${sessionsToday * 2}', 'Points'),
+          Expanded(child: _buildStatItem(Icons.check_circle, sessionsToday.toString(), 'Sessions')),
+          Expanded(child: _buildStatItem(Icons.timer, '${totalMinutes}m', 'Focus Time')),
+          Expanded(child: _buildStatItem(Icons.local_fire_department, '${sessionsToday * 2}', 'Points')),
         ],
       ),
     );
@@ -328,7 +341,7 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
     return Column(
       children: [
         Icon(icon, color: Colors.white, size: 28),
-        const SizedBox(height: 8),
+        SizedBox(height: AppTheme.spacingSM),
         Text(
           value,
           style: const TextStyle(
@@ -366,9 +379,9 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...sessions.map((session) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
+          margin: EdgeInsets.only(bottom: AppTheme.spacingSM),
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
@@ -377,7 +390,7 @@ class _FocusTimerPageState extends State<FocusTimerPage> {
           child: Row(
             children: [
               const Icon(Icons.check_circle, color: Colors.white, size: 20),
-              const SizedBox(width: 12),
+              SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

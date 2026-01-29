@@ -163,13 +163,16 @@ class _HabitsPageState extends State<HabitsPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Habits',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Habits',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -203,7 +206,7 @@ class _HabitsPageState extends State<HabitsPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: AppTheme.spacingXS),
                   Text(
                     '$completed of $total completed',
                     style: TextStyle(
@@ -214,7 +217,7 @@ class _HabitsPageState extends State<HabitsPage> {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMD, vertical: AppTheme.spacingSM),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -222,7 +225,7 @@ class _HabitsPageState extends State<HabitsPage> {
                 child: Row(
                   children: [
                     const Icon(Icons.local_fire_department, color: Colors.orange, size: 20),
-                    const SizedBox(width: 4),
+                    SizedBox(width: AppTheme.spacingXS),
                     Text(
                       '$maxStreak days',
                       style: const TextStyle(
@@ -235,7 +238,7 @@ class _HabitsPageState extends State<HabitsPage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMD),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
@@ -261,7 +264,7 @@ class _HabitsPageState extends State<HabitsPage> {
               size: 64,
               color: Colors.white.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingMD),
             Text(
               'No habits yet',
               style: TextStyle(
@@ -269,7 +272,7 @@ class _HabitsPageState extends State<HabitsPage> {
                 fontSize: 18,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppTheme.spacingSM),
             Text(
               'Tap + to create your first habit',
               style: TextStyle(
@@ -293,7 +296,7 @@ class _HabitsPageState extends State<HabitsPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...habits.map((habit) => _buildHabitItem(habit, padding)),
       ],
     );
@@ -303,7 +306,7 @@ class _HabitsPageState extends State<HabitsPage> {
     final iconData = _iconOptions[habit.icon] ?? Icons.check_circle;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: AppTheme.spacingSM + AppTheme.spacingXS),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: habit.isCompletedToday ? 0.25 : 0.15),
         borderRadius: BorderRadius.circular(16),
@@ -312,9 +315,9 @@ class _HabitsPageState extends State<HabitsPage> {
         ),
       ),
       child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: padding, vertical: 8),
+        contentPadding: EdgeInsets.symmetric(horizontal: padding, vertical: AppTheme.spacingSM),
         leading: Container(
-          padding: const EdgeInsets.all(10),
+          padding: EdgeInsets.all(AppTheme.spacingSM + 2),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12),
@@ -328,12 +331,14 @@ class _HabitsPageState extends State<HabitsPage> {
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         subtitle: habit.streak > 0
             ? Row(
                 children: [
                   const Icon(Icons.local_fire_department, color: Colors.orange, size: 14),
-                  const SizedBox(width: 4),
+                  SizedBox(width: AppTheme.spacingXS),
                   Text(
                     '${habit.streak} day streak',
                     style: TextStyle(
@@ -373,7 +378,7 @@ class _HabitsPageState extends State<HabitsPage> {
                     : null,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: AppTheme.spacingSM),
             IconButton(
               onPressed: () {
                 _repository.deleteHabit(habit.id);

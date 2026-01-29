@@ -80,13 +80,16 @@ class ScreenTimePage extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Screen Time',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Screen Time',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -117,20 +120,22 @@ class ScreenTimePage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '$hours',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 64,
-                  fontWeight: FontWeight.bold,
-                  height: 1,
+          SizedBox(height: AppTheme.spacingLG),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '$hours',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 64,
+                    fontWeight: FontWeight.bold,
+                    height: 1,
+                  ),
                 ),
-              ),
               const Text(
                 'h ',
                 style: TextStyle(
@@ -158,12 +163,13 @@ class ScreenTimePage extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          ),
+          SizedBox(height: AppTheme.spacingMD),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.touch_app, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
+              SizedBox(width: AppTheme.spacingSM),
               Text(
                 '$pickups pickups',
                 style: TextStyle(
@@ -195,7 +201,7 @@ class ScreenTimePage extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(AppTheme.spacingSM + AppTheme.spacingXS),
             decoration: BoxDecoration(
               color: (isLess ? Colors.green : Colors.red).withValues(alpha: 0.2),
               shape: BoxShape.circle,
@@ -206,7 +212,7 @@ class ScreenTimePage extends StatelessWidget {
               size: 28,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: AppTheme.spacingMD),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,7 +251,7 @@ class ScreenTimePage extends StatelessWidget {
               size: 48,
               color: Colors.white.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
             Text(
               'No app usage data',
               style: TextStyle(
@@ -272,14 +278,14 @@ class ScreenTimePage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...appUsage.map((app) {
           final percentage = totalMinutes > 0
               ? (app.minutesUsed / totalMinutes * 100).round()
               : 0;
 
           return Container(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: EdgeInsets.only(bottom: AppTheme.spacingSM + AppTheme.spacingXS),
             padding: EdgeInsets.all(padding),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.1),
@@ -290,7 +296,7 @@ class ScreenTimePage extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: EdgeInsets.all(AppTheme.spacingSM + 2),
                       decoration: BoxDecoration(
                         color: _getCategoryColor(app.category).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
@@ -301,7 +307,7 @@ class ScreenTimePage extends StatelessWidget {
                         size: 20,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,6 +318,8 @@ class ScreenTimePage extends StatelessWidget {
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             app.category,
@@ -344,7 +352,7 @@ class ScreenTimePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(

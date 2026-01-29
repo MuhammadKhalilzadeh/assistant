@@ -96,13 +96,16 @@ class WeatherPage extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Weather',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Weather',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -123,7 +126,7 @@ class WeatherPage extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.location_on, color: Colors.white, size: 18),
-              const SizedBox(width: 4),
+              SizedBox(width: AppTheme.spacingXS),
               Text(
                 weather.location,
                 style: const TextStyle(
@@ -133,7 +136,7 @@ class WeatherPage extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMD),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +146,7 @@ class WeatherPage extends StatelessWidget {
                 color: Colors.white,
                 size: 64,
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: AppTheme.spacingMD),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -167,7 +170,7 @@ class WeatherPage extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMD),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -203,11 +206,10 @@ class WeatherPage extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildDetailItem(Icons.water_drop, '${weather.humidity}%', 'Humidity'),
-          _buildDetailItem(Icons.air, '${weather.windSpeed} km/h', 'Wind'),
-          _buildDetailItem(Icons.thermostat, '${weather.currentTemperature}°', 'Feels Like'),
+          Expanded(child: _buildDetailItem(Icons.water_drop, '${weather.humidity}%', 'Humidity')),
+          Expanded(child: _buildDetailItem(Icons.air, '${weather.windSpeed} km/h', 'Wind')),
+          Expanded(child: _buildDetailItem(Icons.thermostat, '${weather.currentTemperature}°', 'Feels Like')),
         ],
       ),
     );
@@ -217,7 +219,7 @@ class WeatherPage extends StatelessWidget {
     return Column(
       children: [
         Icon(icon, color: Colors.white, size: 24),
-        const SizedBox(height: 8),
+        SizedBox(height: AppTheme.spacingSM),
         Text(
           value,
           style: const TextStyle(
@@ -249,7 +251,7 @@ class WeatherPage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         SizedBox(
           height: 100,
           child: ListView.builder(
@@ -258,8 +260,8 @@ class WeatherPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final hourly = weather.hourlyForecast[index];
               return Container(
-                margin: EdgeInsets.only(right: padding / 2),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                margin: EdgeInsets.only(right: AppTheme.spacingSM),
+                padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingSM + AppTheme.spacingXS, vertical: AppTheme.spacingSM),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(16),
@@ -310,9 +312,9 @@ class WeatherPage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...weather.dailyForecast.map((daily) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
+          margin: EdgeInsets.only(bottom: AppTheme.spacingSM),
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
@@ -320,29 +322,33 @@ class WeatherPage extends StatelessWidget {
           ),
           child: Row(
             children: [
-              SizedBox(
-                width: 80,
+              Flexible(
+                flex: 2,
                 child: Text(
                   _formatDay(daily.date),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              SizedBox(width: AppTheme.spacingSM),
               Icon(
                 _getWeatherIcon(daily.condition),
                 color: Colors.white,
                 size: 24,
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: AppTheme.spacingMD),
               Expanded(
+                flex: 3,
                 child: Text(
                   _getConditionText(daily.condition),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
@@ -352,7 +358,7 @@ class WeatherPage extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: AppTheme.spacingSM),
               Text(
                 '${daily.low}°',
                 style: TextStyle(

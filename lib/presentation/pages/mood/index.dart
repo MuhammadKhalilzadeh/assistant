@@ -159,13 +159,16 @@ class _MoodPageState extends State<MoodPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back, color: Colors.white),
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'Mood',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          SizedBox(width: AppTheme.spacingSM),
+          const Expanded(
+            child: Text(
+              'Mood',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -192,13 +195,13 @@ class _MoodPageState extends State<MoodPage> {
             ),
           ),
           if (todayMood != null) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingMD),
             Icon(
               _getMoodIcon(todayMood.mood),
               color: _getMoodColor(todayMood.mood),
               size: 64,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppTheme.spacingSM),
             Text(
               todayMood.moodLabel,
               style: TextStyle(
@@ -208,7 +211,7 @@ class _MoodPageState extends State<MoodPage> {
               ),
             ),
             if (todayMood.notes != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: AppTheme.spacingSM),
               Text(
                 '"${todayMood.notes}"',
                 style: TextStyle(
@@ -216,11 +219,13 @@ class _MoodPageState extends State<MoodPage> {
                   fontStyle: FontStyle.italic,
                 ),
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
-            const SizedBox(height: 16),
+            SizedBox(height: AppTheme.spacingMD),
             const Divider(color: Colors.white24),
-            const SizedBox(height: 8),
+            SizedBox(height: AppTheme.spacingSM),
             Text(
               'Update your mood',
               style: TextStyle(
@@ -229,7 +234,7 @@ class _MoodPageState extends State<MoodPage> {
               ),
             ),
           ],
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMD),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: MoodLevel.values.map((mood) {
@@ -284,7 +289,7 @@ class _MoodPageState extends State<MoodPage> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(AppTheme.spacingSM + AppTheme.spacingXS),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
@@ -295,7 +300,7 @@ class _MoodPageState extends State<MoodPage> {
               size: 28,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: AppTheme.spacingMD),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,9 +352,9 @@ class _MoodPageState extends State<MoodPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppTheme.spacingSM + AppTheme.spacingXS),
         ...entries.take(10).map((entry) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
+          margin: EdgeInsets.only(bottom: AppTheme.spacingSM),
           padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
@@ -358,7 +363,7 @@ class _MoodPageState extends State<MoodPage> {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(AppTheme.spacingSM),
                 decoration: BoxDecoration(
                   color: _getMoodColor(entry.mood).withValues(alpha: 0.2),
                   shape: BoxShape.circle,
@@ -369,7 +374,7 @@ class _MoodPageState extends State<MoodPage> {
                   size: 24,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: AppTheme.spacingSM + AppTheme.spacingXS),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
