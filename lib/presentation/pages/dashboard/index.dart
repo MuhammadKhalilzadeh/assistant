@@ -1,4 +1,21 @@
+import 'package:assistant/data/mock/repositories/mock_repository.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
+import 'package:assistant/presentation/pages/calendar/index.dart';
+import 'package:assistant/presentation/pages/calories/index.dart';
+import 'package:assistant/presentation/pages/focus_timer/index.dart';
+import 'package:assistant/presentation/pages/habits/index.dart';
+import 'package:assistant/presentation/pages/heart_rate/index.dart';
+import 'package:assistant/presentation/pages/inbox/index.dart';
+import 'package:assistant/presentation/pages/meditation/index.dart';
+import 'package:assistant/presentation/pages/mood/index.dart';
+import 'package:assistant/presentation/pages/screen_time/index.dart';
+import 'package:assistant/presentation/pages/sleep/index.dart';
+import 'package:assistant/presentation/pages/steps/index.dart';
+import 'package:assistant/presentation/pages/todos/index.dart';
+import 'package:assistant/presentation/pages/water/index.dart';
+import 'package:assistant/presentation/pages/weather/index.dart';
+import 'package:assistant/presentation/pages/workout/index.dart';
+import 'package:assistant/presentation/utils/navigation_utils.dart';
 import 'package:assistant/presentation/widgets/bottom_navigation_bar/custom_bottom_navigation_bar.dart';
 import 'package:assistant/presentation/widgets/cards/custom_calendar_events_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_calorie_intake_card.dart';
@@ -66,13 +83,44 @@ class _DashboardState extends State<Dashboard> {
   }
 }
 
-class _HomeTab extends StatelessWidget {
+class _HomeTab extends StatefulWidget {
   const _HomeTab();
+
+  @override
+  State<_HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<_HomeTab> {
+  final MockRepository _repository = MockRepository();
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double paddingValue = (screenWidth * 0.04).clamp(16.0, 24.0);
+
+    // Get live data from repository
+    final todos = _repository.todos;
+    final todayWater = _repository.todayWaterIntake;
+    final todayCalories = _repository.todayCalories;
+    final todayWorkoutMinutes = _repository.todayWorkoutMinutes;
+    final todayWorkoutSessions = _repository.todayWorkoutSessions;
+    final latestHeartRate = _repository.latestHeartRate;
+    final restingHeartRate = _repository.restingHeartRate;
+    final todayMood = _repository.todayMood;
+    final moodStreak = _repository.moodStreak;
+    final todayScreenTime = _repository.todayScreenTime;
+    final yesterdayScreenTime = _repository.yesterdayScreenTime;
+    final todayMeditationMinutes = _repository.todayMeditationMinutes;
+    final meditationStreak = _repository.meditationStreak;
+    final habits = _repository.habits;
+    final completedHabitsToday = _repository.completedHabitsToday;
+    final maxHabitStreak = _repository.maxStreak;
+    final unreadMessages = _repository.unreadMessagesCount;
+    final messageServices = _repository.messageServices.length;
+    final todayEvents = _repository.todayEventsCount;
+    final nextEvent = _repository.nextEvent;
+    final focusSessionsToday = _repository.todayCompletedSessions;
+    final weather = _repository.weather;
 
     return SafeArea(
       child: Container(
@@ -94,109 +142,109 @@ class _HomeTab extends StatelessWidget {
               children: [
               // Productivity Section
               CustomTodosCard(
-                totalTodos: 5,
-                completedTodos: 2,
-                onTap: () {},
-                onAddPressed: () {},
+                totalTodos: todos.length,
+                completedTodos: _repository.completedTodosCount,
+                onTap: () => _navigateTo(const TodosPage()),
+                onAddPressed: () => _navigateTo(const TodosPage()),
               ),
               SizedBox(height: paddingValue),
               CustomGeneralInboxCard(
-                unreadCount: 37,
-                servicesCount: 2,
-                onTap: () {},
+                unreadCount: unreadMessages,
+                servicesCount: messageServices,
+                onTap: () => _navigateTo(const InboxPage()),
               ),
               SizedBox(height: paddingValue),
               CustomCalendarEventsCard(
-                nextEventTitle: 'Team Meeting',
-                nextEventTime: '2:00 PM',
-                eventsToday: 3,
-                onTap: () {},
-                onAddPressed: () {},
+                nextEventTitle: nextEvent?.title ?? 'No events',
+                nextEventTime: nextEvent != null ? _formatEventTime(nextEvent.startTime) : '',
+                eventsToday: todayEvents,
+                onTap: () => _navigateTo(const CalendarPage()),
+                onAddPressed: () => _navigateTo(const CalendarPage()),
               ),
               SizedBox(height: paddingValue),
               CustomFocusTimerCard(
                 isRunning: false,
                 remainingMinutes: 25,
-                sessionsCompleted: 2,
-                onTap: () {},
-                onStartStopPressed: () {},
+                sessionsCompleted: focusSessionsToday,
+                onTap: () => _navigateTo(const FocusTimerPage()),
+                onStartStopPressed: () => _navigateTo(const FocusTimerPage()),
               ),
               SizedBox(height: paddingValue),
               CustomHabitsTrackerCard(
-                completedHabits: 3,
-                totalHabits: 5,
-                streak: 7,
-                onTap: () {},
-                onAddPressed: () {},
+                completedHabits: completedHabitsToday,
+                totalHabits: habits.length,
+                streak: maxHabitStreak,
+                onTap: () => _navigateTo(const HabitsPage()),
+                onAddPressed: () => _navigateTo(const HabitsPage()),
               ),
               SizedBox(height: paddingValue),
 
               // Health Section
               CustomWeatherCard(
-                temperature: 24,
-                condition: WeatherCondition.sunny,
-                high: 28,
-                low: 18,
-                location: 'New York',
-                onTap: () {},
+                temperature: weather?.currentTemperature ?? 24,
+                condition: _mapWeatherCondition(weather?.currentCondition),
+                high: weather?.high ?? 28,
+                low: weather?.low ?? 18,
+                location: weather?.location ?? 'New York',
+                onTap: () => _navigateTo(const WeatherPage()),
               ),
               SizedBox(height: paddingValue),
               CustomWaterIntakeCard(
-                currentIntake: 0,
+                currentIntake: todayWater,
                 goalIntake: 3000,
-                onTap: () {},
-                onAddPressed: () {},
+                onTap: () => _navigateTo(const WaterPage()),
+                onAddPressed: () => _navigateTo(const WaterPage()),
               ),
               SizedBox(height: paddingValue),
               CustomCalorieIntakeCard(
-                currentCalories: 1200,
+                currentCalories: todayCalories,
                 goalCalories: 2000,
-                onTap: () {},
-                onAddPressed: () {},
+                onTap: () => _navigateTo(const CaloriesPage()),
+                onAddPressed: () => _navigateTo(const CaloriesPage()),
               ),
               SizedBox(height: paddingValue),
               CustomSleepDurationTrackerCard(
-                onTap: () {},
+                onTap: () => _navigateTo(const SleepPage()),
               ),
               SizedBox(height: paddingValue),
               CustomStepsTrackerCard(
-                onTap: () {},
+                onTap: () => _navigateTo(const StepsPage()),
               ),
               SizedBox(height: paddingValue),
               CustomWorkoutCard(
-                activeMinutes: 25,
+                activeMinutes: todayWorkoutMinutes,
                 goalMinutes: 60,
-                sessionsToday: 1,
-                onTap: () {},
-                onStartPressed: () {},
+                sessionsToday: todayWorkoutSessions,
+                onTap: () => _navigateTo(const WorkoutPage()),
+                onStartPressed: () => _navigateTo(const WorkoutPage()),
               ),
               SizedBox(height: paddingValue),
               CustomHeartRateCard(
-                currentBpm: 72,
-                restingBpm: 65,
-                onTap: () {},
+                currentBpm: latestHeartRate?.bpm ?? 72,
+                restingBpm: restingHeartRate,
+                onTap: () => _navigateTo(const HeartRatePage()),
               ),
               SizedBox(height: paddingValue),
 
               // Wellness Section
               CustomMoodTrackerCard(
-                currentMood: MoodType.good,
-                streak: 5,
-                onTap: () {},
-                onMoodSelected: (mood) {},
+                currentMood: _mapMoodLevel(todayMood?.mood),
+                streak: moodStreak,
+                onTap: () => _navigateTo(const MoodPage()),
+                onMoodSelected: (mood) => _navigateTo(const MoodPage()),
               ),
               SizedBox(height: paddingValue),
               CustomScreenTimeCard(
-                todayMinutes: 225,
-                yesterdayMinutes: 260,
-                onTap: () {},
+                todayMinutes: todayScreenTime?.totalMinutes ?? 225,
+                yesterdayMinutes: yesterdayScreenTime?.totalMinutes ?? 260,
+                onTap: () => _navigateTo(const ScreenTimePage()),
               ),
               SizedBox(height: paddingValue),
               CustomMeditationCard(
-                minutesToday: 10,
-                streak: 3,
-                onTap: () {},
-                onStartPressed: () {},
+                minutesToday: todayMeditationMinutes,
+                streak: meditationStreak,
+                onTap: () => _navigateTo(const MeditationPage()),
+                onStartPressed: () => _navigateTo(const MeditationPage()),
               ),
               ],
             ),
@@ -204,6 +252,54 @@ class _HomeTab extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _navigateTo(Widget page) {
+    NavigationUtils.navigateWithFade(context, page);
+  }
+
+  String _formatEventTime(DateTime time) {
+    final hour = time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
+    final period = time.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:${time.minute.toString().padLeft(2, '0')} $period';
+  }
+
+  WeatherCondition _mapWeatherCondition(dynamic condition) {
+    if (condition == null) return WeatherCondition.sunny;
+    switch (condition.toString()) {
+      case 'WeatherConditionType.sunny':
+        return WeatherCondition.sunny;
+      case 'WeatherConditionType.cloudy':
+        return WeatherCondition.cloudy;
+      case 'WeatherConditionType.rainy':
+        return WeatherCondition.rainy;
+      case 'WeatherConditionType.stormy':
+        return WeatherCondition.stormy;
+      case 'WeatherConditionType.snowy':
+        return WeatherCondition.snowy;
+      case 'WeatherConditionType.partlyCloudy':
+        return WeatherCondition.partlyCloudy;
+      default:
+        return WeatherCondition.sunny;
+    }
+  }
+
+  MoodType? _mapMoodLevel(dynamic mood) {
+    if (mood == null) return null;
+    switch (mood.toString()) {
+      case 'MoodLevel.great':
+        return MoodType.great;
+      case 'MoodLevel.good':
+        return MoodType.good;
+      case 'MoodLevel.okay':
+        return MoodType.okay;
+      case 'MoodLevel.bad':
+        return MoodType.bad;
+      case 'MoodLevel.awful':
+        return MoodType.awful;
+      default:
+        return null;
+    }
   }
 }
 
