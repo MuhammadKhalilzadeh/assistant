@@ -1,11 +1,39 @@
-enum MeditationType { breathing, guided, unguided, sleep, focus }
+import 'package:hive/hive.dart';
 
-class MeditationSessionModel {
+part 'meditation_session_model.g.dart';
+
+@HiveType(typeId: 9)
+enum MeditationType {
+  @HiveField(0)
+  breathing,
+  @HiveField(1)
+  guided,
+  @HiveField(2)
+  unguided,
+  @HiveField(3)
+  sleep,
+  @HiveField(4)
+  focus,
+}
+
+@HiveType(typeId: 10)
+class MeditationSessionModel extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final MeditationType type;
+
+  @HiveField(2)
   final DateTime startTime;
+
+  @HiveField(3)
   final int durationMinutes;
+
+  @HiveField(4)
   final bool isCompleted;
+
+  @HiveField(5)
   final String? notes;
 
   MeditationSessionModel({

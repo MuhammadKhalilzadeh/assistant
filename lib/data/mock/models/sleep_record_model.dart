@@ -1,10 +1,34 @@
-enum SleepQuality { poor, fair, good, excellent }
+import 'package:hive/hive.dart';
 
-class SleepRecordModel {
+part 'sleep_record_model.g.dart';
+
+@HiveType(typeId: 3)
+enum SleepQuality {
+  @HiveField(0)
+  poor,
+  @HiveField(1)
+  fair,
+  @HiveField(2)
+  good,
+  @HiveField(3)
+  excellent,
+}
+
+@HiveType(typeId: 4)
+class SleepRecordModel extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final DateTime bedTime;
+
+  @HiveField(2)
   final DateTime wakeTime;
+
+  @HiveField(3)
   final SleepQuality quality;
+
+  @HiveField(4)
   final String? notes;
 
   SleepRecordModel({

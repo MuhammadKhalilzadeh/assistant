@@ -1,9 +1,33 @@
-enum HeartRateZone { resting, warmUp, fatBurn, cardio, peak }
+import 'package:hive/hive.dart';
 
-class HeartRateRecordModel {
+part 'heart_rate_record_model.g.dart';
+
+@HiveType(typeId: 5)
+enum HeartRateZone {
+  @HiveField(0)
+  resting,
+  @HiveField(1)
+  warmUp,
+  @HiveField(2)
+  fatBurn,
+  @HiveField(3)
+  cardio,
+  @HiveField(4)
+  peak,
+}
+
+@HiveType(typeId: 6)
+class HeartRateRecordModel extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final int bpm;
+
+  @HiveField(2)
   final DateTime recordedAt;
+
+  @HiveField(3)
   final HeartRateZone zone;
 
   HeartRateRecordModel({

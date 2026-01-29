@@ -1,11 +1,31 @@
-class InboxMessageModel {
+import 'package:hive/hive.dart';
+
+part 'inbox_message_model.g.dart';
+
+@HiveType(typeId: 19)
+class InboxMessageModel extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String service; // e.g., 'Gmail', 'Slack', 'Teams'
+
+  @HiveField(2)
   final String sender;
+
+  @HiveField(3)
   final String subject;
+
+  @HiveField(4)
   final String preview;
+
+  @HiveField(5)
   final DateTime receivedAt;
+
+  @HiveField(6)
   final bool isRead;
+
+  @HiveField(7)
   final bool isStarred;
 
   InboxMessageModel({

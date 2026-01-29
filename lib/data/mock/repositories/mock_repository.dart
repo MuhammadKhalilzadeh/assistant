@@ -1,3 +1,4 @@
+import 'package:assistant/data/local/hive_init.dart';
 import 'package:assistant/data/mock/models/todo_model.dart';
 import 'package:assistant/data/mock/models/inbox_message_model.dart';
 import 'package:assistant/data/mock/models/calendar_event_model.dart';
@@ -17,36 +18,164 @@ import 'package:assistant/data/mock/models/meditation_session_model.dart';
 class MockRepository {
   static final MockRepository _instance = MockRepository._internal();
   factory MockRepository() => _instance;
-  MockRepository._internal() {
-    _initializeData();
-  }
 
-  // Data storage
-  final List<TodoModel> _todos = [];
-  final List<InboxMessageModel> _messages = [];
-  final List<CalendarEventModel> _events = [];
-  final List<FocusSessionModel> _focusSessions = [];
-  final List<HabitModel> _habits = [];
+  // Weather and ScreenTime remain in-memory (external data sources)
   WeatherForecastModel? _weather;
-  final List<WaterLogModel> _waterLogs = [];
-  final List<CalorieEntryModel> _calorieEntries = [];
-  final List<SleepRecordModel> _sleepRecords = [];
-  final List<StepRecordModel> _stepRecords = [];
-  final List<WorkoutSessionModel> _workoutSessions = [];
-  final List<HeartRateRecordModel> _heartRateRecords = [];
-  final List<MoodEntryModel> _moodEntries = [];
   final List<ScreenTimeModel> _screenTimeRecords = [];
-  final List<MeditationSessionModel> _meditationSessions = [];
 
   int _idCounter = 1;
+
+  MockRepository._internal() {
+    _initializeIdCounter();
+    _initializeNonPersistedData();
+  }
+
   String _generateId() => '${_idCounter++}';
 
-  void _initializeData() {
+  void _initializeIdCounter() {
+    // Find the highest ID across all boxes to avoid ID collisions
+    int maxId = 0;
+
+    for (final item in HiveInit.todosBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.inboxMessagesBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.calendarEventsBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.focusSessionsBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.habitsBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.waterLogsBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.calorieEntriesBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.sleepRecordsBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.stepRecordsBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.workoutSessionsBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.heartRateRecordsBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.moodEntriesBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+    for (final item in HiveInit.meditationSessionsBox.values) {
+      final id = int.tryParse(item.id) ?? 0;
+      if (id > maxId) maxId = id;
+    }
+
+    _idCounter = maxId + 1;
+
+    // If no data exists, seed with initial data
+    if (_idCounter == 1) {
+      _seedInitialData();
+    }
+  }
+
+  void _initializeNonPersistedData() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    // Initialize Todos
-    _todos.addAll([
+    // Initialize Weather (external API data - stays in memory)
+    _weather = WeatherForecastModel(
+      location: 'New York',
+      currentTemperature: 24,
+      currentCondition: WeatherConditionType.sunny,
+      high: 28,
+      low: 18,
+      humidity: 45,
+      windSpeed: 12,
+      hourlyForecast: List.generate(24, (i) {
+        final hour = now.add(Duration(hours: i));
+        return HourlyForecast(
+          time: hour,
+          temperature: 20 + (i % 8),
+          condition: i < 6
+              ? WeatherConditionType.sunny
+              : i < 12
+                  ? WeatherConditionType.partlyCloudy
+                  : i < 18
+                      ? WeatherConditionType.cloudy
+                      : WeatherConditionType.sunny,
+        );
+      }),
+      dailyForecast: List.generate(7, (i) {
+        final day = today.add(Duration(days: i));
+        return DailyForecast(
+          date: day,
+          high: 26 + (i % 4),
+          low: 16 + (i % 3),
+          condition: i % 3 == 0
+              ? WeatherConditionType.sunny
+              : i % 3 == 1
+                  ? WeatherConditionType.partlyCloudy
+                  : WeatherConditionType.cloudy,
+        );
+      }),
+    );
+
+    // Initialize Screen Time (OS-level API data - stays in memory)
+    _screenTimeRecords.addAll([
+      ScreenTimeModel(
+        id: 'st_1',
+        date: today,
+        totalMinutes: 225,
+        pickups: 45,
+        appUsage: [
+          AppUsageModel(appName: 'Social Media', category: 'Social', minutesUsed: 65, iconName: 'people'),
+          AppUsageModel(appName: 'Email', category: 'Productivity', minutesUsed: 45, iconName: 'email'),
+          AppUsageModel(appName: 'Browser', category: 'Productivity', minutesUsed: 55, iconName: 'language'),
+          AppUsageModel(appName: 'Games', category: 'Entertainment', minutesUsed: 30, iconName: 'games'),
+          AppUsageModel(appName: 'Other', category: 'Other', minutesUsed: 30, iconName: 'apps'),
+        ],
+      ),
+      ScreenTimeModel(
+        id: 'st_2',
+        date: today.subtract(const Duration(days: 1)),
+        totalMinutes: 260,
+        pickups: 52,
+        appUsage: [
+          AppUsageModel(appName: 'Social Media', category: 'Social', minutesUsed: 80, iconName: 'people'),
+          AppUsageModel(appName: 'Email', category: 'Productivity', minutesUsed: 50, iconName: 'email'),
+          AppUsageModel(appName: 'Browser', category: 'Productivity', minutesUsed: 60, iconName: 'language'),
+          AppUsageModel(appName: 'Games', category: 'Entertainment', minutesUsed: 40, iconName: 'games'),
+          AppUsageModel(appName: 'Other', category: 'Other', minutesUsed: 30, iconName: 'apps'),
+        ],
+      ),
+    ]);
+  }
+
+  void _seedInitialData() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Seed Todos
+    final todos = [
       TodoModel(
         id: _generateId(),
         title: 'Review project proposal',
@@ -83,10 +212,13 @@ class MockRepository {
         priority: 2,
         isCompleted: true,
       ),
-    ]);
+    ];
+    for (final todo in todos) {
+      HiveInit.todosBox.put(todo.id, todo);
+    }
 
-    // Initialize Messages
-    _messages.addAll([
+    // Seed Messages
+    final messages = [
       InboxMessageModel(
         id: _generateId(),
         service: 'Gmail',
@@ -130,10 +262,13 @@ class MockRepository {
         receivedAt: now.subtract(const Duration(days: 1)),
         isRead: true,
       ),
-    ]);
+    ];
+    for (final msg in messages) {
+      HiveInit.inboxMessagesBox.put(msg.id, msg);
+    }
 
-    // Initialize Calendar Events
-    _events.addAll([
+    // Seed Calendar Events
+    final events = [
       CalendarEventModel(
         id: _generateId(),
         title: 'Team Meeting',
@@ -166,10 +301,13 @@ class MockRepository {
         isAllDay: true,
         color: '#EF4444',
       ),
-    ]);
+    ];
+    for (final event in events) {
+      HiveInit.calendarEventsBox.put(event.id, event);
+    }
 
-    // Initialize Focus Sessions
-    _focusSessions.addAll([
+    // Seed Focus Sessions
+    final focusSessions = [
       FocusSessionModel(
         id: _generateId(),
         startTime: now.subtract(const Duration(hours: 3)),
@@ -186,10 +324,13 @@ class MockRepository {
         isCompleted: true,
         task: 'Documentation',
       ),
-    ]);
+    ];
+    for (final session in focusSessions) {
+      HiveInit.focusSessionsBox.put(session.id, session);
+    }
 
-    // Initialize Habits
-    _habits.addAll([
+    // Seed Habits
+    final habits = [
       HabitModel(
         id: _generateId(),
         name: 'Morning Exercise',
@@ -229,48 +370,23 @@ class MockRepository {
         isCompletedToday: false,
         completedDates: [today.subtract(const Duration(days: 1)), today.subtract(const Duration(days: 2))],
       ),
-    ]);
+    ];
+    for (final habit in habits) {
+      HiveInit.habitsBox.put(habit.id, habit);
+    }
 
-    // Initialize Weather
-    _weather = WeatherForecastModel(
-      location: 'New York',
-      currentTemperature: 24,
-      currentCondition: WeatherConditionType.sunny,
-      high: 28,
-      low: 18,
-      humidity: 45,
-      windSpeed: 12,
-      hourlyForecast: List.generate(24, (i) {
-        final hour = now.add(Duration(hours: i));
-        return HourlyForecast(
-          time: hour,
-          temperature: 20 + (i % 8),
-          condition: i < 6 ? WeatherConditionType.sunny :
-                    i < 12 ? WeatherConditionType.partlyCloudy :
-                    i < 18 ? WeatherConditionType.cloudy : WeatherConditionType.sunny,
-        );
-      }),
-      dailyForecast: List.generate(7, (i) {
-        final day = today.add(Duration(days: i));
-        return DailyForecast(
-          date: day,
-          high: 26 + (i % 4),
-          low: 16 + (i % 3),
-          condition: i % 3 == 0 ? WeatherConditionType.sunny :
-                    i % 3 == 1 ? WeatherConditionType.partlyCloudy : WeatherConditionType.cloudy,
-        );
-      }),
-    );
-
-    // Initialize Water Logs
-    _waterLogs.addAll([
+    // Seed Water Logs
+    final waterLogs = [
       WaterLogModel(id: _generateId(), amountMl: 250, loggedAt: today.add(const Duration(hours: 8))),
       WaterLogModel(id: _generateId(), amountMl: 500, loggedAt: today.add(const Duration(hours: 10))),
       WaterLogModel(id: _generateId(), amountMl: 250, loggedAt: today.add(const Duration(hours: 12))),
-    ]);
+    ];
+    for (final log in waterLogs) {
+      HiveInit.waterLogsBox.put(log.id, log);
+    }
 
-    // Initialize Calorie Entries
-    _calorieEntries.addAll([
+    // Seed Calorie Entries
+    final calorieEntries = [
       CalorieEntryModel(
         id: _generateId(),
         foodName: 'Oatmeal with Berries',
@@ -299,10 +415,13 @@ class MockRepository {
         loggedAt: today.add(const Duration(hours: 15)),
         carbs: 25,
       ),
-    ]);
+    ];
+    for (final entry in calorieEntries) {
+      HiveInit.calorieEntriesBox.put(entry.id, entry);
+    }
 
-    // Initialize Sleep Records
-    _sleepRecords.addAll([
+    // Seed Sleep Records
+    final sleepRecords = [
       SleepRecordModel(
         id: _generateId(),
         bedTime: today.subtract(const Duration(hours: 8)),
@@ -321,10 +440,13 @@ class MockRepository {
         wakeTime: today.subtract(const Duration(days: 2)),
         quality: SleepQuality.fair,
       ),
-    ]);
+    ];
+    for (final record in sleepRecords) {
+      HiveInit.sleepRecordsBox.put(record.id, record);
+    }
 
-    // Initialize Step Records
-    _stepRecords.addAll([
+    // Seed Step Records
+    final stepRecords = [
       StepRecordModel(
         id: _generateId(),
         date: today,
@@ -349,10 +471,13 @@ class MockRepository {
         distanceKm: 6.4,
         caloriesBurned: 360,
       ),
-    ]);
+    ];
+    for (final record in stepRecords) {
+      HiveInit.stepRecordsBox.put(record.id, record);
+    }
 
-    // Initialize Workout Sessions
-    _workoutSessions.addAll([
+    // Seed Workout Sessions
+    final workoutSessions = [
       WorkoutSessionModel(
         id: _generateId(),
         type: WorkoutType.running,
@@ -374,19 +499,25 @@ class MockRepository {
           ExerciseModel(name: 'Deadlift', sets: 3, reps: 8, weight: 100),
         ],
       ),
-    ]);
+    ];
+    for (final session in workoutSessions) {
+      HiveInit.workoutSessionsBox.put(session.id, session);
+    }
 
-    // Initialize Heart Rate Records
-    _heartRateRecords.addAll([
+    // Seed Heart Rate Records
+    final heartRateRecords = [
       HeartRateRecordModel(id: _generateId(), bpm: 72, recordedAt: now),
       HeartRateRecordModel(id: _generateId(), bpm: 68, recordedAt: now.subtract(const Duration(hours: 1))),
       HeartRateRecordModel(id: _generateId(), bpm: 85, recordedAt: now.subtract(const Duration(hours: 2))),
       HeartRateRecordModel(id: _generateId(), bpm: 120, recordedAt: now.subtract(const Duration(hours: 3))),
       HeartRateRecordModel(id: _generateId(), bpm: 65, recordedAt: now.subtract(const Duration(hours: 6))),
-    ]);
+    ];
+    for (final record in heartRateRecords) {
+      HiveInit.heartRateRecordsBox.put(record.id, record);
+    }
 
-    // Initialize Mood Entries
-    _moodEntries.addAll([
+    // Seed Mood Entries
+    final moodEntries = [
       MoodEntryModel(
         id: _generateId(),
         mood: MoodLevel.good,
@@ -405,40 +536,13 @@ class MockRepository {
         mood: MoodLevel.okay,
         recordedAt: today.subtract(const Duration(days: 2)).add(const Duration(hours: 12)),
       ),
-    ]);
+    ];
+    for (final entry in moodEntries) {
+      HiveInit.moodEntriesBox.put(entry.id, entry);
+    }
 
-    // Initialize Screen Time
-    _screenTimeRecords.addAll([
-      ScreenTimeModel(
-        id: _generateId(),
-        date: today,
-        totalMinutes: 225,
-        pickups: 45,
-        appUsage: [
-          AppUsageModel(appName: 'Social Media', category: 'Social', minutesUsed: 65, iconName: 'people'),
-          AppUsageModel(appName: 'Email', category: 'Productivity', minutesUsed: 45, iconName: 'email'),
-          AppUsageModel(appName: 'Browser', category: 'Productivity', minutesUsed: 55, iconName: 'language'),
-          AppUsageModel(appName: 'Games', category: 'Entertainment', minutesUsed: 30, iconName: 'games'),
-          AppUsageModel(appName: 'Other', category: 'Other', minutesUsed: 30, iconName: 'apps'),
-        ],
-      ),
-      ScreenTimeModel(
-        id: _generateId(),
-        date: today.subtract(const Duration(days: 1)),
-        totalMinutes: 260,
-        pickups: 52,
-        appUsage: [
-          AppUsageModel(appName: 'Social Media', category: 'Social', minutesUsed: 80, iconName: 'people'),
-          AppUsageModel(appName: 'Email', category: 'Productivity', minutesUsed: 50, iconName: 'email'),
-          AppUsageModel(appName: 'Browser', category: 'Productivity', minutesUsed: 60, iconName: 'language'),
-          AppUsageModel(appName: 'Games', category: 'Entertainment', minutesUsed: 40, iconName: 'games'),
-          AppUsageModel(appName: 'Other', category: 'Other', minutesUsed: 30, iconName: 'apps'),
-        ],
-      ),
-    ]);
-
-    // Initialize Meditation Sessions
-    _meditationSessions.addAll([
+    // Seed Meditation Sessions
+    final meditationSessions = [
       MeditationSessionModel(
         id: _generateId(),
         type: MeditationType.breathing,
@@ -460,69 +564,75 @@ class MockRepository {
         durationMinutes: 20,
         isCompleted: true,
       ),
-    ]);
+    ];
+    for (final session in meditationSessions) {
+      HiveInit.meditationSessionsBox.put(session.id, session);
+    }
   }
 
   // ==================== TODOS ====================
-  List<TodoModel> get todos => List.unmodifiable(_todos);
+  List<TodoModel> get todos => HiveInit.todosBox.values.toList();
 
-  int get completedTodosCount => _todos.where((t) => t.isCompleted).length;
+  int get completedTodosCount => todos.where((t) => t.isCompleted).length;
 
   void addTodo(TodoModel todo) {
-    _todos.add(todo.copyWith(id: _generateId()));
+    final newTodo = todo.copyWith(id: _generateId());
+    HiveInit.todosBox.put(newTodo.id, newTodo);
   }
 
   void updateTodo(TodoModel todo) {
-    final index = _todos.indexWhere((t) => t.id == todo.id);
-    if (index != -1) _todos[index] = todo;
+    HiveInit.todosBox.put(todo.id, todo);
   }
 
   void deleteTodo(String id) {
-    _todos.removeWhere((t) => t.id == id);
+    HiveInit.todosBox.delete(id);
   }
 
   void toggleTodoComplete(String id) {
-    final index = _todos.indexWhere((t) => t.id == id);
-    if (index != -1) {
-      _todos[index] = _todos[index].copyWith(isCompleted: !_todos[index].isCompleted);
+    final todo = HiveInit.todosBox.get(id);
+    if (todo != null) {
+      final updated = todo.copyWith(isCompleted: !todo.isCompleted);
+      HiveInit.todosBox.put(id, updated);
     }
   }
 
   // ==================== MESSAGES ====================
-  List<InboxMessageModel> get messages => List.unmodifiable(_messages);
+  List<InboxMessageModel> get messages => HiveInit.inboxMessagesBox.values.toList();
 
-  int get unreadMessagesCount => _messages.where((m) => !m.isRead).length;
+  int get unreadMessagesCount => messages.where((m) => !m.isRead).length;
 
-  Set<String> get messageServices => _messages.map((m) => m.service).toSet();
+  Set<String> get messageServices => messages.map((m) => m.service).toSet();
 
   void markMessageAsRead(String id) {
-    final index = _messages.indexWhere((m) => m.id == id);
-    if (index != -1) {
-      _messages[index] = _messages[index].copyWith(isRead: true);
+    final msg = HiveInit.inboxMessagesBox.get(id);
+    if (msg != null) {
+      final updated = msg.copyWith(isRead: true);
+      HiveInit.inboxMessagesBox.put(id, updated);
     }
   }
 
   void toggleMessageStar(String id) {
-    final index = _messages.indexWhere((m) => m.id == id);
-    if (index != -1) {
-      _messages[index] = _messages[index].copyWith(isStarred: !_messages[index].isStarred);
+    final msg = HiveInit.inboxMessagesBox.get(id);
+    if (msg != null) {
+      final updated = msg.copyWith(isStarred: !msg.isStarred);
+      HiveInit.inboxMessagesBox.put(id, updated);
     }
   }
 
   void deleteMessage(String id) {
-    _messages.removeWhere((m) => m.id == id);
+    HiveInit.inboxMessagesBox.delete(id);
   }
 
   // ==================== CALENDAR EVENTS ====================
-  List<CalendarEventModel> get events => List.unmodifiable(_events);
+  List<CalendarEventModel> get events => HiveInit.calendarEventsBox.values.toList();
 
   List<CalendarEventModel> getEventsForDate(DateTime date) {
     final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
-    return _events.where((e) {
-      return e.startTime.isAfter(startOfDay.subtract(const Duration(seconds: 1))) &&
-             e.startTime.isBefore(endOfDay);
-    }).toList()..sort((a, b) => a.startTime.compareTo(b.startTime));
+    return events.where((e) {
+      return e.startTime.isAfter(startOfDay.subtract(const Duration(seconds: 1))) && e.startTime.isBefore(endOfDay);
+    }).toList()
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
   int get todayEventsCount {
@@ -532,251 +642,259 @@ class MockRepository {
 
   CalendarEventModel? get nextEvent {
     final now = DateTime.now();
-    final upcoming = _events.where((e) => e.startTime.isAfter(now)).toList()
+    final upcoming = events.where((e) => e.startTime.isAfter(now)).toList()
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
     return upcoming.isNotEmpty ? upcoming.first : null;
   }
 
   void addEvent(CalendarEventModel event) {
-    _events.add(event.copyWith(id: _generateId()));
+    final newEvent = event.copyWith(id: _generateId());
+    HiveInit.calendarEventsBox.put(newEvent.id, newEvent);
   }
 
   void updateEvent(CalendarEventModel event) {
-    final index = _events.indexWhere((e) => e.id == event.id);
-    if (index != -1) _events[index] = event;
+    HiveInit.calendarEventsBox.put(event.id, event);
   }
 
   void deleteEvent(String id) {
-    _events.removeWhere((e) => e.id == id);
+    HiveInit.calendarEventsBox.delete(id);
   }
 
   // ==================== FOCUS SESSIONS ====================
-  List<FocusSessionModel> get focusSessions => List.unmodifiable(_focusSessions);
+  List<FocusSessionModel> get focusSessions => HiveInit.focusSessionsBox.values.toList();
 
   int get todayCompletedSessions {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
-    return _focusSessions.where((s) =>
-      s.isCompleted && s.startTime.isAfter(startOfDay)
-    ).length;
+    return focusSessions.where((s) => s.isCompleted && s.startTime.isAfter(startOfDay)).length;
   }
 
   void addFocusSession(FocusSessionModel session) {
-    _focusSessions.add(session.copyWith(id: _generateId()));
+    final newSession = session.copyWith(id: _generateId());
+    HiveInit.focusSessionsBox.put(newSession.id, newSession);
   }
 
   void completeFocusSession(String id) {
-    final index = _focusSessions.indexWhere((s) => s.id == id);
-    if (index != -1) {
-      _focusSessions[index] = _focusSessions[index].copyWith(
+    final session = HiveInit.focusSessionsBox.get(id);
+    if (session != null) {
+      final updated = session.copyWith(
         isCompleted: true,
         endTime: DateTime.now(),
       );
+      HiveInit.focusSessionsBox.put(id, updated);
     }
   }
 
   // ==================== HABITS ====================
-  List<HabitModel> get habits => List.unmodifiable(_habits);
+  List<HabitModel> get habits => HiveInit.habitsBox.values.toList();
 
-  int get completedHabitsToday => _habits.where((h) => h.isCompletedToday).length;
+  int get completedHabitsToday => habits.where((h) => h.isCompletedToday).length;
 
-  int get maxStreak => _habits.isEmpty ? 0 : _habits.map((h) => h.streak).reduce((a, b) => a > b ? a : b);
+  int get maxStreak => habits.isEmpty ? 0 : habits.map((h) => h.streak).reduce((a, b) => a > b ? a : b);
 
   void addHabit(HabitModel habit) {
-    _habits.add(habit.copyWith(id: _generateId()));
+    final newHabit = habit.copyWith(id: _generateId());
+    HiveInit.habitsBox.put(newHabit.id, newHabit);
   }
 
   void toggleHabitComplete(String id) {
-    final index = _habits.indexWhere((h) => h.id == id);
-    if (index != -1) {
-      final habit = _habits[index];
+    final habit = HiveInit.habitsBox.get(id);
+    if (habit != null) {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
 
+      HabitModel updated;
       if (habit.isCompletedToday) {
         // Un-complete
         final newCompletedDates = habit.completedDates.where((d) {
           final date = DateTime(d.year, d.month, d.day);
           return date != today;
         }).toList();
-        _habits[index] = habit.copyWith(
+        updated = habit.copyWith(
           isCompletedToday: false,
           streak: habit.streak > 0 ? habit.streak - 1 : 0,
           completedDates: newCompletedDates,
         );
       } else {
         // Complete
-        _habits[index] = habit.copyWith(
+        updated = habit.copyWith(
           isCompletedToday: true,
           streak: habit.streak + 1,
           completedDates: [...habit.completedDates, today],
         );
       }
+      HiveInit.habitsBox.put(id, updated);
     }
   }
 
   void deleteHabit(String id) {
-    _habits.removeWhere((h) => h.id == id);
+    HiveInit.habitsBox.delete(id);
   }
 
   // ==================== WEATHER ====================
   WeatherForecastModel? get weather => _weather;
 
   // ==================== WATER LOGS ====================
-  List<WaterLogModel> get waterLogs => List.unmodifiable(_waterLogs);
+  List<WaterLogModel> get waterLogs => HiveInit.waterLogsBox.values.toList();
 
   int get todayWaterIntake {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
-    return _waterLogs
-        .where((l) => l.loggedAt.isAfter(startOfDay))
-        .fold(0, (sum, l) => sum + l.amountMl);
+    return waterLogs.where((l) => l.loggedAt.isAfter(startOfDay)).fold(0, (sum, l) => sum + l.amountMl);
   }
 
   void addWaterLog(int amountMl) {
-    _waterLogs.add(WaterLogModel(
+    final log = WaterLogModel(
       id: _generateId(),
       amountMl: amountMl,
       loggedAt: DateTime.now(),
-    ));
+    );
+    HiveInit.waterLogsBox.put(log.id, log);
   }
 
   void deleteWaterLog(String id) {
-    _waterLogs.removeWhere((l) => l.id == id);
+    HiveInit.waterLogsBox.delete(id);
   }
 
   // ==================== CALORIE ENTRIES ====================
-  List<CalorieEntryModel> get calorieEntries => List.unmodifiable(_calorieEntries);
+  List<CalorieEntryModel> get calorieEntries => HiveInit.calorieEntriesBox.values.toList();
 
   int get todayCalories {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
-    return _calorieEntries
-        .where((e) => e.loggedAt.isAfter(startOfDay))
-        .fold(0, (sum, e) => sum + e.calories);
+    return calorieEntries.where((e) => e.loggedAt.isAfter(startOfDay)).fold(0, (sum, e) => sum + e.calories);
   }
 
   List<CalorieEntryModel> get todayCalorieEntries {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
-    return _calorieEntries.where((e) => e.loggedAt.isAfter(startOfDay)).toList();
+    return calorieEntries.where((e) => e.loggedAt.isAfter(startOfDay)).toList();
   }
 
   void addCalorieEntry(CalorieEntryModel entry) {
-    _calorieEntries.add(entry.copyWith(id: _generateId()));
+    final newEntry = entry.copyWith(id: _generateId());
+    HiveInit.calorieEntriesBox.put(newEntry.id, newEntry);
   }
 
   void deleteCalorieEntry(String id) {
-    _calorieEntries.removeWhere((e) => e.id == id);
+    HiveInit.calorieEntriesBox.delete(id);
   }
 
   // ==================== SLEEP RECORDS ====================
-  List<SleepRecordModel> get sleepRecords => List.unmodifiable(_sleepRecords);
+  List<SleepRecordModel> get sleepRecords => HiveInit.sleepRecordsBox.values.toList();
 
   SleepRecordModel? get lastNightSleep {
-    if (_sleepRecords.isEmpty) return null;
-    return _sleepRecords.reduce((a, b) => a.wakeTime.isAfter(b.wakeTime) ? a : b);
+    final records = sleepRecords;
+    if (records.isEmpty) return null;
+    return records.reduce((a, b) => a.wakeTime.isAfter(b.wakeTime) ? a : b);
   }
 
   void addSleepRecord(SleepRecordModel record) {
-    _sleepRecords.add(record.copyWith(id: _generateId()));
+    final newRecord = record.copyWith(id: _generateId());
+    HiveInit.sleepRecordsBox.put(newRecord.id, newRecord);
   }
 
   void deleteSleepRecord(String id) {
-    _sleepRecords.removeWhere((r) => r.id == id);
+    HiveInit.sleepRecordsBox.delete(id);
   }
 
   // ==================== STEP RECORDS ====================
-  List<StepRecordModel> get stepRecords => List.unmodifiable(_stepRecords);
+  List<StepRecordModel> get stepRecords => HiveInit.stepRecordsBox.values.toList();
 
   StepRecordModel? get todaySteps {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    return _stepRecords.cast<StepRecordModel?>().firstWhere(
-      (r) => r != null && DateTime(r.date.year, r.date.month, r.date.day) == todayDate,
-      orElse: () => null,
-    );
+    try {
+      return stepRecords.firstWhere(
+        (r) => DateTime(r.date.year, r.date.month, r.date.day) == todayDate,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   void updateTodaySteps(int steps) {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    final index = _stepRecords.indexWhere((r) =>
-      DateTime(r.date.year, r.date.month, r.date.day) == todayDate
-    );
 
-    if (index != -1) {
-      _stepRecords[index] = _stepRecords[index].copyWith(steps: steps);
+    final existing = stepRecords.where((r) => DateTime(r.date.year, r.date.month, r.date.day) == todayDate).toList();
+
+    if (existing.isNotEmpty) {
+      final updated = existing.first.copyWith(steps: steps);
+      HiveInit.stepRecordsBox.put(existing.first.id, updated);
     } else {
-      _stepRecords.add(StepRecordModel(
+      final newRecord = StepRecordModel(
         id: _generateId(),
         date: todayDate,
         steps: steps,
-      ));
+      );
+      HiveInit.stepRecordsBox.put(newRecord.id, newRecord);
     }
   }
 
   // ==================== WORKOUT SESSIONS ====================
-  List<WorkoutSessionModel> get workoutSessions => List.unmodifiable(_workoutSessions);
+  List<WorkoutSessionModel> get workoutSessions => HiveInit.workoutSessionsBox.values.toList();
 
   int get todayWorkoutMinutes {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
-    return _workoutSessions
-        .where((w) => w.startTime.isAfter(startOfDay))
-        .fold(0, (sum, w) => sum + w.durationMinutes);
+    return workoutSessions.where((w) => w.startTime.isAfter(startOfDay)).fold(0, (sum, w) => sum + w.durationMinutes);
   }
 
   int get todayWorkoutSessions {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
-    return _workoutSessions.where((w) => w.startTime.isAfter(startOfDay)).length;
+    return workoutSessions.where((w) => w.startTime.isAfter(startOfDay)).length;
   }
 
   void addWorkoutSession(WorkoutSessionModel session) {
-    _workoutSessions.add(session.copyWith(id: _generateId()));
+    final newSession = session.copyWith(id: _generateId());
+    HiveInit.workoutSessionsBox.put(newSession.id, newSession);
   }
 
   void deleteWorkoutSession(String id) {
-    _workoutSessions.removeWhere((w) => w.id == id);
+    HiveInit.workoutSessionsBox.delete(id);
   }
 
   // ==================== HEART RATE RECORDS ====================
-  List<HeartRateRecordModel> get heartRateRecords => List.unmodifiable(_heartRateRecords);
+  List<HeartRateRecordModel> get heartRateRecords => HiveInit.heartRateRecordsBox.values.toList();
 
   HeartRateRecordModel? get latestHeartRate {
-    if (_heartRateRecords.isEmpty) return null;
-    return _heartRateRecords.reduce((a, b) => a.recordedAt.isAfter(b.recordedAt) ? a : b);
+    final records = heartRateRecords;
+    if (records.isEmpty) return null;
+    return records.reduce((a, b) => a.recordedAt.isAfter(b.recordedAt) ? a : b);
   }
 
   int get restingHeartRate {
-    final restingRecords = _heartRateRecords.where((r) => r.zone == HeartRateZone.resting);
+    final restingRecords = heartRateRecords.where((r) => r.zone == HeartRateZone.resting);
     if (restingRecords.isEmpty) return 65;
     return (restingRecords.map((r) => r.bpm).reduce((a, b) => a + b) / restingRecords.length).round();
   }
 
   void addHeartRateRecord(int bpm) {
-    _heartRateRecords.add(HeartRateRecordModel(
+    final record = HeartRateRecordModel(
       id: _generateId(),
       bpm: bpm,
       recordedAt: DateTime.now(),
-    ));
+    );
+    HiveInit.heartRateRecordsBox.put(record.id, record);
   }
 
   // ==================== MOOD ENTRIES ====================
-  List<MoodEntryModel> get moodEntries => List.unmodifiable(_moodEntries);
+  List<MoodEntryModel> get moodEntries => HiveInit.moodEntriesBox.values.toList();
 
   MoodEntryModel? get todayMood {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
-    final todayEntries = _moodEntries.where((m) => m.recordedAt.isAfter(startOfDay)).toList();
+    final todayEntries = moodEntries.where((m) => m.recordedAt.isAfter(startOfDay)).toList();
     if (todayEntries.isEmpty) return null;
     return todayEntries.reduce((a, b) => a.recordedAt.isAfter(b.recordedAt) ? a : b);
   }
 
   int get moodStreak {
-    if (_moodEntries.isEmpty) return 0;
-    final sorted = _moodEntries.toList()..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+    final entries = moodEntries;
+    if (entries.isEmpty) return 0;
+    final sorted = entries.toList()..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
     int streak = 0;
     DateTime? lastDate;
     for (final entry in sorted) {
@@ -795,7 +913,8 @@ class MockRepository {
   }
 
   void addMoodEntry(MoodEntryModel entry) {
-    _moodEntries.add(entry.copyWith(id: _generateId()));
+    final newEntry = entry.copyWith(id: _generateId());
+    HiveInit.moodEntriesBox.put(newEntry.id, newEntry);
   }
 
   // ==================== SCREEN TIME ====================
@@ -804,35 +923,42 @@ class MockRepository {
   ScreenTimeModel? get todayScreenTime {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    return _screenTimeRecords.cast<ScreenTimeModel?>().firstWhere(
-      (r) => r != null && DateTime(r.date.year, r.date.month, r.date.day) == todayDate,
-      orElse: () => null,
-    );
+    try {
+      return _screenTimeRecords.firstWhere(
+        (r) => DateTime(r.date.year, r.date.month, r.date.day) == todayDate,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   ScreenTimeModel? get yesterdayScreenTime {
     final yesterday = DateTime.now().subtract(const Duration(days: 1));
     final yesterdayDate = DateTime(yesterday.year, yesterday.month, yesterday.day);
-    return _screenTimeRecords.cast<ScreenTimeModel?>().firstWhere(
-      (r) => r != null && DateTime(r.date.year, r.date.month, r.date.day) == yesterdayDate,
-      orElse: () => null,
-    );
+    try {
+      return _screenTimeRecords.firstWhere(
+        (r) => DateTime(r.date.year, r.date.month, r.date.day) == yesterdayDate,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   // ==================== MEDITATION SESSIONS ====================
-  List<MeditationSessionModel> get meditationSessions => List.unmodifiable(_meditationSessions);
+  List<MeditationSessionModel> get meditationSessions => HiveInit.meditationSessionsBox.values.toList();
 
   int get todayMeditationMinutes {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
-    return _meditationSessions
+    return meditationSessions
         .where((m) => m.startTime.isAfter(startOfDay) && m.isCompleted)
         .fold(0, (sum, m) => sum + m.durationMinutes);
   }
 
   int get meditationStreak {
-    if (_meditationSessions.isEmpty) return 0;
-    final completedSessions = _meditationSessions.where((m) => m.isCompleted).toList();
+    final sessions = meditationSessions;
+    if (sessions.isEmpty) return 0;
+    final completedSessions = sessions.where((m) => m.isCompleted).toList();
     if (completedSessions.isEmpty) return 0;
 
     completedSessions.sort((a, b) => b.startTime.compareTo(a.startTime));
@@ -855,13 +981,15 @@ class MockRepository {
   }
 
   void addMeditationSession(MeditationSessionModel session) {
-    _meditationSessions.add(session.copyWith(id: _generateId()));
+    final newSession = session.copyWith(id: _generateId());
+    HiveInit.meditationSessionsBox.put(newSession.id, newSession);
   }
 
   void completeMeditationSession(String id) {
-    final index = _meditationSessions.indexWhere((m) => m.id == id);
-    if (index != -1) {
-      _meditationSessions[index] = _meditationSessions[index].copyWith(isCompleted: true);
+    final session = HiveInit.meditationSessionsBox.get(id);
+    if (session != null) {
+      final updated = session.copyWith(isCompleted: true);
+      HiveInit.meditationSessionsBox.put(id, updated);
     }
   }
 }

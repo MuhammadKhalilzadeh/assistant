@@ -1,13 +1,43 @@
-enum MealType { breakfast, lunch, dinner, snack }
+import 'package:hive/hive.dart';
 
-class CalorieEntryModel {
+part 'calorie_entry_model.g.dart';
+
+@HiveType(typeId: 12)
+enum MealType {
+  @HiveField(0)
+  breakfast,
+  @HiveField(1)
+  lunch,
+  @HiveField(2)
+  dinner,
+  @HiveField(3)
+  snack,
+}
+
+@HiveType(typeId: 13)
+class CalorieEntryModel extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String foodName;
+
+  @HiveField(2)
   final int calories;
+
+  @HiveField(3)
   final MealType mealType;
+
+  @HiveField(4)
   final DateTime loggedAt;
+
+  @HiveField(5)
   final int? protein;
+
+  @HiveField(6)
   final int? carbs;
+
+  @HiveField(7)
   final int? fat;
 
   CalorieEntryModel({

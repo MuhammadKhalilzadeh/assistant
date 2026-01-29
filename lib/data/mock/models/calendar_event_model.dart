@@ -1,11 +1,31 @@
-class CalendarEventModel {
+import 'package:hive/hive.dart';
+
+part 'calendar_event_model.g.dart';
+
+@HiveType(typeId: 15)
+class CalendarEventModel extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String title;
+
+  @HiveField(2)
   final String? description;
+
+  @HiveField(3)
   final DateTime startTime;
+
+  @HiveField(4)
   final DateTime endTime;
+
+  @HiveField(5)
   final String? location;
+
+  @HiveField(6)
   final String color; // hex color string
+
+  @HiveField(7)
   final bool isAllDay;
 
   CalendarEventModel({

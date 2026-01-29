@@ -1,9 +1,25 @@
-class FocusSessionModel {
+import 'package:hive/hive.dart';
+
+part 'focus_session_model.g.dart';
+
+@HiveType(typeId: 8)
+class FocusSessionModel extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final DateTime startTime;
+
+  @HiveField(2)
   final DateTime? endTime;
+
+  @HiveField(3)
   final int durationMinutes;
+
+  @HiveField(4)
   final bool isCompleted;
+
+  @HiveField(5)
   final String? task;
 
   FocusSessionModel({

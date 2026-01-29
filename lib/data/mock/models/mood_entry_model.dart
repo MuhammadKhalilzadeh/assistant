@@ -1,10 +1,36 @@
-enum MoodLevel { great, good, okay, bad, awful }
+import 'package:hive/hive.dart';
 
-class MoodEntryModel {
+part 'mood_entry_model.g.dart';
+
+@HiveType(typeId: 1)
+enum MoodLevel {
+  @HiveField(0)
+  great,
+  @HiveField(1)
+  good,
+  @HiveField(2)
+  okay,
+  @HiveField(3)
+  bad,
+  @HiveField(4)
+  awful,
+}
+
+@HiveType(typeId: 2)
+class MoodEntryModel extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final MoodLevel mood;
+
+  @HiveField(2)
   final DateTime recordedAt;
+
+  @HiveField(3)
   final String? notes;
+
+  @HiveField(4)
   final List<String> activities;
 
   MoodEntryModel({

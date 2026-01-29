@@ -1,9 +1,25 @@
-class StepRecordModel {
+import 'package:hive/hive.dart';
+
+part 'step_record_model.g.dart';
+
+@HiveType(typeId: 11)
+class StepRecordModel extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final DateTime date;
+
+  @HiveField(2)
   final int steps;
+
+  @HiveField(3)
   final int goal;
+
+  @HiveField(4)
   final double distanceKm;
+
+  @HiveField(5)
   final int caloriesBurned;
 
   StepRecordModel({

@@ -1,6 +1,16 @@
-class WaterLogModel {
+import 'package:hive/hive.dart';
+
+part 'water_log_model.g.dart';
+
+@HiveType(typeId: 0)
+class WaterLogModel extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final int amountMl;
+
+  @HiveField(2)
   final DateTime loggedAt;
 
   WaterLogModel({
