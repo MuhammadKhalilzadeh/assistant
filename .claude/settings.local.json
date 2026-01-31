@@ -14,7 +14,13 @@
       "Bash(echo:*)",
       "WebFetch(domain:maven.aliyun.com)",
       "WebFetch(domain:mirrors.huaweicloud.com)",
-      "WebFetch(domain:maven.tuna.tsinghua.edu.cn)"
+      "WebFetch(domain:maven.tuna.tsinghua.edu.cn)",
+      "Bash(tree:*)",
+      "WebFetch(domain:www.freecodecamp.org)",
+      "WebFetch(domain:www.topcoder.com)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:dart.dev)",
+      "WebFetch(domain:medium.com)"
     ]
   }
 }
