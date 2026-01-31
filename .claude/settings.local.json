@@ -20,7 +20,8 @@
       "WebFetch(domain:www.topcoder.com)",
       "WebFetch(domain:dev.to)",
       "WebFetch(domain:dart.dev)",
-      "WebFetch(domain:medium.com)"
+      "WebFetch(domain:medium.com)",
+      "Bash(ls -la \"C:\\\\Workspace\\\\flutter-projects\\\\First\\\\assistant\\\\lib\\\\presentation\\\\pages\\\\calendar\"\" 2>/dev/null || echo \"Calendar dir structure not found \")"
     ]
   }
 }
