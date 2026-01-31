@@ -1,7 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(flutter --version:*)",
+      "WebSearch",
+      "WebFetch(domain:dl.google.com)",
+      "Bash(curl:*)",
+      "Bash(dir:*)",
+      "Bash(if not exist \"C:\\\\Users\\\\mokha\\\\.gradle\\\\init.d\" mkdir \"C:\\\\Users\\\\mokha\\\\.gradle\\\\init.d\")",
+      "Bash(flutter clean:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter build:*)",
+      "Bash(echo:*)",
+      "WebFetch(domain:maven.aliyun.com)",
+      "WebFetch(domain:mirrors.huaweicloud.com)",
+      "WebFetch(domain:maven.tuna.tsinghua.edu.cn)"
     ]
   }
 }
