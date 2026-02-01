@@ -38,9 +38,10 @@ class AppTheme {
   );
 
   // Neutral Colors
-  static const Color backgroundColor = Color(0xFFFFF5F5); // Light pink tint
+  static const Color backgroundColor = Color(0xFFFFF0F0); // Slightly darker pink for better card contrast
   static const Color surfaceColor = Color(0xFFFFFFFF);
   static const Color cardColor = Color(0xFFFFFFFF);
+  static const Color cardBorderColor = Color(0xFFE8E8E8); // Light gray for card borders
   
   // Text Colors
   static const Color textPrimary = Color(0xFF1E293B);
@@ -57,14 +58,14 @@ class AppTheme {
   // Shadows
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
-      color: Colors.black.withValues(alpha: 0.05),
-      blurRadius: 10,
-      offset: const Offset(0, 4),
+      color: Colors.black.withValues(alpha: 0.04),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
     ),
     BoxShadow(
       color: Colors.black.withValues(alpha: 0.02),
       blurRadius: 4,
-      offset: const Offset(0, 2),
+      offset: const Offset(0, 1),
     ),
   ];
   
@@ -363,10 +364,11 @@ class AppTheme {
     );
   }
 
-  /// Card decoration for standard white cards with subtle shadow
+  /// Card decoration for standard white cards with subtle shadow and border
   static BoxDecoration cardDecoration({double? borderRadius}) => BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(borderRadius ?? borderRadiusCard),
+        border: Border.all(color: cardBorderColor, width: 1),
         boxShadow: cardShadow,
       );
 }

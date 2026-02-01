@@ -124,16 +124,7 @@ class _HomeTabState extends State<_HomeTab> {
 
     return SafeArea(
       child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.backgroundColor,
-              AppTheme.surfaceColor,
-            ],
-          ),
-        ),
+        color: AppTheme.backgroundColor,
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.all(paddingValue),
@@ -309,16 +300,7 @@ class _JarvisTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppTheme.backgroundColor,
-            AppTheme.surfaceColor,
-          ],
-        ),
-      ),
+      color: AppTheme.backgroundColor,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

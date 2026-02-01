@@ -58,6 +58,7 @@ class CustomScreenTimeCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: backgroundColor ?? Colors.white,
             borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(color: AppTheme.cardBorderColor, width: 1),
             boxShadow: AppTheme.cardShadow,
           ),
           child: Padding(
