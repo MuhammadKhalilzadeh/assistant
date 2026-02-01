@@ -1,3 +1,39 @@
+/// Goal settings for screen time tracking
+class ScreenTimeGoal {
+  final int dailyLimitMinutes;
+
+  const ScreenTimeGoal({
+    this.dailyLimitMinutes = 180,
+  });
+
+  ScreenTimeGoal copyWith({
+    int? dailyLimitMinutes,
+  }) {
+    return ScreenTimeGoal(
+      dailyLimitMinutes: dailyLimitMinutes ?? this.dailyLimitMinutes,
+    );
+  }
+}
+
+/// Statistics for screen time tracking
+class ScreenTimeStats {
+  final double dailyAverageMinutes;
+  final double averagePickups;
+  final int currentStreak;
+  final int bestStreak;
+  final double goalCompletionRate;
+  final Map<String, int> appUsageBreakdown;
+
+  const ScreenTimeStats({
+    this.dailyAverageMinutes = 0.0,
+    this.averagePickups = 0.0,
+    this.currentStreak = 0,
+    this.bestStreak = 0,
+    this.goalCompletionRate = 0.0,
+    this.appUsageBreakdown = const {},
+  });
+}
+
 class AppUsageModel {
   final String appName;
   final String category;

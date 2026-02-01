@@ -1,5 +1,45 @@
 enum MeditationType { breathing, guided, unguided, sleep, focus }
 
+/// Goal settings for meditation tracking
+class MeditationGoal {
+  final int dailyMinutesGoal;
+  final int weeklySessionsGoal;
+
+  const MeditationGoal({
+    this.dailyMinutesGoal = 10,
+    this.weeklySessionsGoal = 7,
+  });
+
+  MeditationGoal copyWith({
+    int? dailyMinutesGoal,
+    int? weeklySessionsGoal,
+  }) {
+    return MeditationGoal(
+      dailyMinutesGoal: dailyMinutesGoal ?? this.dailyMinutesGoal,
+      weeklySessionsGoal: weeklySessionsGoal ?? this.weeklySessionsGoal,
+    );
+  }
+}
+
+/// Statistics for meditation tracking
+class MeditationStats {
+  final int weeklyMinutes;
+  final int weeklySessions;
+  final int currentStreak;
+  final int bestStreak;
+  final double goalCompletionRate;
+  final Map<MeditationType, int> sessionsByType;
+
+  const MeditationStats({
+    this.weeklyMinutes = 0,
+    this.weeklySessions = 0,
+    this.currentStreak = 0,
+    this.bestStreak = 0,
+    this.goalCompletionRate = 0.0,
+    this.sessionsByType = const {},
+  });
+}
+
 class MeditationSessionModel {
   final String id;
   final MeditationType type;

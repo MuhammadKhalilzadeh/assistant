@@ -1696,6 +1696,17 @@ class MockRepository {
   // ==================== WORKOUT SESSIONS ====================
   List<WorkoutSessionModel> get workoutSessions => List.unmodifiable(_workoutSessions);
 
+  WorkoutGoal _workoutGoal = const WorkoutGoal();
+
+  WorkoutGoal get workoutGoal => _workoutGoal;
+
+  void updateWorkoutGoal({int? weeklyMinutesGoal, int? weeklySessionsGoal}) {
+    _workoutGoal = _workoutGoal.copyWith(
+      weeklyMinutesGoal: weeklyMinutesGoal,
+      weeklySessionsGoal: weeklySessionsGoal,
+    );
+  }
+
   int get todayWorkoutMinutes {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
@@ -1710,6 +1721,134 @@ class MockRepository {
     return _workoutSessions.where((w) => w.startTime.isAfter(startOfDay)).length;
   }
 
+  int get todayWorkoutCalories {
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
+    return _workoutSessions
+        .where((w) => w.startTime.isAfter(startOfDay))
+        .fold(0, (sum, w) => sum + w.caloriesBurned);
+  }
+
+  List<WorkoutSessionModel> getWorkoutsForDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    return _workoutSessions
+        .where((w) => w.startTime.isAfter(startOfDay) && w.startTime.isBefore(endOfDay))
+        .toList()
+      ..sort((a, b) => b.startTime.compareTo(a.startTime));
+  }
+
+  List<WorkoutSessionModel> getLast7DaysWorkouts() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final weekAgo = today.subtract(const Duration(days: 7));
+    return _workoutSessions
+        .where((w) => w.startTime.isAfter(weekAgo))
+        .toList()
+      ..sort((a, b) => b.startTime.compareTo(a.startTime));
+  }
+
+  Map<String, int> getLast7DaysWorkoutMinutesMap() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final Map<String, int> result = {};
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayName = dayNames[date.weekday - 1];
+      final dayWorkouts = getWorkoutsForDate(date);
+      result[dayName] = dayWorkouts.fold(0, (sum, w) => sum + w.durationMinutes);
+    }
+
+    return result;
+  }
+
+  int getWorkoutStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int streak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final dayWorkouts = getWorkoutsForDate(date);
+      final dayMinutes = dayWorkouts.fold(0, (sum, w) => sum + w.durationMinutes);
+
+      if (dayMinutes > 0) {
+        streak++;
+      } else if (i > 0) {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  int getBestWorkoutStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int bestStreak = 0;
+    int currentStreak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final dayWorkouts = getWorkoutsForDate(date);
+      final dayMinutes = dayWorkouts.fold(0, (sum, w) => sum + w.durationMinutes);
+
+      if (dayMinutes > 0) {
+        currentStreak++;
+        if (currentStreak > bestStreak) {
+          bestStreak = currentStreak;
+        }
+      } else {
+        currentStreak = 0;
+      }
+    }
+
+    return bestStreak;
+  }
+
+  WorkoutStats getWeeklyWorkoutStats() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final weekAgo = today.subtract(const Duration(days: 7));
+
+    final weekWorkouts = _workoutSessions
+        .where((w) => w.startTime.isAfter(weekAgo))
+        .toList();
+
+    int totalMinutes = 0;
+    int totalCalories = 0;
+    final Map<WorkoutType, int> byType = {};
+
+    for (final workout in weekWorkouts) {
+      totalMinutes += workout.durationMinutes;
+      totalCalories += workout.caloriesBurned;
+      byType[workout.type] = (byType[workout.type] ?? 0) + 1;
+    }
+
+    int daysWithWorkout = 0;
+    for (int i = 0; i < 7; i++) {
+      final date = today.subtract(Duration(days: i));
+      final dayWorkouts = getWorkoutsForDate(date);
+      if (dayWorkouts.isNotEmpty) {
+        daysWithWorkout++;
+      }
+    }
+
+    final completionRate = daysWithWorkout / 7;
+
+    return WorkoutStats(
+      weeklyMinutes: totalMinutes,
+      weeklySessions: weekWorkouts.length,
+      weeklyCalories: totalCalories,
+      currentStreak: getWorkoutStreak(),
+      bestStreak: getBestWorkoutStreak(),
+      goalCompletionRate: completionRate,
+      workoutsByType: byType,
+    );
+  }
+
   void addWorkoutSession(WorkoutSessionModel session) {
     _workoutSessions.add(session.copyWith(id: _generateId()));
   }
@@ -1720,6 +1859,17 @@ class MockRepository {
 
   // ==================== HEART RATE RECORDS ====================
   List<HeartRateRecordModel> get heartRateRecords => List.unmodifiable(_heartRateRecords);
+
+  HeartRateGoal _heartRateGoal = const HeartRateGoal();
+
+  HeartRateGoal get heartRateGoal => _heartRateGoal;
+
+  void updateHeartRateGoal({int? targetRestingBpm, int? maxBpm}) {
+    _heartRateGoal = _heartRateGoal.copyWith(
+      targetRestingBpm: targetRestingBpm,
+      maxBpm: maxBpm,
+    );
+  }
 
   HeartRateRecordModel? get latestHeartRate {
     if (_heartRateRecords.isEmpty) return null;
@@ -1732,6 +1882,126 @@ class MockRepository {
     return (restingRecords.map((r) => r.bpm).reduce((a, b) => a + b) / restingRecords.length).round();
   }
 
+  List<HeartRateRecordModel> getHeartRatesForDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    return _heartRateRecords
+        .where((r) => r.recordedAt.isAfter(startOfDay) && r.recordedAt.isBefore(endOfDay))
+        .toList()
+      ..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+  }
+
+  List<HeartRateRecordModel> getLast7DaysHeartRates() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final weekAgo = today.subtract(const Duration(days: 7));
+    return _heartRateRecords
+        .where((r) => r.recordedAt.isAfter(weekAgo))
+        .toList()
+      ..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+  }
+
+  Map<String, int> getLast7DaysHeartRateMap() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final Map<String, int> result = {};
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayName = dayNames[date.weekday - 1];
+      final dayRecords = getHeartRatesForDate(date);
+      if (dayRecords.isNotEmpty) {
+        final avg = dayRecords.fold(0, (sum, r) => sum + r.bpm) / dayRecords.length;
+        result[dayName] = avg.round();
+      } else {
+        result[dayName] = 0;
+      }
+    }
+
+    return result;
+  }
+
+  int getHeartRateStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int streak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final dayRecords = getHeartRatesForDate(date);
+
+      if (dayRecords.isNotEmpty) {
+        streak++;
+      } else if (i > 0) {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  int getBestHeartRateStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int bestStreak = 0;
+    int currentStreak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final dayRecords = getHeartRatesForDate(date);
+
+      if (dayRecords.isNotEmpty) {
+        currentStreak++;
+        if (currentStreak > bestStreak) {
+          bestStreak = currentStreak;
+        }
+      } else {
+        currentStreak = 0;
+      }
+    }
+
+    return bestStreak;
+  }
+
+  HeartRateStats getWeeklyHeartRateStats() {
+    final weekRecords = getLast7DaysHeartRates();
+
+    if (weekRecords.isEmpty) {
+      return const HeartRateStats();
+    }
+
+    final restingRecords = weekRecords.where((r) => r.zone == HeartRateZone.resting || r.zone == HeartRateZone.warmUp).toList();
+    final activeRecords = weekRecords.where((r) => r.zone == HeartRateZone.fatBurn || r.zone == HeartRateZone.cardio || r.zone == HeartRateZone.peak).toList();
+
+    final avgResting = restingRecords.isNotEmpty
+        ? restingRecords.fold(0, (sum, r) => sum + r.bpm) / restingRecords.length
+        : 0.0;
+    final avgActive = activeRecords.isNotEmpty
+        ? activeRecords.fold(0, (sum, r) => sum + r.bpm) / activeRecords.length
+        : 0.0;
+
+    final allBpm = weekRecords.map((r) => r.bpm).toList();
+    final minBpm = allBpm.reduce((a, b) => a < b ? a : b);
+    final maxBpm = allBpm.reduce((a, b) => a > b ? a : b);
+
+    final Map<HeartRateZone, int> zoneDist = {};
+    for (final record in weekRecords) {
+      zoneDist[record.zone] = (zoneDist[record.zone] ?? 0) + 1;
+    }
+
+    return HeartRateStats(
+      averageRestingBpm: avgResting,
+      averageActiveBpm: avgActive,
+      minBpm: minBpm,
+      maxBpm: maxBpm,
+      currentStreak: getHeartRateStreak(),
+      bestStreak: getBestHeartRateStreak(),
+      totalReadings: weekRecords.length,
+      zoneDistribution: zoneDist,
+    );
+  }
+
   void addHeartRateRecord(int bpm) {
     _heartRateRecords.add(HeartRateRecordModel(
       id: _generateId(),
@@ -1740,8 +2010,23 @@ class MockRepository {
     ));
   }
 
+  void deleteHeartRateRecord(String id) {
+    _heartRateRecords.removeWhere((r) => r.id == id);
+  }
+
   // ==================== MOOD ENTRIES ====================
   List<MoodEntryModel> get moodEntries => List.unmodifiable(_moodEntries);
+
+  MoodGoal _moodGoal = const MoodGoal();
+
+  MoodGoal get moodGoal => _moodGoal;
+
+  void updateMoodGoal({int? dailyEntriesGoal, MoodLevel? targetMood}) {
+    _moodGoal = _moodGoal.copyWith(
+      dailyEntriesGoal: dailyEntriesGoal,
+      targetMood: targetMood,
+    );
+  }
 
   MoodEntryModel? get todayMood {
     final today = DateTime.now();
@@ -1749,6 +2034,46 @@ class MockRepository {
     final todayEntries = _moodEntries.where((m) => m.recordedAt.isAfter(startOfDay)).toList();
     if (todayEntries.isEmpty) return null;
     return todayEntries.reduce((a, b) => a.recordedAt.isAfter(b.recordedAt) ? a : b);
+  }
+
+  List<MoodEntryModel> getMoodEntriesForDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    return _moodEntries
+        .where((m) => m.recordedAt.isAfter(startOfDay) && m.recordedAt.isBefore(endOfDay))
+        .toList()
+      ..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+  }
+
+  List<MoodEntryModel> getLast7DaysMoodEntries() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final weekAgo = today.subtract(const Duration(days: 7));
+    return _moodEntries
+        .where((m) => m.recordedAt.isAfter(weekAgo))
+        .toList()
+      ..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+  }
+
+  Map<String, double> getLast7DaysMoodMap() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final Map<String, double> result = {};
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayName = dayNames[date.weekday - 1];
+      final dayEntries = getMoodEntriesForDate(date);
+      if (dayEntries.isNotEmpty) {
+        final avg = dayEntries.fold(0, (sum, m) => sum + m.mood.index) / dayEntries.length;
+        result[dayName] = 4 - avg; // Invert so great=4, awful=0
+      } else {
+        result[dayName] = -1; // No data
+      }
+    }
+
+    return result;
   }
 
   int get moodStreak {
@@ -1764,19 +2089,99 @@ class MockRepository {
       } else if (lastDate.difference(entryDate).inDays == 1) {
         streak++;
         lastDate = entryDate;
-      } else {
+      } else if (lastDate != entryDate) {
         break;
       }
     }
     return streak;
   }
 
+  int getBestMoodStreak() {
+    if (_moodEntries.isEmpty) return 0;
+    final sorted = _moodEntries.toList()..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+    int bestStreak = 0;
+    int currentStreak = 0;
+    DateTime? lastDate;
+
+    for (final entry in sorted) {
+      final entryDate = DateTime(entry.recordedAt.year, entry.recordedAt.month, entry.recordedAt.day);
+      if (lastDate == null) {
+        currentStreak = 1;
+        lastDate = entryDate;
+      } else if (lastDate.difference(entryDate).inDays == 1) {
+        currentStreak++;
+        lastDate = entryDate;
+      } else if (lastDate != entryDate) {
+        if (currentStreak > bestStreak) {
+          bestStreak = currentStreak;
+        }
+        currentStreak = 1;
+        lastDate = entryDate;
+      }
+    }
+
+    if (currentStreak > bestStreak) {
+      bestStreak = currentStreak;
+    }
+
+    return bestStreak;
+  }
+
+  MoodStats getWeeklyMoodStats() {
+    final weekEntries = getLast7DaysMoodEntries();
+
+    if (weekEntries.isEmpty) {
+      return const MoodStats();
+    }
+
+    // Calculate average mood (0=awful, 4=great -> invert for display)
+    final totalMoodValue = weekEntries.fold(0, (sum, m) => sum + (4 - m.mood.index));
+    final avgMood = totalMoodValue / weekEntries.length;
+
+    // Mood distribution
+    final Map<MoodLevel, int> moodDist = {};
+    for (final entry in weekEntries) {
+      moodDist[entry.mood] = (moodDist[entry.mood] ?? 0) + 1;
+    }
+
+    // Common activities
+    final Map<String, int> activities = {};
+    for (final entry in weekEntries) {
+      for (final activity in entry.activities) {
+        activities[activity] = (activities[activity] ?? 0) + 1;
+      }
+    }
+
+    return MoodStats(
+      weeklyAverageMood: avgMood,
+      currentStreak: moodStreak,
+      bestStreak: getBestMoodStreak(),
+      totalEntries: weekEntries.length,
+      moodDistribution: moodDist,
+      commonActivities: activities,
+    );
+  }
+
   void addMoodEntry(MoodEntryModel entry) {
     _moodEntries.add(entry.copyWith(id: _generateId()));
   }
 
+  void deleteMoodEntry(String id) {
+    _moodEntries.removeWhere((m) => m.id == id);
+  }
+
   // ==================== SCREEN TIME ====================
   List<ScreenTimeModel> get screenTimeRecords => List.unmodifiable(_screenTimeRecords);
+
+  ScreenTimeGoal _screenTimeGoal = const ScreenTimeGoal();
+
+  ScreenTimeGoal get screenTimeGoal => _screenTimeGoal;
+
+  void updateScreenTimeGoal({int? dailyLimitMinutes}) {
+    _screenTimeGoal = _screenTimeGoal.copyWith(
+      dailyLimitMinutes: dailyLimitMinutes,
+    );
+  }
 
   ScreenTimeModel? get todayScreenTime {
     final today = DateTime.now();
@@ -1796,8 +2201,139 @@ class MockRepository {
     );
   }
 
+  ScreenTimeModel? getScreenTimeForDate(DateTime date) {
+    final targetDate = DateTime(date.year, date.month, date.day);
+    return _screenTimeRecords.cast<ScreenTimeModel?>().firstWhere(
+      (r) => r != null && DateTime(r.date.year, r.date.month, r.date.day) == targetDate,
+      orElse: () => null,
+    );
+  }
+
+  List<ScreenTimeModel> getLast7DaysScreenTime() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final List<ScreenTimeModel> result = [];
+
+    for (int i = 0; i < 7; i++) {
+      final date = today.subtract(Duration(days: i));
+      final record = getScreenTimeForDate(date);
+      if (record != null) {
+        result.add(record);
+      }
+    }
+
+    return result;
+  }
+
+  Map<String, int> getLast7DaysScreenTimeMap() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final Map<String, int> result = {};
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayName = dayNames[date.weekday - 1];
+      final record = getScreenTimeForDate(date);
+      result[dayName] = record?.totalMinutes ?? 0;
+    }
+
+    return result;
+  }
+
+  int getScreenTimeStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int streak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final record = getScreenTimeForDate(date);
+
+      if (record != null && record.totalMinutes <= _screenTimeGoal.dailyLimitMinutes) {
+        streak++;
+      } else if (i > 0) {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  int getBestScreenTimeStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int bestStreak = 0;
+    int currentStreak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final record = getScreenTimeForDate(date);
+
+      if (record != null && record.totalMinutes <= _screenTimeGoal.dailyLimitMinutes) {
+        currentStreak++;
+        if (currentStreak > bestStreak) {
+          bestStreak = currentStreak;
+        }
+      } else {
+        currentStreak = 0;
+      }
+    }
+
+    return bestStreak;
+  }
+
+  ScreenTimeStats getWeeklyScreenTimeStats() {
+    final weekRecords = getLast7DaysScreenTime();
+
+    if (weekRecords.isEmpty) {
+      return const ScreenTimeStats();
+    }
+
+    final totalMinutes = weekRecords.fold(0, (sum, r) => sum + r.totalMinutes);
+    final totalPickups = weekRecords.fold(0, (sum, r) => sum + r.pickups);
+    final avgMinutes = totalMinutes / weekRecords.length;
+    final avgPickups = totalPickups / weekRecords.length;
+
+    int underLimitDays = 0;
+    for (final record in weekRecords) {
+      if (record.totalMinutes <= _screenTimeGoal.dailyLimitMinutes) {
+        underLimitDays++;
+      }
+    }
+    final completionRate = underLimitDays / weekRecords.length;
+
+    // App usage breakdown
+    final Map<String, int> appBreakdown = {};
+    for (final record in weekRecords) {
+      for (final app in record.appUsage) {
+        appBreakdown[app.appName] = (appBreakdown[app.appName] ?? 0) + app.minutesUsed;
+      }
+    }
+
+    return ScreenTimeStats(
+      dailyAverageMinutes: avgMinutes,
+      averagePickups: avgPickups,
+      currentStreak: getScreenTimeStreak(),
+      bestStreak: getBestScreenTimeStreak(),
+      goalCompletionRate: completionRate,
+      appUsageBreakdown: appBreakdown,
+    );
+  }
+
   // ==================== MEDITATION SESSIONS ====================
   List<MeditationSessionModel> get meditationSessions => List.unmodifiable(_meditationSessions);
+
+  MeditationGoal _meditationGoal = const MeditationGoal();
+
+  MeditationGoal get meditationGoal => _meditationGoal;
+
+  void updateMeditationGoal({int? dailyMinutesGoal, int? weeklySessionsGoal}) {
+    _meditationGoal = _meditationGoal.copyWith(
+      dailyMinutesGoal: dailyMinutesGoal,
+      weeklySessionsGoal: weeklySessionsGoal,
+    );
+  }
 
   int get todayMeditationMinutes {
     final today = DateTime.now();
@@ -1805,6 +2341,49 @@ class MockRepository {
     return _meditationSessions
         .where((m) => m.startTime.isAfter(startOfDay) && m.isCompleted)
         .fold(0, (sum, m) => sum + m.durationMinutes);
+  }
+
+  int get todayMeditationSessions {
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
+    return _meditationSessions
+        .where((m) => m.startTime.isAfter(startOfDay) && m.isCompleted)
+        .length;
+  }
+
+  List<MeditationSessionModel> getMeditationsForDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    return _meditationSessions
+        .where((m) => m.startTime.isAfter(startOfDay) && m.startTime.isBefore(endOfDay) && m.isCompleted)
+        .toList()
+      ..sort((a, b) => b.startTime.compareTo(a.startTime));
+  }
+
+  List<MeditationSessionModel> getLast7DaysMeditations() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final weekAgo = today.subtract(const Duration(days: 7));
+    return _meditationSessions
+        .where((m) => m.startTime.isAfter(weekAgo) && m.isCompleted)
+        .toList()
+      ..sort((a, b) => b.startTime.compareTo(a.startTime));
+  }
+
+  Map<String, int> getLast7DaysMeditationMinutesMap() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final Map<String, int> result = {};
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayName = dayNames[date.weekday - 1];
+      final daySessions = getMeditationsForDate(date);
+      result[dayName] = daySessions.fold(0, (sum, m) => sum + m.durationMinutes);
+    }
+
+    return result;
   }
 
   int get meditationStreak {
@@ -1831,8 +2410,87 @@ class MockRepository {
     return streak;
   }
 
+  int getBestMeditationStreak() {
+    if (_meditationSessions.isEmpty) return 0;
+    final completedSessions = _meditationSessions.where((m) => m.isCompleted).toList();
+    if (completedSessions.isEmpty) return 0;
+
+    completedSessions.sort((a, b) => b.startTime.compareTo(a.startTime));
+    int bestStreak = 0;
+    int currentStreak = 0;
+    DateTime? lastDate;
+
+    for (final session in completedSessions) {
+      final sessionDate = DateTime(session.startTime.year, session.startTime.month, session.startTime.day);
+      if (lastDate == null) {
+        currentStreak = 1;
+        lastDate = sessionDate;
+      } else if (lastDate.difference(sessionDate).inDays == 1) {
+        currentStreak++;
+        lastDate = sessionDate;
+      } else if (lastDate != sessionDate) {
+        if (currentStreak > bestStreak) {
+          bestStreak = currentStreak;
+        }
+        currentStreak = 1;
+        lastDate = sessionDate;
+      }
+    }
+
+    if (currentStreak > bestStreak) {
+      bestStreak = currentStreak;
+    }
+
+    return bestStreak;
+  }
+
+  MeditationStats getWeeklyMeditationStats() {
+    final weekSessions = getLast7DaysMeditations();
+
+    if (weekSessions.isEmpty) {
+      return const MeditationStats();
+    }
+
+    int totalMinutes = 0;
+    final Map<MeditationType, int> byType = {};
+
+    for (final session in weekSessions) {
+      totalMinutes += session.durationMinutes;
+      byType[session.type] = (byType[session.type] ?? 0) + 1;
+    }
+
+    // Calculate goal completion rate based on daily minutes goal
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int daysMetGoal = 0;
+
+    for (int i = 0; i < 7; i++) {
+      final date = today.subtract(Duration(days: i));
+      final daySessions = getMeditationsForDate(date);
+      final dayMinutes = daySessions.fold(0, (sum, m) => sum + m.durationMinutes);
+      if (dayMinutes >= _meditationGoal.dailyMinutesGoal) {
+        daysMetGoal++;
+      }
+    }
+
+    final completionRate = daysMetGoal / 7;
+
+    return MeditationStats(
+      weeklyMinutes: totalMinutes,
+      weeklySessions: weekSessions.length,
+      currentStreak: meditationStreak,
+      bestStreak: getBestMeditationStreak(),
+      goalCompletionRate: completionRate,
+      sessionsByType: byType,
+    );
+  }
+
   void addMeditationSession(MeditationSessionModel session) {
     _meditationSessions.add(session.copyWith(id: _generateId()));
+  }
+
+  void deleteMeditationSession(String id) {
+    _meditationSessions.removeWhere((m) => m.id == id);
   }
 
   void completeMeditationSession(String id) {

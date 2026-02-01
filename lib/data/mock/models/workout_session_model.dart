@@ -1,5 +1,47 @@
 enum WorkoutType { running, cycling, strength, yoga, swimming, walking, hiit, other }
 
+/// Goal settings for workout tracking
+class WorkoutGoal {
+  final int weeklyMinutesGoal;
+  final int weeklySessionsGoal;
+
+  const WorkoutGoal({
+    this.weeklyMinutesGoal = 150,
+    this.weeklySessionsGoal = 5,
+  });
+
+  WorkoutGoal copyWith({
+    int? weeklyMinutesGoal,
+    int? weeklySessionsGoal,
+  }) {
+    return WorkoutGoal(
+      weeklyMinutesGoal: weeklyMinutesGoal ?? this.weeklyMinutesGoal,
+      weeklySessionsGoal: weeklySessionsGoal ?? this.weeklySessionsGoal,
+    );
+  }
+}
+
+/// Statistics for workout tracking
+class WorkoutStats {
+  final int weeklyMinutes;
+  final int weeklySessions;
+  final int weeklyCalories;
+  final int currentStreak;
+  final int bestStreak;
+  final double goalCompletionRate;
+  final Map<WorkoutType, int> workoutsByType;
+
+  const WorkoutStats({
+    this.weeklyMinutes = 0,
+    this.weeklySessions = 0,
+    this.weeklyCalories = 0,
+    this.currentStreak = 0,
+    this.bestStreak = 0,
+    this.goalCompletionRate = 0.0,
+    this.workoutsByType = const {},
+  });
+}
+
 class ExerciseModel {
   final String name;
   final int sets;

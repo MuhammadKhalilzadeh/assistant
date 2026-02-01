@@ -1,5 +1,45 @@
 enum MoodLevel { great, good, okay, bad, awful }
 
+/// Goal settings for mood tracking
+class MoodGoal {
+  final int dailyEntriesGoal;
+  final MoodLevel targetMood;
+
+  const MoodGoal({
+    this.dailyEntriesGoal = 1,
+    this.targetMood = MoodLevel.good,
+  });
+
+  MoodGoal copyWith({
+    int? dailyEntriesGoal,
+    MoodLevel? targetMood,
+  }) {
+    return MoodGoal(
+      dailyEntriesGoal: dailyEntriesGoal ?? this.dailyEntriesGoal,
+      targetMood: targetMood ?? this.targetMood,
+    );
+  }
+}
+
+/// Statistics for mood tracking
+class MoodStats {
+  final double weeklyAverageMood;
+  final int currentStreak;
+  final int bestStreak;
+  final int totalEntries;
+  final Map<MoodLevel, int> moodDistribution;
+  final Map<String, int> commonActivities;
+
+  const MoodStats({
+    this.weeklyAverageMood = 0.0,
+    this.currentStreak = 0,
+    this.bestStreak = 0,
+    this.totalEntries = 0,
+    this.moodDistribution = const {},
+    this.commonActivities = const {},
+  });
+}
+
 class MoodEntryModel {
   final String id;
   final MoodLevel mood;

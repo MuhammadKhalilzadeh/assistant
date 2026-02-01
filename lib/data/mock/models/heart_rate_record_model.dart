@@ -1,5 +1,49 @@
 enum HeartRateZone { resting, warmUp, fatBurn, cardio, peak }
 
+/// Goal settings for heart rate tracking
+class HeartRateGoal {
+  final int targetRestingBpm;
+  final int maxBpm;
+
+  const HeartRateGoal({
+    this.targetRestingBpm = 65,
+    this.maxBpm = 180,
+  });
+
+  HeartRateGoal copyWith({
+    int? targetRestingBpm,
+    int? maxBpm,
+  }) {
+    return HeartRateGoal(
+      targetRestingBpm: targetRestingBpm ?? this.targetRestingBpm,
+      maxBpm: maxBpm ?? this.maxBpm,
+    );
+  }
+}
+
+/// Statistics for heart rate tracking
+class HeartRateStats {
+  final double averageRestingBpm;
+  final double averageActiveBpm;
+  final int minBpm;
+  final int maxBpm;
+  final int currentStreak;
+  final int bestStreak;
+  final int totalReadings;
+  final Map<HeartRateZone, int> zoneDistribution;
+
+  const HeartRateStats({
+    this.averageRestingBpm = 0.0,
+    this.averageActiveBpm = 0.0,
+    this.minBpm = 0,
+    this.maxBpm = 0,
+    this.currentStreak = 0,
+    this.bestStreak = 0,
+    this.totalReadings = 0,
+    this.zoneDistribution = const {},
+  });
+}
+
 class HeartRateRecordModel {
   final String id;
   final int bpm;
