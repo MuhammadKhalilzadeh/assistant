@@ -285,6 +285,22 @@ class MockRepository {
     ]);
 
     // Initialize Weather
+    final sunrise = DateTime(now.year, now.month, now.day, 6, 32);
+    final sunset = DateTime(now.year, now.month, now.day, 19, 48);
+
+    final conditions = [
+      WeatherConditionType.sunny,
+      WeatherConditionType.partlyCloudy,
+      WeatherConditionType.cloudy,
+      WeatherConditionType.rainy,
+      WeatherConditionType.sunny,
+      WeatherConditionType.partlyCloudy,
+      WeatherConditionType.stormy,
+    ];
+
+    final precipChances = [0, 10, 30, 75, 5, 15, 85];
+    final uvIndices = [8, 6, 4, 2, 9, 5, 1];
+
     _weather = WeatherForecastModel(
       location: 'New York',
       currentTemperature: 24,
@@ -293,24 +309,65 @@ class MockRepository {
       low: 18,
       humidity: 45,
       windSpeed: 12,
-      hourlyForecast: List.generate(24, (i) {
+      feelsLike: 26,
+      uvIndex: 7,
+      pressure: 1015,
+      visibility: 16,
+      precipChance: 10,
+      windDirection: 'NE',
+      sunrise: sunrise,
+      sunset: sunset,
+      dewPoint: 14,
+      alerts: [
+        WeatherAlert(
+          id: _generateId(),
+          type: 'heat',
+          title: 'Heat Advisory',
+          description: 'High temperatures expected this afternoon. Stay hydrated and avoid prolonged sun exposure.',
+          startTime: today.add(const Duration(hours: 12)),
+          endTime: today.add(const Duration(hours: 18)),
+          severity: AlertSeverity.moderate,
+        ),
+      ],
+      hourlyForecast: List.generate(48, (i) {
         final hour = now.add(Duration(hours: i));
+        final baseTemp = 18 + (8 * (1 - ((hour.hour - 14).abs() / 14))).round();
+        final condition = i < 6
+            ? WeatherConditionType.sunny
+            : i < 12
+                ? WeatherConditionType.partlyCloudy
+                : i < 18
+                    ? WeatherConditionType.cloudy
+                    : i < 24
+                        ? WeatherConditionType.sunny
+                        : conditions[i % conditions.length];
         return HourlyForecast(
           time: hour,
-          temperature: 20 + (i % 8),
-          condition: i < 6 ? WeatherConditionType.sunny :
-                    i < 12 ? WeatherConditionType.partlyCloudy :
-                    i < 18 ? WeatherConditionType.cloudy : WeatherConditionType.sunny,
+          temperature: baseTemp + (i % 3),
+          condition: condition,
+          precipChance: condition == WeatherConditionType.rainy
+              ? 70 + (i % 20)
+              : condition == WeatherConditionType.stormy
+                  ? 85 + (i % 10)
+                  : condition == WeatherConditionType.cloudy
+                      ? 20 + (i % 15)
+                      : (i % 10),
+          feelsLike: baseTemp + (i % 3) + 2,
         );
       }),
       dailyForecast: List.generate(7, (i) {
         final day = today.add(Duration(days: i));
+        final daySunrise = DateTime(day.year, day.month, day.day, 6, 30 + i);
+        final daySunset = DateTime(day.year, day.month, day.day, 19, 45 - i);
         return DailyForecast(
           date: day,
           high: 26 + (i % 4),
           low: 16 + (i % 3),
-          condition: i % 3 == 0 ? WeatherConditionType.sunny :
-                    i % 3 == 1 ? WeatherConditionType.partlyCloudy : WeatherConditionType.cloudy,
+          condition: conditions[i],
+          precipChance: precipChances[i],
+          uvIndex: uvIndices[i],
+          sunrise: daySunrise,
+          sunset: daySunset,
         );
       }),
     );
@@ -732,6 +789,192 @@ class MockRepository {
 
   // ==================== WEATHER ====================
   WeatherForecastModel? get weather => _weather;
+
+  DailyForecast? getWeatherForDate(DateTime date) {
+    if (_weather == null) return null;
+    final targetDate = DateTime(date.year, date.month, date.day);
+    return _weather!.dailyForecast.cast<DailyForecast?>().firstWhere(
+          (d) =>
+              d != null &&
+              DateTime(d.date.year, d.date.month, d.date.day) == targetDate,
+          orElse: () => null,
+        );
+  }
+
+  List<HourlyForecast> getHourlyForDate(DateTime date) {
+    if (_weather == null) return [];
+    final targetDate = DateTime(date.year, date.month, date.day);
+    return _weather!.hourlyForecast.where((h) {
+      final hourDate = DateTime(h.time.year, h.time.month, h.time.day);
+      return hourDate == targetDate;
+    }).toList();
+  }
+
+  void updateWeatherLocation(String location) {
+    if (_weather == null) return;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final locationData = _getLocationWeatherData(location);
+
+    final conditions = [
+      WeatherConditionType.sunny,
+      WeatherConditionType.partlyCloudy,
+      WeatherConditionType.cloudy,
+      WeatherConditionType.rainy,
+      WeatherConditionType.sunny,
+      WeatherConditionType.partlyCloudy,
+      WeatherConditionType.stormy,
+    ];
+
+    _weather = WeatherForecastModel(
+      location: location,
+      currentTemperature: locationData['temp'] as int,
+      currentCondition: locationData['condition'] as WeatherConditionType,
+      high: locationData['high'] as int,
+      low: locationData['low'] as int,
+      humidity: locationData['humidity'] as int,
+      windSpeed: locationData['windSpeed'] as int,
+      feelsLike: locationData['feelsLike'] as int,
+      uvIndex: locationData['uvIndex'] as int,
+      pressure: locationData['pressure'] as int,
+      visibility: locationData['visibility'] as int,
+      precipChance: locationData['precipChance'] as int,
+      windDirection: locationData['windDirection'] as String,
+      sunrise: DateTime(now.year, now.month, now.day, 6, 30),
+      sunset: DateTime(now.year, now.month, now.day, 19, 45),
+      dewPoint: locationData['dewPoint'] as int,
+      alerts: (locationData['alerts'] as List<WeatherAlert>?) ?? [],
+      hourlyForecast: List.generate(48, (i) {
+        final hour = now.add(Duration(hours: i));
+        final baseTemp = (locationData['low'] as int) +
+            (((locationData['high'] as int) - (locationData['low'] as int)) *
+                    (1 - ((hour.hour - 14).abs() / 14)))
+                .round();
+        return HourlyForecast(
+          time: hour,
+          temperature: baseTemp + (i % 3),
+          condition: conditions[i % conditions.length],
+          precipChance: (i % 10) * 5,
+          feelsLike: baseTemp + (i % 3) + 2,
+        );
+      }),
+      dailyForecast: List.generate(7, (i) {
+        final day = today.add(Duration(days: i));
+        return DailyForecast(
+          date: day,
+          high: (locationData['high'] as int) + (i % 4) - 2,
+          low: (locationData['low'] as int) + (i % 3) - 1,
+          condition: conditions[i],
+          precipChance: [0, 10, 30, 75, 5, 15, 85][i],
+          uvIndex: [8, 6, 4, 2, 9, 5, 1][i],
+          sunrise: DateTime(day.year, day.month, day.day, 6, 30 + i),
+          sunset: DateTime(day.year, day.month, day.day, 19, 45 - i),
+        );
+      }),
+    );
+  }
+
+  Map<String, dynamic> _getLocationWeatherData(String location) {
+    final locationLower = location.toLowerCase();
+    if (locationLower.contains('london')) {
+      return {
+        'temp': 18,
+        'condition': WeatherConditionType.cloudy,
+        'high': 21,
+        'low': 14,
+        'humidity': 72,
+        'windSpeed': 18,
+        'feelsLike': 17,
+        'uvIndex': 4,
+        'pressure': 1008,
+        'visibility': 12,
+        'precipChance': 45,
+        'windDirection': 'W',
+        'dewPoint': 12,
+        'alerts': <WeatherAlert>[],
+      };
+    } else if (locationLower.contains('tokyo')) {
+      return {
+        'temp': 28,
+        'condition': WeatherConditionType.partlyCloudy,
+        'high': 31,
+        'low': 24,
+        'humidity': 68,
+        'windSpeed': 8,
+        'feelsLike': 32,
+        'uvIndex': 9,
+        'pressure': 1010,
+        'visibility': 14,
+        'precipChance': 20,
+        'windDirection': 'SE',
+        'dewPoint': 22,
+        'alerts': <WeatherAlert>[],
+      };
+    } else if (locationLower.contains('sydney')) {
+      return {
+        'temp': 22,
+        'condition': WeatherConditionType.sunny,
+        'high': 25,
+        'low': 18,
+        'humidity': 55,
+        'windSpeed': 15,
+        'feelsLike': 23,
+        'uvIndex': 10,
+        'pressure': 1018,
+        'visibility': 20,
+        'precipChance': 5,
+        'windDirection': 'NE',
+        'dewPoint': 14,
+        'alerts': <WeatherAlert>[],
+      };
+    } else if (locationLower.contains('paris')) {
+      return {
+        'temp': 20,
+        'condition': WeatherConditionType.partlyCloudy,
+        'high': 24,
+        'low': 15,
+        'humidity': 60,
+        'windSpeed': 12,
+        'feelsLike': 21,
+        'uvIndex': 6,
+        'pressure': 1012,
+        'visibility': 15,
+        'precipChance': 25,
+        'windDirection': 'SW',
+        'dewPoint': 13,
+        'alerts': <WeatherAlert>[],
+      };
+    }
+    // Default: New York
+    return {
+      'temp': 24,
+      'condition': WeatherConditionType.sunny,
+      'high': 28,
+      'low': 18,
+      'humidity': 45,
+      'windSpeed': 12,
+      'feelsLike': 26,
+      'uvIndex': 7,
+      'pressure': 1015,
+      'visibility': 16,
+      'precipChance': 10,
+      'windDirection': 'NE',
+      'dewPoint': 14,
+      'alerts': <WeatherAlert>[
+        WeatherAlert(
+          id: '999',
+          type: 'heat',
+          title: 'Heat Advisory',
+          description:
+              'High temperatures expected. Stay hydrated and avoid prolonged sun exposure.',
+          startTime: DateTime.now(),
+          endTime: DateTime.now().add(const Duration(hours: 6)),
+          severity: AlertSeverity.moderate,
+        ),
+      ],
+    };
+  }
 
   // ==================== WATER LOGS ====================
   List<WaterLogModel> get waterLogs => List.unmodifiable(_waterLogs);
