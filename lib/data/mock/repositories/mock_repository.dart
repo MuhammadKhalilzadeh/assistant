@@ -193,41 +193,94 @@ class MockRepository {
       HabitModel(
         id: _generateId(),
         name: 'Morning Exercise',
+        description: 'Start the day with 30 minutes of cardio',
         icon: 'fitness_center',
         streak: 7,
+        bestStreak: 14,
         isCompletedToday: true,
         completedDates: List.generate(7, (i) => today.subtract(Duration(days: i))),
+        category: HabitCategory.fitness,
+        frequency: HabitFrequency.daily,
+        createdAt: today.subtract(const Duration(days: 30)),
       ),
       HabitModel(
         id: _generateId(),
         name: 'Read 30 mins',
+        description: 'Read at least 30 minutes of non-fiction',
         icon: 'menu_book',
         streak: 5,
+        bestStreak: 12,
         isCompletedToday: true,
         completedDates: List.generate(5, (i) => today.subtract(Duration(days: i))),
+        category: HabitCategory.learning,
+        frequency: HabitFrequency.daily,
+        createdAt: today.subtract(const Duration(days: 20)),
       ),
       HabitModel(
         id: _generateId(),
         name: 'Meditate',
+        description: 'Practice mindfulness meditation',
         icon: 'self_improvement',
         streak: 3,
+        bestStreak: 21,
         isCompletedToday: true,
         completedDates: List.generate(3, (i) => today.subtract(Duration(days: i))),
+        category: HabitCategory.mindfulness,
+        frequency: HabitFrequency.daily,
+        createdAt: today.subtract(const Duration(days: 45)),
       ),
       HabitModel(
         id: _generateId(),
         name: 'Journal',
+        description: 'Write daily reflections and gratitude',
         icon: 'edit_note',
         streak: 0,
+        bestStreak: 7,
         isCompletedToday: false,
+        category: HabitCategory.mindfulness,
+        frequency: HabitFrequency.daily,
+        createdAt: today.subtract(const Duration(days: 15)),
       ),
       HabitModel(
         id: _generateId(),
         name: 'No Social Media',
+        description: 'Avoid social media during work hours',
         icon: 'phone_disabled',
         streak: 2,
+        bestStreak: 5,
         isCompletedToday: false,
         completedDates: [today.subtract(const Duration(days: 1)), today.subtract(const Duration(days: 2))],
+        category: HabitCategory.productivity,
+        frequency: HabitFrequency.weekdays,
+        targetDays: [0, 1, 2, 3, 4], // Mon-Fri
+        createdAt: today.subtract(const Duration(days: 10)),
+      ),
+      HabitModel(
+        id: _generateId(),
+        name: 'Drink 8 glasses of water',
+        description: 'Stay hydrated throughout the day',
+        icon: 'water_drop',
+        streak: 4,
+        bestStreak: 10,
+        isCompletedToday: false,
+        completedDates: List.generate(4, (i) => today.subtract(Duration(days: i + 1))),
+        category: HabitCategory.health,
+        frequency: HabitFrequency.daily,
+        createdAt: today.subtract(const Duration(days: 25)),
+      ),
+      HabitModel(
+        id: _generateId(),
+        name: 'Call a friend',
+        description: 'Stay connected with loved ones',
+        icon: 'phone',
+        streak: 1,
+        bestStreak: 4,
+        isCompletedToday: false,
+        completedDates: [today.subtract(const Duration(days: 1))],
+        category: HabitCategory.social,
+        frequency: HabitFrequency.weekends,
+        targetDays: [5, 6], // Sat-Sun
+        createdAt: today.subtract(const Duration(days: 8)),
       ),
     ]);
 
@@ -580,10 +633,66 @@ class MockRepository {
 
   int get completedHabitsToday => _habits.where((h) => h.isCompletedToday).length;
 
+  int get totalHabitsForToday => _habits.where((h) => h.isTodayTargetDay).length;
+
   int get maxStreak => _habits.isEmpty ? 0 : _habits.map((h) => h.streak).reduce((a, b) => a > b ? a : b);
+
+  int get maxBestStreak => _habits.isEmpty ? 0 : _habits.map((h) => h.bestStreak).reduce((a, b) => a > b ? a : b);
 
   void addHabit(HabitModel habit) {
     _habits.add(habit.copyWith(id: _generateId()));
+  }
+
+  void updateHabit(HabitModel habit) {
+    final index = _habits.indexWhere((h) => h.id == habit.id);
+    if (index != -1) {
+      _habits[index] = habit;
+    }
+  }
+
+  List<HabitModel> getHabitsByCategory(HabitCategory category) {
+    return _habits.where((h) => h.category == category).toList();
+  }
+
+  double getWeeklyCompletionRate() {
+    if (_habits.isEmpty) return 0.0;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final weekStart = today.subtract(Duration(days: today.weekday - 1));
+
+    int totalTargetCompletions = 0;
+    int actualCompletions = 0;
+
+    for (final habit in _habits) {
+      // Count target days this week up to today
+      for (int i = 0; i <= today.difference(weekStart).inDays; i++) {
+        final date = weekStart.add(Duration(days: i));
+        final dayIndex = date.weekday - 1;
+        if (habit.targetDays.contains(dayIndex)) {
+          totalTargetCompletions++;
+          // Check if completed on this date
+          final completed = habit.completedDates.any((d) {
+            final completedDate = DateTime(d.year, d.month, d.day);
+            return completedDate == date;
+          });
+          if (completed) {
+            actualCompletions++;
+          }
+        }
+      }
+    }
+
+    if (totalTargetCompletions == 0) return 0.0;
+    return actualCompletions / totalTargetCompletions;
+  }
+
+  Map<HabitCategory, int> get habitsByCategory {
+    final Map<HabitCategory, int> counts = {};
+    for (final habit in _habits) {
+      counts[habit.category] = (counts[habit.category] ?? 0) + 1;
+    }
+    return counts;
   }
 
   void toggleHabitComplete(String id) {
@@ -606,9 +715,11 @@ class MockRepository {
         );
       } else {
         // Complete
+        final newStreak = habit.streak + 1;
         _habits[index] = habit.copyWith(
           isCompletedToday: true,
-          streak: habit.streak + 1,
+          streak: newStreak,
+          bestStreak: newStreak > habit.bestStreak ? newStreak : habit.bestStreak,
           completedDates: [...habit.completedDates, today],
         );
       }
