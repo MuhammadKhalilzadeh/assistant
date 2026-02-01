@@ -1478,6 +1478,14 @@ class MockRepository {
   // ==================== STEP RECORDS ====================
   List<StepRecordModel> get stepRecords => List.unmodifiable(_stepRecords);
 
+  StepsGoal _stepsGoal = const StepsGoal();
+
+  StepsGoal get stepsGoal => _stepsGoal;
+
+  void updateStepsGoal(int dailyGoal) {
+    _stepsGoal = _stepsGoal.copyWith(dailyGoal: dailyGoal);
+  }
+
   StepRecordModel? get todaySteps {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
@@ -1487,6 +1495,170 @@ class MockRepository {
     );
   }
 
+  StepRecordModel? getStepsForDate(DateTime date) {
+    final targetDate = DateTime(date.year, date.month, date.day);
+    return _stepRecords.cast<StepRecordModel?>().firstWhere(
+      (r) {
+        if (r == null) return false;
+        final recordDate = DateTime(r.date.year, r.date.month, r.date.day);
+        return recordDate == targetDate;
+      },
+      orElse: () => null,
+    );
+  }
+
+  List<StepRecordModel> getLast7DaysSteps() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final List<StepRecordModel> result = [];
+
+    for (int i = 0; i < 7; i++) {
+      final date = today.subtract(Duration(days: i));
+      final record = getStepsForDate(date);
+      if (record != null) {
+        result.add(record);
+      }
+    }
+
+    return result;
+  }
+
+  Map<String, int> getLast7DaysStepsMap() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final Map<String, int> result = {};
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayName = dayNames[date.weekday - 1];
+      final record = getStepsForDate(date);
+      result[dayName] = record?.steps ?? 0;
+    }
+
+    return result;
+  }
+
+  double getAverageDailySteps() {
+    final records = getLast7DaysSteps();
+    if (records.isEmpty) return 0.0;
+    final totalSteps = records.fold<int>(0, (sum, r) => sum + r.steps);
+    return totalSteps / records.length;
+  }
+
+  int getStepsStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int streak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final record = getStepsForDate(date);
+
+      if (record != null && record.steps >= _stepsGoal.dailyGoal) {
+        streak++;
+      } else if (i > 0) {
+        // Allow today to be incomplete
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  int getBestStepsStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int bestStreak = 0;
+    int currentStreak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final record = getStepsForDate(date);
+
+      if (record != null && record.steps >= _stepsGoal.dailyGoal) {
+        currentStreak++;
+        if (currentStreak > bestStreak) {
+          bestStreak = currentStreak;
+        }
+      } else {
+        currentStreak = 0;
+      }
+    }
+
+    return bestStreak;
+  }
+
+  double getWeeklyStepsCompletionRate() {
+    final records = getLast7DaysSteps();
+    if (records.isEmpty) return 0.0;
+
+    int goalMetDays = 0;
+    for (final record in records) {
+      if (record.steps >= _stepsGoal.dailyGoal) {
+        goalMetDays++;
+      }
+    }
+
+    return goalMetDays / records.length;
+  }
+
+  StepsStats getWeeklyStepsStats() {
+    final records = getLast7DaysSteps();
+    final avgSteps = getAverageDailySteps();
+    final currentStreak = getStepsStreak();
+    final bestStreak = getBestStepsStreak();
+    final completionRate = getWeeklyStepsCompletionRate();
+
+    double totalDistance = 0.0;
+    int totalCalories = 0;
+
+    for (final record in records) {
+      totalDistance += record.distanceKm;
+      totalCalories += record.caloriesBurned;
+    }
+
+    return StepsStats(
+      weeklyAverageSteps: avgSteps,
+      currentStreak: currentStreak,
+      bestStreak: bestStreak,
+      goalCompletionRate: completionRate,
+      totalDistanceKm: totalDistance,
+      totalCaloriesBurned: totalCalories,
+    );
+  }
+
+  void addSteps(int steps) {
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final index = _stepRecords.indexWhere((r) =>
+      DateTime(r.date.year, r.date.month, r.date.day) == todayDate
+    );
+
+    // Calculate distance and calories (approximate: 0.0008 km per step, 0.04 cal per step)
+    final newDistance = steps * 0.0008;
+    final newCalories = (steps * 0.04).round();
+
+    if (index != -1) {
+      final current = _stepRecords[index];
+      _stepRecords[index] = current.copyWith(
+        steps: current.steps + steps,
+        distanceKm: current.distanceKm + newDistance,
+        caloriesBurned: current.caloriesBurned + newCalories,
+        goal: _stepsGoal.dailyGoal,
+      );
+    } else {
+      _stepRecords.add(StepRecordModel(
+        id: _generateId(),
+        date: todayDate,
+        steps: steps,
+        goal: _stepsGoal.dailyGoal,
+        distanceKm: newDistance,
+        caloriesBurned: newCalories,
+      ));
+    }
+  }
+
   void updateTodaySteps(int steps) {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
@@ -1494,15 +1666,31 @@ class MockRepository {
       DateTime(r.date.year, r.date.month, r.date.day) == todayDate
     );
 
+    // Calculate distance and calories
+    final distance = steps * 0.0008;
+    final calories = (steps * 0.04).round();
+
     if (index != -1) {
-      _stepRecords[index] = _stepRecords[index].copyWith(steps: steps);
+      _stepRecords[index] = _stepRecords[index].copyWith(
+        steps: steps,
+        distanceKm: distance,
+        caloriesBurned: calories,
+        goal: _stepsGoal.dailyGoal,
+      );
     } else {
       _stepRecords.add(StepRecordModel(
         id: _generateId(),
         date: todayDate,
         steps: steps,
+        goal: _stepsGoal.dailyGoal,
+        distanceKm: distance,
+        caloriesBurned: calories,
       ));
     }
+  }
+
+  void deleteStepRecord(String id) {
+    _stepRecords.removeWhere((r) => r.id == id);
   }
 
   // ==================== WORKOUT SESSIONS ====================

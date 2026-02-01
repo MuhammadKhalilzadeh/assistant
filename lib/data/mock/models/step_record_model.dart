@@ -35,3 +35,33 @@ class StepRecordModel {
     );
   }
 }
+
+/// Steps goal configuration
+class StepsGoal {
+  final int dailyGoal;
+
+  const StepsGoal({this.dailyGoal = 10000});
+
+  StepsGoal copyWith({int? dailyGoal}) {
+    return StepsGoal(dailyGoal: dailyGoal ?? this.dailyGoal);
+  }
+}
+
+/// Weekly steps statistics
+class StepsStats {
+  final double weeklyAverageSteps;
+  final int currentStreak;
+  final int bestStreak;
+  final double goalCompletionRate;
+  final double totalDistanceKm;
+  final int totalCaloriesBurned;
+
+  const StepsStats({
+    required this.weeklyAverageSteps,
+    required this.currentStreak,
+    required this.bestStreak,
+    required this.goalCompletionRate,
+    required this.totalDistanceKm,
+    required this.totalCaloriesBurned,
+  });
+}
