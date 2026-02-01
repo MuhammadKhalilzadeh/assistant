@@ -1119,6 +1119,10 @@ class MockRepository {
   // ==================== CALORIE ENTRIES ====================
   List<CalorieEntryModel> get calorieEntries => List.unmodifiable(_calorieEntries);
 
+  NutritionGoal _nutritionGoal = const NutritionGoal();
+
+  NutritionGoal get nutritionGoal => _nutritionGoal;
+
   int get todayCalories {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
@@ -1131,6 +1135,161 @@ class MockRepository {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
     return _calorieEntries.where((e) => e.loggedAt.isAfter(startOfDay)).toList();
+  }
+
+  List<CalorieEntryModel> getCalorieEntriesForDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    return _calorieEntries
+        .where((e) => e.loggedAt.isAfter(startOfDay) && e.loggedAt.isBefore(endOfDay))
+        .toList()
+      ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+  }
+
+  int getCaloriesForDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    return _calorieEntries
+        .where((e) => e.loggedAt.isAfter(startOfDay) && e.loggedAt.isBefore(endOfDay))
+        .fold(0, (sum, e) => sum + e.calories);
+  }
+
+  Map<String, int> getMacrosForDate(DateTime date) {
+    final entries = getCalorieEntriesForDate(date);
+    int totalProtein = 0;
+    int totalCarbs = 0;
+    int totalFat = 0;
+
+    for (final entry in entries) {
+      totalProtein += entry.protein ?? 0;
+      totalCarbs += entry.carbs ?? 0;
+      totalFat += entry.fat ?? 0;
+    }
+
+    return {
+      'protein': totalProtein,
+      'carbs': totalCarbs,
+      'fat': totalFat,
+    };
+  }
+
+  NutritionStats getWeeklyNutritionStats() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    int totalCalories = 0;
+    int totalProtein = 0;
+    int totalCarbs = 0;
+    int totalFat = 0;
+    int daysWithData = 0;
+    int goalMetDays = 0;
+
+    for (int i = 0; i < 7; i++) {
+      final date = today.subtract(Duration(days: i));
+      final calories = getCaloriesForDate(date);
+      final macros = getMacrosForDate(date);
+
+      if (calories > 0 || i == 0) {
+        totalCalories += calories;
+        totalProtein += macros['protein'] ?? 0;
+        totalCarbs += macros['carbs'] ?? 0;
+        totalFat += macros['fat'] ?? 0;
+        daysWithData++;
+
+        if (calories >= _nutritionGoal.dailyCalorieGoal * 0.8 &&
+            calories <= _nutritionGoal.dailyCalorieGoal) {
+          goalMetDays++;
+        }
+      }
+    }
+
+    final weeklyAverage = daysWithData > 0 ? totalCalories / daysWithData : 0.0;
+    final completionRate = daysWithData > 0 ? goalMetDays / daysWithData : 0.0;
+
+    return NutritionStats(
+      weeklyAverageCalories: weeklyAverage,
+      currentStreak: getNutritionStreak(),
+      bestStreak: getBestNutritionStreak(),
+      goalCompletionRate: completionRate,
+      avgProtein: daysWithData > 0 ? totalProtein / daysWithData : 0.0,
+      avgCarbs: daysWithData > 0 ? totalCarbs / daysWithData : 0.0,
+      avgFat: daysWithData > 0 ? totalFat / daysWithData : 0.0,
+    );
+  }
+
+  Map<String, int> getLast7DaysCalories() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final Map<String, int> result = {};
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayName = dayNames[date.weekday - 1];
+      result[dayName] = getCaloriesForDate(date);
+    }
+
+    return result;
+  }
+
+  int getNutritionStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int streak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final calories = getCaloriesForDate(date);
+
+      final withinGoal = calories >= _nutritionGoal.dailyCalorieGoal * 0.8 &&
+          calories <= _nutritionGoal.dailyCalorieGoal;
+
+      if (withinGoal) {
+        streak++;
+      } else if (i > 0) {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  int getBestNutritionStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int bestStreak = 0;
+    int currentStreak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final calories = getCaloriesForDate(date);
+
+      final withinGoal = calories >= _nutritionGoal.dailyCalorieGoal * 0.8 &&
+          calories <= _nutritionGoal.dailyCalorieGoal;
+
+      if (withinGoal) {
+        currentStreak++;
+        if (currentStreak > bestStreak) {
+          bestStreak = currentStreak;
+        }
+      } else {
+        currentStreak = 0;
+      }
+    }
+
+    return bestStreak;
+  }
+
+  void updateCalorieGoal(int goalCal) {
+    _nutritionGoal = _nutritionGoal.copyWith(dailyCalorieGoal: goalCal);
+  }
+
+  void updateMacroGoals(int protein, int carbs, int fat) {
+    _nutritionGoal = _nutritionGoal.copyWith(
+      proteinGoalGrams: protein,
+      carbsGoalGrams: carbs,
+      fatGoalGrams: fat,
+    );
   }
 
   void addCalorieEntry(CalorieEntryModel entry) {
