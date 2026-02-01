@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/calorie_entry_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -37,7 +38,7 @@ class QuickAddButtons extends StatelessWidget {
       name: 'Apple',
       calories: 95,
       icon: Icons.apple,
-      color: Color(0xFF4CAF50),
+      color: AppTheme.successColor,
       category: FoodCategory.fruits,
       carbs: 25,
     ),
@@ -52,7 +53,7 @@ class QuickAddButtons extends StatelessWidget {
       name: 'Sandwich',
       calories: 350,
       icon: Icons.lunch_dining,
-      color: Color(0xFFFF9800),
+      color: AppTheme.warningColor,
       category: FoodCategory.grains,
       protein: 15,
       carbs: 40,
@@ -75,9 +76,9 @@ class QuickAddButtons extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,14 +87,14 @@ class QuickAddButtons extends StatelessWidget {
             children: [
               Icon(
                 Icons.bolt,
-                color: Colors.amber.shade300,
+                color: AppTheme.primaryColor,
                 size: 20,
               ),
               const SizedBox(width: 8),
               const Text(
                 'Quick Add',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -180,10 +181,10 @@ class _QuickAddButtonState extends State<_QuickAddButton>
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: widget.item.color.withValues(alpha: 0.2),
+                    color: widget.item.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: widget.item.color.withValues(alpha: 0.4),
+                      color: widget.item.color.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Icon(
@@ -196,15 +197,15 @@ class _QuickAddButtonState extends State<_QuickAddButton>
                 Text(
                   widget.item.name,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
                   '${widget.item.calories} cal',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
                     fontSize: 10,
                   ),
                 ),

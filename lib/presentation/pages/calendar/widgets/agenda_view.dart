@@ -143,7 +143,7 @@ class _AgendaViewState extends State<AgendaView> {
             ),
             decoration: BoxDecoration(
               color: isSelected
-                  ? Colors.white.withValues(alpha: 0.15)
+                  ? AppTheme.primaryColor.withValues(alpha: 0.1)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
             ),
@@ -154,9 +154,10 @@ class _AgendaViewState extends State<AgendaView> {
                   height: 50,
                   decoration: BoxDecoration(
                     color: isToday
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.1),
+                        ? AppTheme.primaryColor
+                        : AppTheme.cardColor,
                     borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+                    boxShadow: isToday ? null : AppTheme.cardShadow,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -165,8 +166,8 @@ class _AgendaViewState extends State<AgendaView> {
                         _getDayName(date.weekday),
                         style: TextStyle(
                           color: isToday
-                              ? AppTheme.primaryColor
-                              : Colors.white.withValues(alpha: 0.6),
+                              ? Colors.white.withValues(alpha: 0.9)
+                              : AppTheme.textSecondary,
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
@@ -174,7 +175,7 @@ class _AgendaViewState extends State<AgendaView> {
                       Text(
                         '${date.day}',
                         style: TextStyle(
-                          color: isToday ? AppTheme.primaryColor : Colors.white,
+                          color: isToday ? Colors.white : AppTheme.textPrimary,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -191,16 +192,16 @@ class _AgendaViewState extends State<AgendaView> {
                         _formatDateHeader(date),
                         style: TextStyle(
                           color: isToday
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.8),
+                              ? AppTheme.primaryColor
+                              : AppTheme.textPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
                         '${events.length} event${events.length == 1 ? '' : 's'}',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
+                        style: const TextStyle(
+                          color: AppTheme.textTertiary,
                           fontSize: 12,
                         ),
                       ),
@@ -209,7 +210,7 @@ class _AgendaViewState extends State<AgendaView> {
                 ),
                 Icon(
                   Icons.chevron_right,
-                  color: Colors.white.withValues(alpha: 0.4),
+                  color: AppTheme.textTertiary,
                 ),
               ],
             ),

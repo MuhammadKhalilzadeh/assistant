@@ -34,7 +34,7 @@ class TimeSlot extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: Colors.grey.shade200,
               width: 1,
             ),
           ),
@@ -50,8 +50,8 @@ class TimeSlot extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 4, right: 8),
                     child: Text(
                       _formatHour(hour),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
+                      style: const TextStyle(
+                        color: AppTheme.textTertiary,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -65,7 +65,7 @@ class TimeSlot extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: Colors.grey.shade200,
                           width: 1,
                           style: BorderStyle.solid,
                         ),
@@ -94,11 +94,11 @@ class TimeSlot extends StatelessWidget {
             width: 10,
             height: 10,
             decoration: BoxDecoration(
-              color: AppTheme.errorColor,
+              color: AppTheme.primaryColor,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.errorColor.withValues(alpha: 0.4),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.4),
                   blurRadius: 6,
                   spreadRadius: 1,
                 ),
@@ -109,10 +109,10 @@ class TimeSlot extends StatelessWidget {
             child: Container(
               height: 2,
               decoration: BoxDecoration(
-                color: AppTheme.errorColor,
+                color: AppTheme.primaryColor,
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.errorColor.withValues(alpha: 0.4),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.4),
                     blurRadius: 4,
                   ),
                 ],

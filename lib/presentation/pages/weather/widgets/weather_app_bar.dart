@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class WeatherAppBar extends StatelessWidget {
@@ -30,18 +31,14 @@ class WeatherAppBar extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
-        ),
+        color: AppTheme.cardColor,
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Row(
         children: [
           IconButton(
             onPressed: onBackPressed,
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
             splashRadius: 24,
           ),
           const SizedBox(width: 8),
@@ -68,14 +65,14 @@ class WeatherAppBar extends StatelessWidget {
             onPressed: onSearchToggle,
             icon: Icon(
               isSearching ? Icons.close : Icons.search,
-              color: Colors.white,
+              color: AppTheme.textPrimary,
             ),
             splashRadius: 24,
           ),
           if (onSettingsPressed != null && !isSearching)
             IconButton(
               onPressed: onSettingsPressed,
-              icon: const Icon(Icons.settings, color: Colors.white),
+              icon: Icon(Icons.settings, color: AppTheme.textPrimary),
               splashRadius: 24,
             ),
         ],
@@ -87,13 +84,13 @@ class WeatherAppBar extends StatelessWidget {
     return Row(
       key: const ValueKey('location'),
       children: [
-        const Icon(Icons.location_on, color: Colors.white, size: 20),
+        Icon(Icons.location_on, color: AppTheme.primaryColor, size: 20),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             location,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppTheme.textPrimary,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -109,21 +106,21 @@ class WeatherAppBar extends StatelessWidget {
       key: const ValueKey('search'),
       height: 40,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        border: Border.all(color: Colors.grey.shade300),
       ),
       child: TextField(
         autofocus: true,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: AppTheme.textPrimary),
         decoration: InputDecoration(
           hintText: 'Search location...',
-          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+          hintStyle: TextStyle(color: AppTheme.textTertiary),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           prefixIcon: Icon(
             Icons.search,
-            color: Colors.white.withValues(alpha: 0.6),
+            color: AppTheme.textTertiary,
             size: 20,
           ),
         ),

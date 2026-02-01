@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Quick add buttons for common water amounts with animations
 class QuickAddButtons extends StatelessWidget {
@@ -20,17 +21,17 @@ class QuickAddButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     final amounts = [
       (100, Icons.local_cafe, const Color(0xFF8B5A2B), 'Coffee cup'),
-      (250, Icons.local_drink, const Color(0xFF3B82F6), 'Glass'),
-      (500, Icons.water_drop, const Color(0xFF06B6D4), 'Water bottle'),
-      (1000, Icons.water, const Color(0xFF0D9488), 'Large bottle'),
+      (250, Icons.local_drink, AppTheme.infoColor, 'Glass'),
+      (500, Icons.water_drop, AppTheme.primaryColor, 'Water bottle'),
+      (1000, Icons.water, AppTheme.successColor, 'Large bottle'),
     ];
 
     Widget content = Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,14 +40,14 @@ class QuickAddButtons extends StatelessWidget {
             children: [
               Icon(
                 Icons.add_circle_outline,
-                color: Colors.white.withValues(alpha: 0.8),
+                color: AppTheme.textSecondary,
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Quick Add',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -153,10 +154,10 @@ class _QuickAddButtonState extends State<_QuickAddButton>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
-            color: widget.color.withValues(alpha: 0.2),
+            color: widget.color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: widget.color.withValues(alpha: 0.3),
+              color: widget.color.withValues(alpha: 0.2),
             ),
           ),
           child: Column(
@@ -164,20 +165,20 @@ class _QuickAddButtonState extends State<_QuickAddButton>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: widget.color.withValues(alpha: 0.2),
+                  color: widget.color.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   widget.icon,
-                  color: Colors.white,
+                  color: widget.color,
                   size: 24,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 '${widget.amount}ml',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'water_wave_painter.dart';
 
 /// Main progress card displaying animated wave fill and intake stats
@@ -41,9 +42,9 @@ class WaterProgressCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(padding * 1.5),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         children: [
@@ -68,7 +69,7 @@ class WaterProgressCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.water_drop,
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: AppTheme.primaryColor.withValues(alpha: 0.9),
                       size: 32,
                     ),
                     const SizedBox(height: 8),
@@ -80,8 +81,8 @@ class WaterProgressCard extends StatelessWidget {
                       builder: (context, value, child) {
                         return Text(
                           '${value}ml',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: AppTheme.textPrimary,
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                           ),
@@ -91,7 +92,7 @@ class WaterProgressCard extends StatelessWidget {
                     Text(
                       'of ${dailyGoal}ml',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: AppTheme.textSecondary,
                         fontSize: 14,
                       ),
                     ),
@@ -107,9 +108,9 @@ class WaterProgressCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress.clamp(0.0, 1.0),
               minHeight: 8,
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(
-                progress >= 1.0 ? const Color(0xFF10B981) : Colors.white,
+                progress >= 1.0 ? AppTheme.successColor : AppTheme.primaryColor,
               ),
             ),
           ),
@@ -121,7 +122,7 @@ class WaterProgressCard extends StatelessWidget {
               Text(
                 '${(progress * 100).toInt()}%',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: AppTheme.textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -131,7 +132,7 @@ class WaterProgressCard extends StatelessWidget {
                     ? 'Goal completed!'
                     : '${(dailyGoal - currentIntake).clamp(0, dailyGoal)}ml remaining',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: AppTheme.textSecondary,
                   fontSize: 14,
                 ),
               ),
@@ -142,13 +143,13 @@ class WaterProgressCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               _getMotivationalMessage(),
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: AppTheme.primaryColor,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),

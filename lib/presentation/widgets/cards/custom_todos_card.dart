@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 /// A reusable todos card widget
 ///
 /// This widget displays todo/task information with customizable
-/// total and completed counts. It features a red background
-/// with white text, a checkbox icon, and an add button.
+/// total and completed counts. It features a white background
+/// with dark text and red accents.
 class CustomTodosCard extends StatelessWidget {
   /// Card title
   final String title;
@@ -22,11 +22,11 @@ class CustomTodosCard extends StatelessWidget {
   /// Callback when the add button is pressed
   final VoidCallback? onAddPressed;
 
-  /// Background color (defaults to primaryColor - red)
+  /// Background color (defaults to white)
   final Color? backgroundColor;
 
-  /// Foreground/text color (defaults to white)
-  final Color? foregroundColor;
+  /// Accent color for icons and highlights (defaults to primaryColor - red)
+  final Color? accentColor;
 
   /// Border radius for the card
   final double borderRadius;
@@ -45,7 +45,7 @@ class CustomTodosCard extends StatelessWidget {
     this.onTap,
     this.onAddPressed,
     this.backgroundColor,
-    this.foregroundColor,
+    this.accentColor,
     this.borderRadius = 20,
     this.icon = Icons.check_box_outlined,
     this.enabled = true,
@@ -68,7 +68,7 @@ class CustomTodosCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color fgColor = foregroundColor ?? Colors.white;
+    final Color accent = accentColor ?? AppTheme.primaryColor;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double responsivePadding = screenWidth * 0.05;
 
@@ -79,10 +79,7 @@ class CustomTodosCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: backgroundColor == null
-                ? AppTheme.primaryGradient
-                : null,
-            color: backgroundColor,
+            color: backgroundColor ?? Colors.white,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: AppTheme.cardShadow,
           ),
@@ -94,19 +91,19 @@ class CustomTodosCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Left section: Icon with border
-                    _buildIconWithBorder(fgColor, constraints.maxWidth),
+                    _buildIconWithBorder(accent, constraints.maxWidth),
 
                     SizedBox(width: constraints.maxWidth * 0.04),
 
                     // Center section: Title + Subtitle
                     Expanded(
-                      child: _buildTextSection(fgColor, constraints.maxWidth),
+                      child: _buildTextSection(constraints.maxWidth),
                     ),
 
                     SizedBox(width: constraints.maxWidth * 0.04),
 
                     // Right section: Add button
-                    _buildAddButton(fgColor, constraints.maxWidth),
+                    _buildAddButton(accent, constraints.maxWidth),
                   ],
                 );
               },
@@ -117,7 +114,7 @@ class CustomTodosCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIconWithBorder(Color fgColor, double maxWidth) {
+  Widget _buildIconWithBorder(Color accent, double maxWidth) {
     final double iconSize = (maxWidth * 0.08).clamp(20.0, 32.0);
     final double padding = iconSize * 0.3;
     final double borderWidth = (iconSize * 0.08).clamp(1.5, 2.5);
@@ -125,18 +122,18 @@ class CustomTodosCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        border: Border.all(color: fgColor, width: borderWidth),
+        border: Border.all(color: accent, width: borderWidth),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(
         icon,
-        color: fgColor,
+        color: accent,
         size: iconSize,
       ),
     );
   }
 
-  Widget _buildTextSection(Color fgColor, double maxWidth) {
+  Widget _buildTextSection(double maxWidth) {
     final double titleFontSize = (maxWidth * 0.055).clamp(16.0, 22.0);
     final double subtitleFontSize = (maxWidth * 0.038).clamp(12.0, 16.0);
     final double spacing = (maxWidth * 0.015).clamp(4.0, 8.0);
@@ -149,7 +146,7 @@ class CustomTodosCard extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            color: fgColor,
+            color: AppTheme.textPrimary,
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
           ),
@@ -159,7 +156,7 @@ class CustomTodosCard extends StatelessWidget {
         Text(
           _subtitleText,
           style: TextStyle(
-            color: fgColor,
+            color: AppTheme.textSecondary,
             fontSize: subtitleFontSize,
             fontWeight: FontWeight.w400,
           ),
@@ -168,7 +165,7 @@ class CustomTodosCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAddButton(Color fgColor, double maxWidth) {
+  Widget _buildAddButton(Color accent, double maxWidth) {
     final double buttonSize = (maxWidth * 0.12).clamp(40.0, 56.0);
     final double iconSize = (maxWidth * 0.06).clamp(20.0, 28.0);
 
@@ -181,12 +178,12 @@ class CustomTodosCard extends StatelessWidget {
           width: buttonSize,
           height: buttonSize,
           decoration: BoxDecoration(
-            color: fgColor.withValues(alpha: 0.2),
+            color: accent.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.add,
-            color: fgColor,
+            color: accent,
             size: iconSize,
           ),
         ),

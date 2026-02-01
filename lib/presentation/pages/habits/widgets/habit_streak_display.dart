@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class HabitStreakDisplay extends StatefulWidget {
@@ -73,29 +74,24 @@ class _HabitStreakDisplayState extends State<HabitStreakDisplay>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFFF59E0B),
-                  Color(0xFFEF4444),
+                  AppTheme.primaryColor,
+                  AppTheme.primaryLight,
                 ],
               )
             : null,
         color: widget.currentStreak == 0
-            ? Colors.white.withValues(alpha: 0.1)
+            ? AppTheme.cardColor
             : null,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: widget.currentStreak > 0
-              ? Colors.white.withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.2),
-        ),
         boxShadow: widget.currentStreak > 0
             ? [
                 BoxShadow(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
               ]
-            : null,
+            : AppTheme.cardShadow,
       ),
       child: Row(
         children: [
@@ -105,14 +101,16 @@ class _HabitStreakDisplayState extends State<HabitStreakDisplay>
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: widget.currentStreak > 0
+                    ? AppTheme.textOnPrimary.withValues(alpha: 0.2)
+                    : AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 Icons.local_fire_department,
                 color: widget.currentStreak > 0
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.5),
+                    ? AppTheme.textOnPrimary
+                    : AppTheme.textTertiary,
                 size: 28,
               ),
             ),
@@ -129,8 +127,10 @@ class _HabitStreakDisplayState extends State<HabitStreakDisplay>
                       widget.currentStreak > 0
                           ? '${widget.currentStreak} Day Streak!'
                           : 'No Active Streak',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: widget.currentStreak > 0
+                            ? AppTheme.textOnPrimary
+                            : AppTheme.textPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -147,7 +147,9 @@ class _HabitStreakDisplayState extends State<HabitStreakDisplay>
                       ? 'Keep up the great work!'
                       : 'Complete a habit to start a streak',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: widget.currentStreak > 0
+                        ? AppTheme.textOnPrimary.withValues(alpha: 0.8)
+                        : AppTheme.textSecondary,
                     fontSize: 13,
                   ),
                 ),
@@ -162,14 +164,18 @@ class _HabitStreakDisplayState extends State<HabitStreakDisplay>
                 Text(
                   'Best',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: widget.currentStreak > 0
+                        ? AppTheme.textOnPrimary.withValues(alpha: 0.7)
+                        : AppTheme.textSecondary,
                     fontSize: 11,
                   ),
                 ),
                 Text(
                   '${widget.bestStreak}',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: widget.currentStreak > 0
+                        ? AppTheme.textOnPrimary
+                        : AppTheme.textPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -193,7 +199,7 @@ class _HabitStreakDisplayState extends State<HabitStreakDisplay>
           scale: _pulseAnimation,
           child: const Icon(
             Icons.local_fire_department,
-            color: Color(0xFFF59E0B),
+            color: AppTheme.primaryColor,
             size: 14,
           ),
         ),
@@ -201,7 +207,7 @@ class _HabitStreakDisplayState extends State<HabitStreakDisplay>
         Text(
           '${widget.currentStreak} day streak',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: AppTheme.textSecondary,
             fontSize: 12,
           ),
         ),
@@ -210,13 +216,13 @@ class _HabitStreakDisplayState extends State<HabitStreakDisplay>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+              color: AppTheme.warningColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Text(
               'BEST',
               style: TextStyle(
-                color: Color(0xFFFFD700),
+                color: AppTheme.warningColor,
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
               ),
@@ -239,30 +245,30 @@ class _HabitStreakDisplayState extends State<HabitStreakDisplay>
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                colors: [AppTheme.warningColor, Color(0xFFFFA500)],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFFD700).withValues(alpha: 0.4),
+                  color: AppTheme.warningColor.withValues(alpha: 0.4),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.emoji_events,
-                  color: Colors.white,
+                  color: AppTheme.textOnPrimary,
                   size: 12,
                 ),
-                const SizedBox(width: 4),
-                const Text(
+                SizedBox(width: 4),
+                Text(
                   'BEST',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textOnPrimary,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,

@@ -9,7 +9,7 @@ class CustomMoodTrackerCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Function(MoodType)? onMoodSelected;
   final Color? backgroundColor;
-  final Color? foregroundColor;
+  final Color? accentColor;
   final double borderRadius;
   final bool enabled;
 
@@ -20,7 +20,7 @@ class CustomMoodTrackerCard extends StatelessWidget {
     this.onTap,
     this.onMoodSelected,
     this.backgroundColor,
-    this.foregroundColor,
+    this.accentColor,
     this.borderRadius = 20,
     this.enabled = true,
   });
@@ -50,8 +50,7 @@ class CustomMoodTrackerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? AppTheme.primaryColor;
-    final Color fgColor = foregroundColor ?? Colors.white;
+    final Color accent = accentColor ?? AppTheme.primaryColor;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double responsivePadding = screenWidth * 0.05;
 
@@ -62,10 +61,7 @@ class CustomMoodTrackerCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: backgroundColor == null
-                ? AppTheme.secondaryGradient
-                : null,
-            color: backgroundColor,
+            color: backgroundColor ?? Colors.white,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: AppTheme.cardShadow,
           ),
@@ -76,11 +72,11 @@ class CustomMoodTrackerCard extends StatelessWidget {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildIconWithBorder(fgColor, constraints.maxWidth),
+                    _buildIconWithBorder(accent, constraints.maxWidth),
                     SizedBox(width: constraints.maxWidth * 0.04),
-                    Expanded(child: _buildTextSection(fgColor, constraints.maxWidth)),
+                    Expanded(child: _buildTextSection(constraints.maxWidth)),
                     SizedBox(width: constraints.maxWidth * 0.02),
-                    _buildMoodButtons(bgColor, fgColor, constraints.maxWidth),
+                    _buildMoodButtons(accent, constraints.maxWidth),
                   ],
                 );
               },
@@ -91,7 +87,7 @@ class CustomMoodTrackerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIconWithBorder(Color fgColor, double maxWidth) {
+  Widget _buildIconWithBorder(Color accent, double maxWidth) {
     final double iconSize = (maxWidth * 0.08).clamp(20.0, 32.0);
     final double padding = iconSize * 0.3;
     final double borderWidth = (iconSize * 0.08).clamp(1.5, 2.5);
@@ -99,18 +95,18 @@ class CustomMoodTrackerCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        border: Border.all(color: fgColor, width: borderWidth),
+        border: Border.all(color: accent, width: borderWidth),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(
         currentMood != null ? _getMoodIcon(currentMood!) : Icons.emoji_emotions_outlined,
-        color: fgColor,
+        color: accent,
         size: iconSize,
       ),
     );
   }
 
-  Widget _buildTextSection(Color fgColor, double maxWidth) {
+  Widget _buildTextSection(double maxWidth) {
     final double titleFontSize = (maxWidth * 0.045).clamp(14.0, 18.0);
     final double subtitleFontSize = (maxWidth * 0.035).clamp(11.0, 14.0);
     final double spacing = (maxWidth * 0.01).clamp(2.0, 6.0);
@@ -122,7 +118,7 @@ class CustomMoodTrackerCard extends StatelessWidget {
         Text(
           _titleText,
           style: TextStyle(
-            color: fgColor,
+            color: AppTheme.textPrimary,
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
           ),
@@ -131,7 +127,7 @@ class CustomMoodTrackerCard extends StatelessWidget {
         Text(
           _subtitleText,
           style: TextStyle(
-            color: fgColor,
+            color: AppTheme.textSecondary,
             fontSize: subtitleFontSize,
             fontWeight: FontWeight.w400,
           ),
@@ -140,7 +136,7 @@ class CustomMoodTrackerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMoodButtons(Color bgColor, Color fgColor, double maxWidth) {
+  Widget _buildMoodButtons(Color accent, double maxWidth) {
     final double buttonSize = (maxWidth * 0.08).clamp(28.0, 36.0);
     final double iconSize = (maxWidth * 0.045).clamp(16.0, 22.0);
     final double spacing = (maxWidth * 0.01).clamp(2.0, 4.0);
@@ -157,12 +153,12 @@ class CustomMoodTrackerCard extends StatelessWidget {
               width: buttonSize,
               height: buttonSize,
               decoration: BoxDecoration(
-                color: isSelected ? fgColor : fgColor.withValues(alpha: 0.2),
+                color: isSelected ? accent : accent.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 _getMoodIcon(mood),
-                color: isSelected ? bgColor : fgColor,
+                color: isSelected ? Colors.white : accent,
                 size: iconSize,
               ),
             ),

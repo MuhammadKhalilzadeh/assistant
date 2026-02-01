@@ -116,7 +116,7 @@ class _CalendarHeaderState extends State<CalendarHeader>
                     Text(
                       _displayedMonth,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -124,7 +124,7 @@ class _CalendarHeaderState extends State<CalendarHeader>
                     const SizedBox(width: 8),
                     Icon(
                       Icons.keyboard_arrow_down,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: AppTheme.textSecondary,
                       size: 20,
                     ),
                   ],
@@ -170,13 +170,13 @@ class _NavigationButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: AppTheme.cardColor,
             borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: Icon(
             icon,
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             size: 24,
           ),
         ),

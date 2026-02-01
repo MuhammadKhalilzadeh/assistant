@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class HabitAppBar extends StatefulWidget {
@@ -75,15 +76,13 @@ class _HabitAppBarState extends State<HabitAppBar>
           // Back button
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppTheme.cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.2),
-              ),
+              boxShadow: AppTheme.cardShadow,
             ),
             child: IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
             ),
           ),
           const SizedBox(width: 12),
@@ -99,29 +98,27 @@ class _HabitAppBarState extends State<HabitAppBar>
                     child: Container(
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
+                        color: AppTheme.cardColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                        ),
+                        boxShadow: AppTheme.cardShadow,
                       ),
                       child: TextField(
                         controller: _searchController,
                         autofocus: true,
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: AppTheme.textPrimary),
                         decoration: InputDecoration(
                           hintText: 'Search habits...',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
+                          hintStyle: const TextStyle(
+                            color: AppTheme.textTertiary,
                           ),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 14,
                           ),
-                          prefixIcon: Icon(
+                          prefixIcon: const Icon(
                             Icons.search,
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: AppTheme.textSecondary,
                           ),
                           suffixIcon: widget.searchQuery.isNotEmpty
                               ? IconButton(
@@ -129,9 +126,9 @@ class _HabitAppBarState extends State<HabitAppBar>
                                     _searchController.clear();
                                     widget.onSearchChanged('');
                                   },
-                                  icon: Icon(
+                                  icon: const Icon(
                                     Icons.close,
-                                    color: Colors.white.withValues(alpha: 0.7),
+                                    color: AppTheme.textSecondary,
                                     size: 20,
                                   ),
                                 )
@@ -147,7 +144,7 @@ class _HabitAppBarState extends State<HabitAppBar>
                     const Text(
                       'Habits',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -167,20 +164,18 @@ class _HabitAppBarState extends State<HabitAppBar>
           Container(
             decoration: BoxDecoration(
               color: widget.isSearching
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.15),
+                  ? AppTheme.primaryColor
+                  : AppTheme.cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.2),
-              ),
+              boxShadow: AppTheme.cardShadow,
             ),
             child: IconButton(
               onPressed: widget.onSearchToggle,
               icon: Icon(
                 widget.isSearching ? Icons.close : Icons.search,
                 color: widget.isSearching
-                    ? const Color(0xFF6366F1)
-                    : Colors.white,
+                    ? AppTheme.textOnPrimary
+                    : AppTheme.textPrimary,
               ),
             ),
           ),
@@ -201,12 +196,12 @@ class _HabitAppBarState extends State<HabitAppBar>
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
+                colors: [AppTheme.primaryColor, AppTheme.primaryLight],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.4),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -217,14 +212,14 @@ class _HabitAppBarState extends State<HabitAppBar>
               children: [
                 const Icon(
                   Icons.local_fire_department,
-                  color: Colors.white,
+                  color: AppTheme.textOnPrimary,
                   size: 16,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   '$streak',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textOnPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),

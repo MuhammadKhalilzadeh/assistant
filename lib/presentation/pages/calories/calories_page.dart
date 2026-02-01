@@ -167,14 +167,11 @@ class _CaloriesPageState extends State<CaloriesPage>
     final last7Days = _repository.getLast7DaysCalories();
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: AppTheme.secondaryGradient,
-              ),
-              child: Column(
+            Column(
                 children: [
                   CaloriesAppBar(
                     currentCalories: currentCalories,
@@ -244,7 +241,6 @@ class _CaloriesPageState extends State<CaloriesPage>
                   ),
                 ],
               ),
-            ),
             // Celebration overlay
             if (_showCelebration)
               GoalCelebration(
@@ -255,7 +251,7 @@ class _CaloriesPageState extends State<CaloriesPage>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddMealSheet,
-        backgroundColor: const Color(0xFFFF6B6B),
+        backgroundColor: AppTheme.primaryColor,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 /// A reusable general inbox card widget
 ///
 /// This widget displays inbox information with customizable
-/// title, subtitle (unread count), and action callbacks. It features a red background
-/// with white text and an email icon.
+/// title, subtitle (unread count), and action callbacks. It features a white background
+/// with dark text and red accents.
 class CustomGeneralInboxCard extends StatelessWidget {
   /// The main title text (e.g., "Tap to open your inbox")
   final String title;
@@ -22,11 +22,11 @@ class CustomGeneralInboxCard extends StatelessWidget {
   /// Callback when the entire card is tapped
   final VoidCallback? onTap;
 
-  /// Background color (defaults to primaryColor - red)
+  /// Background color (defaults to white)
   final Color? backgroundColor;
 
-  /// Foreground/text color (defaults to white)
-  final Color? foregroundColor;
+  /// Accent color for icons and highlights (defaults to primaryColor - red)
+  final Color? accentColor;
 
   /// Border radius for the card
   final double borderRadius;
@@ -45,7 +45,7 @@ class CustomGeneralInboxCard extends StatelessWidget {
     this.servicesCount = 0,
     this.onTap,
     this.backgroundColor,
-    this.foregroundColor,
+    this.accentColor,
     this.borderRadius = 20,
     this.icon = Icons.mail,
     this.enabled = true,
@@ -64,7 +64,7 @@ class CustomGeneralInboxCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color fgColor = foregroundColor ?? Colors.white;
+    final Color accent = accentColor ?? AppTheme.primaryColor;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double responsivePadding = screenWidth * 0.05;
 
@@ -75,10 +75,7 @@ class CustomGeneralInboxCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: backgroundColor == null
-                ? AppTheme.primaryGradient
-                : null,
-            color: backgroundColor,
+            color: backgroundColor ?? Colors.white,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: AppTheme.cardShadow,
           ),
@@ -90,13 +87,13 @@ class CustomGeneralInboxCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Left section: Icon
-                    _buildIconContainer(fgColor, constraints.maxWidth),
+                    _buildIconContainer(accent, constraints.maxWidth),
 
                     SizedBox(width: constraints.maxWidth * 0.04),
 
                     // Right section: Title + Subtitle
                     Expanded(
-                      child: _buildTextSection(fgColor, constraints.maxWidth),
+                      child: _buildTextSection(constraints.maxWidth),
                     ),
                   ],
                 );
@@ -108,7 +105,7 @@ class CustomGeneralInboxCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIconContainer(Color fgColor, double maxWidth) {
+  Widget _buildIconContainer(Color accent, double maxWidth) {
     final double iconSize = (maxWidth * 0.08).clamp(20.0, 32.0);
     final double padding = iconSize * 0.4;
     final double containerRadius = (iconSize * 0.3).clamp(8.0, 12.0);
@@ -116,18 +113,18 @@ class CustomGeneralInboxCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: fgColor,
+        color: accent,
         borderRadius: BorderRadius.circular(containerRadius),
       ),
       child: Icon(
         icon,
-        color: backgroundColor ?? AppTheme.primaryColor,
+        color: Colors.white,
         size: iconSize,
       ),
     );
   }
 
-  Widget _buildTextSection(Color fgColor, double maxWidth) {
+  Widget _buildTextSection(double maxWidth) {
     final double titleFontSize = (maxWidth * 0.055).clamp(16.0, 22.0);
     final double subtitleFontSize = (maxWidth * 0.038).clamp(12.0, 16.0);
     final double spacing = (maxWidth * 0.015).clamp(4.0, 8.0);
@@ -140,7 +137,7 @@ class CustomGeneralInboxCard extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            color: fgColor,
+            color: AppTheme.textPrimary,
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
           ),
@@ -150,7 +147,7 @@ class CustomGeneralInboxCard extends StatelessWidget {
         Text(
           _subtitleText,
           style: TextStyle(
-            color: fgColor,
+            color: AppTheme.textSecondary,
             fontSize: subtitleFontSize,
             fontWeight: FontWeight.w400,
           ),

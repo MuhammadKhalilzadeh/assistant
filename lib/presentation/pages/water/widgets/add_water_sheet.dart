@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:assistant/data/mock/models/water_log_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'beverage_type_selector.dart';
 
 /// Bottom sheet for adding custom water amounts with beverage type selection
@@ -77,16 +78,10 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
       maxChildSize: 0.9,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF10B981),
-                Color(0xFF06B6D4),
-              ],
-            ),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: AppTheme.cardColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: AppTheme.elevatedShadow,
           ),
           child: Column(
             children: [
@@ -96,7 +91,7 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: AppTheme.textTertiary.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -108,11 +103,11 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Title
-                      const Center(
+                      Center(
                         child: Text(
                           'Add Water',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.textPrimary,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -121,10 +116,10 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                       const SizedBox(height: 32),
 
                       // Amount input
-                      const Text(
+                      Text(
                         'Amount (ml)',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -132,15 +127,15 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                       const SizedBox(height: 12),
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: AppTheme.backgroundColor,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                          border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.2)),
                         ),
                         child: TextField(
                           controller: _amountController,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: AppTheme.textPrimary,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -150,7 +145,7 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                             contentPadding: const EdgeInsets.all(16),
                             suffixText: 'ml',
                             suffixStyle: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: AppTheme.textSecondary,
                               fontSize: 18,
                             ),
                           ),
@@ -166,10 +161,10 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                       // Slider
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
-                          activeTrackColor: Colors.white,
-                          inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
-                          thumbColor: Colors.white,
-                          overlayColor: Colors.white.withValues(alpha: 0.2),
+                          activeTrackColor: AppTheme.primaryColor,
+                          inactiveTrackColor: AppTheme.primaryColor.withValues(alpha: 0.2),
+                          thumbColor: AppTheme.primaryColor,
+                          overlayColor: AppTheme.primaryColor.withValues(alpha: 0.2),
                           trackHeight: 6,
                         ),
                         child: Slider(
@@ -187,14 +182,14 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                           Text(
                             '0ml',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.6),
+                              color: AppTheme.textTertiary,
                               fontSize: 12,
                             ),
                           ),
                           Text(
                             '2000ml',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.6),
+                              color: AppTheme.textTertiary,
                               fontSize: 12,
                             ),
                           ),
@@ -203,10 +198,10 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                       const SizedBox(height: 24),
 
                       // Beverage type
-                      const Text(
+                      Text(
                         'Beverage Type',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -221,10 +216,10 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                       const SizedBox(height: 24),
 
                       // Note field
-                      const Text(
+                      Text(
                         'Note (optional)',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -232,20 +227,20 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                       const SizedBox(height: 12),
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: AppTheme.backgroundColor,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                          border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.2)),
                         ),
                         child: TextField(
                           controller: _noteController,
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: AppTheme.textPrimary),
                           maxLines: 2,
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             contentPadding: const EdgeInsets.all(16),
                             hintText: 'Add a note...',
                             hintStyle: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.5),
+                              color: AppTheme.textTertiary,
                             ),
                           ),
                         ),
@@ -258,8 +253,8 @@ class _AddWaterSheetState extends State<AddWaterSheet> {
                         child: ElevatedButton(
                           onPressed: _handleAdd,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF10B981),
+                            backgroundColor: AppTheme.primaryColor,
+                            foregroundColor: AppTheme.textOnPrimary,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),

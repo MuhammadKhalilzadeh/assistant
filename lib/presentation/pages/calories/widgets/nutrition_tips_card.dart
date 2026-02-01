@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 class NutritionTipsCard extends StatefulWidget {
   const NutritionTipsCard({super.key});
@@ -130,9 +131,9 @@ class _NutritionTipsCardState extends State<NutritionTipsCard>
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: AppTheme.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+          boxShadow: AppTheme.cardShadow,
         ),
         child: Row(
           children: [
@@ -147,12 +148,12 @@ class _NutritionTipsCardState extends State<NutritionTipsCard>
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Colors.amber.shade400.withValues(alpha: 0.2),
+                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         tip.icon,
-                        color: Colors.amber.shade400,
+                        color: AppTheme.primaryColor,
                         size: 24,
                       ),
                     ),
@@ -169,14 +170,14 @@ class _NutritionTipsCardState extends State<NutritionTipsCard>
                     children: [
                       Icon(
                         Icons.lightbulb_outline,
-                        color: Colors.amber.shade300,
+                        color: AppTheme.primaryColor,
                         size: 14,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'Nutrition Tip',
                         style: TextStyle(
-                          color: Colors.amber.shade300,
+                          color: AppTheme.primaryColor,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
@@ -189,8 +190,8 @@ class _NutritionTipsCardState extends State<NutritionTipsCard>
                     child: Text(
                       tip.text,
                       key: ValueKey(_currentTipIndex),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.85),
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
                         fontSize: 13,
                         height: 1.3,
                       ),
@@ -202,7 +203,7 @@ class _NutritionTipsCardState extends State<NutritionTipsCard>
             const SizedBox(width: 8),
             Icon(
               Icons.touch_app,
-              color: Colors.white.withValues(alpha: 0.3),
+              color: AppTheme.textTertiary.withValues(alpha: 0.5),
               size: 18,
             ),
           ],

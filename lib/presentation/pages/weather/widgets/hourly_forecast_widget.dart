@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/weather_forecast_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/weather/widgets/weather_condition_icon.dart';
 import 'package:flutter/material.dart';
 
@@ -36,10 +37,10 @@ class HourlyForecastWidget extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: padding),
-          child: const Text(
+          child: Text(
             'Hourly Forecast',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -86,14 +87,13 @@ class HourlyForecastWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       decoration: BoxDecoration(
         color: isNow
-            ? Colors.white.withValues(alpha: 0.25)
-            : Colors.white.withValues(alpha: 0.15),
+            ? AppTheme.primaryColor.withValues(alpha: 0.1)
+            : AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isNow
-              ? Colors.white.withValues(alpha: 0.4)
-              : Colors.white.withValues(alpha: 0.2),
-        ),
+        boxShadow: AppTheme.cardShadow,
+        border: isNow
+            ? Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.3))
+            : null,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -101,7 +101,7 @@ class HourlyForecastWidget extends StatelessWidget {
           Text(
             _formatHour(hourly.time),
             style: TextStyle(
-              color: Colors.white.withValues(alpha: isNow ? 1.0 : 0.7),
+              color: isNow ? AppTheme.primaryColor : AppTheme.textSecondary,
               fontSize: 12,
               fontWeight: isNow ? FontWeight.bold : FontWeight.normal,
             ),
@@ -113,8 +113,8 @@ class HourlyForecastWidget extends StatelessWidget {
           ),
           Text(
             '${hourly.temperature}°',
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppTheme.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -126,13 +126,13 @@ class HourlyForecastWidget extends StatelessWidget {
                 Icon(
                   Icons.water_drop,
                   size: 10,
-                  color: Colors.lightBlue.shade200,
+                  color: AppTheme.infoColor,
                 ),
                 const SizedBox(width: 2),
                 Text(
                   '${hourly.precipChance}%',
                   style: TextStyle(
-                    color: Colors.lightBlue.shade200,
+                    color: AppTheme.infoColor,
                     fontSize: 10,
                   ),
                 ),

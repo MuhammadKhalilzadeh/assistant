@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// App bar for the Water Intake page with back button, title, and settings
 class WaterAppBar extends StatelessWidget {
@@ -22,22 +23,22 @@ class WaterAppBar extends StatelessWidget {
           // Back button
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppTheme.cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              boxShadow: AppTheme.cardShadow,
             ),
             child: IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
             ),
           ),
           const SizedBox(width: 16),
           // Title
-          const Expanded(
+          Expanded(
             child: Text(
               'Water Intake',
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -54,26 +55,26 @@ class WaterAppBar extends StatelessWidget {
                 child: CircularProgressIndicator(
                   value: progress.clamp(0.0, 1.0),
                   strokeWidth: 3,
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                  backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.2),
                   valueColor: AlwaysStoppedAnimation<Color>(
                     progress >= 1.0
-                        ? const Color(0xFF10B981) // Green when goal met
-                        : Colors.white.withValues(alpha: 0.8),
+                        ? AppTheme.successColor
+                        : AppTheme.primaryColor,
                   ),
                 ),
               ),
               // Settings button
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
+                  color: AppTheme.cardColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                  boxShadow: AppTheme.cardShadow,
                 ),
                 child: IconButton(
                   onPressed: onSettingsTap,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.settings_outlined,
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     size: 20,
                   ),
                 ),

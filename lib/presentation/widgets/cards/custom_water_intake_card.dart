@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 /// A reusable water intake tracker card widget
 ///
 /// This widget displays water intake tracking with customizable
-/// current intake, goal, and an add button. It features a red background
-/// with white text and a glass icon with fill level indicator.
+/// current intake, goal, and an add button. It features a white background
+/// with dark text and red accents.
 class CustomWaterIntakeCard extends StatelessWidget {
   /// Current water intake in ml
   final int currentIntake;
@@ -19,11 +19,11 @@ class CustomWaterIntakeCard extends StatelessWidget {
   /// Callback when the add button is pressed
   final VoidCallback? onAddPressed;
 
-  /// Background color (defaults to primaryColor - red)
+  /// Background color (defaults to white)
   final Color? backgroundColor;
 
-  /// Foreground/text color (defaults to white)
-  final Color? foregroundColor;
+  /// Accent color for icons and highlights (defaults to primaryColor - red)
+  final Color? accentColor;
 
   /// Border radius for the card
   final double borderRadius;
@@ -41,7 +41,7 @@ class CustomWaterIntakeCard extends StatelessWidget {
     this.onTap,
     this.onAddPressed,
     this.backgroundColor,
-    this.foregroundColor,
+    this.accentColor,
     this.borderRadius = 20,
     this.icon = Icons.local_drink_outlined,
     this.enabled = true,
@@ -72,8 +72,7 @@ class CustomWaterIntakeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? AppTheme.primaryColor;
-    final Color fgColor = foregroundColor ?? Colors.white;
+    final Color accent = accentColor ?? AppTheme.primaryColor;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double responsivePadding = screenWidth * 0.05;
 
@@ -84,10 +83,7 @@ class CustomWaterIntakeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: backgroundColor == null
-                ? AppTheme.secondaryGradient
-                : null,
-            color: backgroundColor,
+            color: backgroundColor ?? Colors.white,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: AppTheme.cardShadow,
           ),
@@ -99,19 +95,19 @@ class CustomWaterIntakeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Left section: Glass icon with fill level
-                    _buildGlassIcon(bgColor, fgColor, constraints.maxWidth),
+                    _buildGlassIcon(accent, constraints.maxWidth),
 
                     SizedBox(width: constraints.maxWidth * 0.04),
 
                     // Center section: Text
                     Expanded(
-                      child: _buildTextSection(fgColor, constraints.maxWidth),
+                      child: _buildTextSection(constraints.maxWidth),
                     ),
 
                     SizedBox(width: constraints.maxWidth * 0.04),
 
                     // Right section: Add button
-                    _buildAddButton(bgColor, fgColor, constraints.maxWidth),
+                    _buildAddButton(accent, constraints.maxWidth),
                   ],
                 );
               },
@@ -122,7 +118,7 @@ class CustomWaterIntakeCard extends StatelessWidget {
     );
   }
 
-  Widget _buildGlassIcon(Color bgColor, Color fgColor, double maxWidth) {
+  Widget _buildGlassIcon(Color accent, double maxWidth) {
     final double iconSize = (maxWidth * 0.1).clamp(28.0, 40.0);
     final double containerSize = iconSize * 1.6;
 
@@ -132,13 +128,13 @@ class CustomWaterIntakeCard extends StatelessWidget {
       child: CustomPaint(
         painter: _GlassPainter(
           fillLevel: progress,
-          glassColor: fgColor,
-          fillColor: fgColor.withValues(alpha: 0.4),
+          glassColor: accent,
+          fillColor: accent.withValues(alpha: 0.4),
         ),
         child: Center(
           child: Icon(
             icon,
-            color: fgColor,
+            color: accent,
             size: iconSize,
           ),
         ),
@@ -146,20 +142,20 @@ class CustomWaterIntakeCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTextSection(Color fgColor, double maxWidth) {
+  Widget _buildTextSection(double maxWidth) {
     final double fontSize = (maxWidth * 0.055).clamp(16.0, 22.0);
 
     return Text(
       _displayText,
       style: TextStyle(
-        color: fgColor,
+        color: AppTheme.textPrimary,
         fontSize: fontSize,
         fontWeight: FontWeight.bold,
       ),
     );
   }
 
-  Widget _buildAddButton(Color bgColor, Color fgColor, double maxWidth) {
+  Widget _buildAddButton(Color accent, double maxWidth) {
     final double buttonSize = (maxWidth * 0.12).clamp(40.0, 56.0);
     final double iconSize = (maxWidth * 0.06).clamp(20.0, 28.0);
 
@@ -172,12 +168,12 @@ class CustomWaterIntakeCard extends StatelessWidget {
           width: buttonSize,
           height: buttonSize,
           decoration: BoxDecoration(
-            color: fgColor.withValues(alpha: 0.2),
+            color: accent.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.add,
-            color: fgColor,
+            color: accent,
             size: iconSize,
           ),
         ),

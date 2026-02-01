@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Custom app bar for the Focus Timer page
 class TimerAppBar extends StatelessWidget {
@@ -20,7 +21,7 @@ class TimerAppBar extends StatelessWidget {
           // Back button
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
             tooltip: 'Back',
           ),
 
@@ -30,7 +31,7 @@ class TimerAppBar extends StatelessWidget {
           const Text(
             'Focus Timer',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
               letterSpacing: -0.5,
@@ -44,11 +45,9 @@ class TimerAppBar extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppTheme.cardColor,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.3),
-                ),
+                boxShadow: AppTheme.cardShadow,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -62,7 +61,7 @@ class TimerAppBar extends StatelessWidget {
                   Text(
                     '$streak',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -79,12 +78,13 @@ class TimerAppBar extends StatelessWidget {
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppTheme.cardColor,
                 shape: BoxShape.circle,
+                boxShadow: AppTheme.cardShadow,
               ),
               child: const Icon(
                 Icons.settings_outlined,
-                color: Colors.white,
+                color: AppTheme.primaryColor,
                 size: 20,
               ),
             ),

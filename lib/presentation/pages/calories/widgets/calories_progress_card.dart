@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'circular_progress_painter.dart';
 
 class CaloriesProgressCard extends StatelessWidget {
@@ -15,11 +16,11 @@ class CaloriesProgressCard extends StatelessWidget {
 
   Color _getProgressColor(double progress) {
     if (progress > 1.0) {
-      return Colors.red.shade400;
+      return AppTheme.errorColor;
     } else if (progress >= 0.8) {
-      return Colors.amber.shade400;
+      return AppTheme.warningColor;
     }
-    return Colors.green.shade400;
+    return AppTheme.successColor;
   }
 
   String _getMotivationalMessage(double progress) {
@@ -49,9 +50,9 @@ class CaloriesProgressCard extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            color: AppTheme.cardColor,
+            borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: Column(
             children: [
@@ -66,7 +67,7 @@ class CaloriesProgressCard extends StatelessWidget {
                       painter: CircularProgressPainter(
                         progress: animatedProgress.clamp(0.0, 1.5),
                         progressColor: progressColor,
-                        backgroundColor: Colors.white.withValues(alpha: 0.2),
+                        backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
                         strokeWidth: 14,
                       ),
                     ),
@@ -76,15 +77,15 @@ class CaloriesProgressCard extends StatelessWidget {
                         Text(
                           '$animatedCalories',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.textPrimary,
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           'of $goalCalories cal',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
                             fontSize: 14,
                           ),
                         ),
@@ -105,7 +106,7 @@ class CaloriesProgressCard extends StatelessWidget {
                   Container(
                     width: 1,
                     height: 40,
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: AppTheme.textTertiary.withValues(alpha: 0.3),
                   ),
                   _buildStatItem(
                     'Remaining',
@@ -119,7 +120,7 @@ class CaloriesProgressCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: progressColor.withValues(alpha: 0.2),
+                  color: progressColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -157,22 +158,22 @@ class CaloriesProgressCard extends StatelessWidget {
       children: [
         Icon(
           icon,
-          color: color ?? Colors.white.withValues(alpha: 0.7),
+          color: color ?? AppTheme.textSecondary,
           size: 20,
         ),
         const SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
-            color: color ?? Colors.white,
+            color: color ?? AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 12,
           ),
         ),

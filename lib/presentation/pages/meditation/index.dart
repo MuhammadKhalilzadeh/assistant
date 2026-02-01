@@ -124,38 +124,34 @@ class _MeditationPageState extends State<MeditationPage>
     final sessions = _repository.meditationSessions;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.secondaryGradient,
-          ),
-          child: Column(
-            children: [
-              _buildAppBar(padding),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(padding),
-                    child: Column(
-                      children: [
-                        _buildTimerDisplay(screenWidth, padding),
+        child: Column(
+          children: [
+            _buildAppBar(padding),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
+                    children: [
+                      _buildTimerDisplay(screenWidth, padding),
+                      SizedBox(height: padding),
+                      if (!_isRunning) ...[
+                        _buildTypeSelector(padding),
                         SizedBox(height: padding),
-                        if (!_isRunning) ...[
-                          _buildTypeSelector(padding),
-                          SizedBox(height: padding),
-                          _buildDurationSelector(padding),
-                          SizedBox(height: padding),
-                        ],
-                        _buildStatsCard(todayMinutes, streak, padding),
+                        _buildDurationSelector(padding),
                         SizedBox(height: padding),
-                        if (!_isRunning) _buildRecentSessions(sessions, padding),
                       ],
-                    ),
+                      _buildStatsCard(todayMinutes, streak, padding),
+                      SizedBox(height: padding),
+                      if (!_isRunning) _buildRecentSessions(sessions, padding),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -168,13 +164,13 @@ class _MeditationPageState extends State<MeditationPage>
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           ),
           const SizedBox(width: 8),
           const Text(
             'Meditation',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -191,11 +187,7 @@ class _MeditationPageState extends State<MeditationPage>
 
     return Container(
       padding: EdgeInsets.all(padding * 2),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         children: [
           if (_isRunning && _selectedType == MeditationType.breathing)
@@ -210,13 +202,13 @@ class _MeditationPageState extends State<MeditationPage>
                     height: screenWidth * 0.3,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: AppTheme.primaryColor.withValues(alpha: 0.2),
                     ),
                     child: Center(
                       child: Text(
                         _breathController.value < 0.5 ? 'Breathe In' : 'Breathe Out',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontSize: 14,
                         ),
                       ),
@@ -237,14 +229,14 @@ class _MeditationPageState extends State<MeditationPage>
                     children: [
                       Icon(
                         _typeIcons[_selectedType],
-                        color: Colors.white,
+                        color: AppTheme.primaryColor,
                         size: 32,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'monospace',
@@ -262,11 +254,11 @@ class _MeditationPageState extends State<MeditationPage>
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.primaryColor,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -274,7 +266,7 @@ class _MeditationPageState extends State<MeditationPage>
               ),
               child: Icon(
                 _isRunning ? Icons.pause : Icons.play_arrow,
-                color: AppTheme.accentColor,
+                color: Colors.white,
                 size: 36,
               ),
             ),
@@ -287,18 +279,14 @@ class _MeditationPageState extends State<MeditationPage>
   Widget _buildTypeSelector(double padding) {
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Type',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -314,7 +302,7 @@ class _MeditationPageState extends State<MeditationPage>
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
+                    color: isSelected ? AppTheme.primaryColor : AppTheme.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -322,14 +310,14 @@ class _MeditationPageState extends State<MeditationPage>
                     children: [
                       Icon(
                         _typeIcons[type],
-                        color: isSelected ? AppTheme.accentColor : Colors.white,
+                        color: isSelected ? Colors.white : AppTheme.primaryColor,
                         size: 18,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         _getTypeName(type),
                         style: TextStyle(
-                          color: isSelected ? AppTheme.accentColor : Colors.white,
+                          color: isSelected ? Colors.white : AppTheme.primaryColor,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -347,18 +335,14 @@ class _MeditationPageState extends State<MeditationPage>
   Widget _buildDurationSelector(double padding) {
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Duration',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -376,13 +360,13 @@ class _MeditationPageState extends State<MeditationPage>
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
+                    color: isSelected ? AppTheme.primaryColor : AppTheme.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     '${duration}m',
                     style: TextStyle(
-                      color: isSelected ? AppTheme.accentColor : Colors.white,
+                      color: isSelected ? Colors.white : AppTheme.primaryColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -398,11 +382,7 @@ class _MeditationPageState extends State<MeditationPage>
   Widget _buildStatsCard(int todayMinutes, int streak, double padding) {
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -417,20 +397,20 @@ class _MeditationPageState extends State<MeditationPage>
   Widget _buildStatItem(IconData icon, String value, String label) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 24),
+        Icon(icon, color: AppTheme.primaryColor, size: 24),
         const SizedBox(height: 8),
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 12,
           ),
         ),
@@ -451,7 +431,7 @@ class _MeditationPageState extends State<MeditationPage>
         const Text(
           'Recent Sessions',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -460,21 +440,18 @@ class _MeditationPageState extends State<MeditationPage>
         ...completedSessions.map((session) => Container(
           margin: const EdgeInsets.only(bottom: 8),
           padding: EdgeInsets.all(padding),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
+          decoration: AppTheme.cardDecoration(),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   _typeIcons[session.type],
-                  color: Colors.white,
+                  color: AppTheme.primaryColor,
                   size: 20,
                 ),
               ),
@@ -486,14 +463,14 @@ class _MeditationPageState extends State<MeditationPage>
                     Text(
                       _getTypeName(session.type),
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
                       _formatDate(session.startTime),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                      style: const TextStyle(
+                        color: AppTheme.textTertiary,
                         fontSize: 12,
                       ),
                     ),
@@ -503,7 +480,7 @@ class _MeditationPageState extends State<MeditationPage>
               Text(
                 '${session.durationMinutes}m',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -537,7 +514,7 @@ class _MeditationProgressPainter extends CustomPainter {
     final radius = size.width / 2 - 10;
 
     final bgPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.2)
+      ..color = AppTheme.primaryColor.withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8
       ..strokeCap = StrokeCap.round;
@@ -545,7 +522,7 @@ class _MeditationProgressPainter extends CustomPainter {
     canvas.drawCircle(center, radius, bgPaint);
 
     final progressPaint = Paint()
-      ..color = Colors.white
+      ..color = AppTheme.primaryColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8
       ..strokeCap = StrokeCap.round;

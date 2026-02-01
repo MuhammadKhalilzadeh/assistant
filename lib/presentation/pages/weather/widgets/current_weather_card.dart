@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/weather_forecast_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/weather/widgets/weather_condition_icon.dart';
 import 'package:flutter/material.dart';
 
@@ -37,9 +38,9 @@ class CurrentWeatherCard extends StatelessWidget {
     Widget card = Container(
       padding: EdgeInsets.all(padding * 1.5),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         children: [
@@ -65,8 +66,8 @@ class CurrentWeatherCard extends StatelessWidget {
                     builder: (context, value, child) {
                       return Text(
                         '${value.round()}°',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppTheme.textPrimary,
                           fontSize: 72,
                           fontWeight: FontWeight.bold,
                           height: 1,
@@ -77,7 +78,7 @@ class CurrentWeatherCard extends StatelessWidget {
                   Text(
                     _getConditionText(weather.currentCondition),
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: AppTheme.textSecondary,
                       fontSize: 18,
                     ),
                   ),
@@ -94,7 +95,7 @@ class CurrentWeatherCard extends StatelessWidget {
                 width: 1,
                 height: 24,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
-                color: Colors.white.withValues(alpha: 0.3),
+                color: Colors.grey.shade300,
               ),
               _buildHighLow(),
             ],
@@ -124,14 +125,14 @@ class CurrentWeatherCard extends StatelessWidget {
       children: [
         Icon(
           Icons.thermostat,
-          color: Colors.white.withValues(alpha: 0.7),
+          color: AppTheme.textSecondary,
           size: 18,
         ),
         const SizedBox(width: 4),
         Text(
           'Feels like ${weather.feelsLike}°',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: AppTheme.textSecondary,
             fontSize: 14,
           ),
         ),
@@ -144,8 +145,8 @@ class CurrentWeatherCard extends StatelessWidget {
       children: [
         Text(
           'H: ${weather.high}°',
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: AppTheme.primaryColor,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -154,7 +155,7 @@ class CurrentWeatherCard extends StatelessWidget {
         Text(
           'L: ${weather.low}°',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: AppTheme.textSecondary,
             fontSize: 14,
           ),
         ),

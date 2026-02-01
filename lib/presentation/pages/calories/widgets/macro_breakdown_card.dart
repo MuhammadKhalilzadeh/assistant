@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 class MacroBreakdownCard extends StatelessWidget {
   final int protein;
@@ -29,21 +30,21 @@ class MacroBreakdownCard extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            color: AppTheme.cardColor,
+            borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.pie_chart_outline, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
-                  Text(
+                  Icon(Icons.pie_chart_outline, color: AppTheme.primaryColor, size: 20),
+                  const SizedBox(width: 8),
+                  const Text(
                     'Macros',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -58,21 +59,21 @@ class MacroBreakdownCard extends StatelessWidget {
                     label: 'Protein',
                     current: (protein * animation.value).round(),
                     goal: proteinGoal,
-                    color: Colors.red.shade400,
+                    color: AppTheme.primaryColor,
                     progress: (protein / proteinGoal) * animation.value,
                   ),
                   _MacroRing(
                     label: 'Carbs',
                     current: (carbs * animation.value).round(),
                     goal: carbsGoal,
-                    color: Colors.blue.shade400,
+                    color: AppTheme.infoColor,
                     progress: (carbs / carbsGoal) * animation.value,
                   ),
                   _MacroRing(
                     label: 'Fat',
                     current: (fat * animation.value).round(),
                     goal: fatGoal,
-                    color: Colors.amber.shade400,
+                    color: AppTheme.warningColor,
                     progress: (fat / fatGoal) * animation.value,
                   ),
                 ],
@@ -115,7 +116,7 @@ class _MacroRing extends StatelessWidget {
                 painter: _MacroRingPainter(
                   progress: progress.clamp(0.0, 1.0),
                   color: color,
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                  backgroundColor: color.withValues(alpha: 0.15),
                 ),
               ),
               Text(
@@ -133,15 +134,15 @@ class _MacroRing extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
         ),
         Text(
           '/ ${goal}g',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.5),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 10,
           ),
         ),

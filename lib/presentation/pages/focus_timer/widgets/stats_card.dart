@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import '../focus_timer_page.dart';
 
 /// Statistics overview card showing today's focus time and sessions
@@ -21,9 +22,9 @@ class StatsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,14 +33,14 @@ class StatsCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.insights_rounded,
-                color: Colors.white.withValues(alpha: 0.8),
+                color: AppTheme.primaryColor,
                 size: 18,
               ),
               const SizedBox(width: 8),
               const Text(
                 "Today's Stats",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -54,26 +55,26 @@ class StatsCard extends StatelessWidget {
                   icon: Icons.timer_rounded,
                   value: hours > 0 ? '${hours}h ${minutes}m' : '${minutes}m',
                   label: 'Focus Time',
-                  iconColor: _getAccentColor(),
+                  iconColor: AppTheme.primaryColor,
                 ),
               ),
               Container(
                 width: 1,
                 height: 50,
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppTheme.textTertiary.withValues(alpha: 0.2),
               ),
               Expanded(
                 child: _StatItem(
                   icon: Icons.check_circle_rounded,
                   value: sessionsToday.toString(),
                   label: 'Sessions',
-                  iconColor: const Color(0xFF10B981),
+                  iconColor: AppTheme.successColor,
                 ),
               ),
               Container(
                 width: 1,
                 height: 50,
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppTheme.textTertiary.withValues(alpha: 0.2),
               ),
               Expanded(
                 child: _StatItem(
@@ -88,17 +89,6 @@ class StatsCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _getAccentColor() {
-    switch (timerMode) {
-      case TimerMode.focus:
-        return Colors.white;
-      case TimerMode.shortBreak:
-        return const Color(0xFF10B981);
-      case TimerMode.longBreak:
-        return const Color(0xFFEC4899);
-    }
   }
 }
 
@@ -122,7 +112,7 @@ class _StatItem extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.2),
+            color: iconColor.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -135,7 +125,7 @@ class _StatItem extends StatelessWidget {
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -143,8 +133,8 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 11,
             fontWeight: FontWeight.w500,
           ),

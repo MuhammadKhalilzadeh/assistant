@@ -2,9 +2,9 @@ import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 /// A modern, reusable custom button widget
-/// 
+///
 /// This widget provides a consistent styling and behavior for buttons
-/// throughout the application, aligned with the app's modern design theme.
+/// throughout the application. Default style is red background with white text.
 class CustomButton extends StatefulWidget {
   /// The text displayed on the button
   final String text;
@@ -24,10 +24,10 @@ class CustomButton extends StatefulWidget {
   /// Whether to show loading indicator
   final bool isLoading;
   
-  /// Background color (defaults to white)
+  /// Background color (defaults to primaryColor - red)
   final Color? backgroundColor;
-  
-  /// Text color (defaults to primaryColor)
+
+  /// Text color (defaults to white)
   final Color? textColor;
   
   /// Border radius
@@ -102,10 +102,11 @@ class _CustomButtonState extends State<CustomButton>
     final bool isButtonEnabled = widget.enabled &&
         widget.onPressed != null &&
         !widget.isLoading;
+    // Default to red background with white text
     final Color buttonBackgroundColor =
-        widget.backgroundColor ?? AppTheme.surfaceColor;
+        widget.backgroundColor ?? AppTheme.primaryColor;
     final Color buttonTextColor =
-        widget.textColor ?? AppTheme.primaryColor;
+        widget.textColor ?? AppTheme.textOnPrimary;
 
     return GestureDetector(
       onTapDown: isButtonEnabled ? _handleTapDown : null,

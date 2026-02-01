@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import '../focus_timer_page.dart';
 
 /// Daily goal progress ring showing sessions completed vs goal
@@ -32,7 +33,7 @@ class DailyProgress extends StatelessWidget {
     } else if (_progress < 1) {
       return "Almost at your goal!";
     } else {
-      return "Daily goal achieved! 🎉";
+      return "Daily goal achieved!";
     }
   }
 
@@ -41,9 +42,9 @@ class DailyProgress extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Row(
         children: [
@@ -59,7 +60,7 @@ class DailyProgress extends StatelessWidget {
                 return CustomPaint(
                   painter: _ProgressRingPainter(
                     progress: value,
-                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    backgroundColor: AppTheme.textTertiary.withValues(alpha: 0.2),
                     progressColor: _getProgressColor(),
                   ),
                   child: Center(
@@ -69,7 +70,7 @@ class DailyProgress extends StatelessWidget {
                         Text(
                           '$_percentage%',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.textPrimary,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -92,7 +93,7 @@ class DailyProgress extends StatelessWidget {
                 const Text(
                   'Daily Goal',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -100,8 +101,8 @@ class DailyProgress extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '$completedSessions of $goalSessions sessions',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
                     fontSize: 14,
                   ),
                 ),
@@ -109,7 +110,7 @@ class DailyProgress extends StatelessWidget {
                 Text(
                   _motivationalMessage,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: _progress >= 1 ? AppTheme.successColor : AppTheme.textTertiary,
                     fontSize: 12,
                     fontStyle: completedSessions >= goalSessions
                         ? FontStyle.normal
@@ -126,16 +127,9 @@ class DailyProgress extends StatelessWidget {
 
   Color _getProgressColor() {
     if (_progress >= 1) {
-      return const Color(0xFF10B981); // Green for completed
+      return AppTheme.successColor; // Green for completed
     }
-    switch (timerMode) {
-      case TimerMode.focus:
-        return Colors.white;
-      case TimerMode.shortBreak:
-        return const Color(0xFF10B981);
-      case TimerMode.longBreak:
-        return const Color(0xFFEC4899);
-    }
+    return AppTheme.primaryColor; // Red for in progress
   }
 }
 

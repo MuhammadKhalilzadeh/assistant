@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 /// Filter options for the habit list
@@ -79,15 +80,10 @@ class HabitFilters extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.15),
+                        ? AppTheme.primaryColor
+                        : AppTheme.cardColor,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.3),
-                      width: 1,
-                    ),
+                    boxShadow: AppTheme.cardShadow,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -96,16 +92,16 @@ class HabitFilters extends StatelessWidget {
                         filter.icon,
                         size: 16,
                         color: isSelected
-                            ? const Color(0xFF6366F1)
-                            : Colors.white.withValues(alpha: 0.9),
+                            ? AppTheme.textOnPrimary
+                            : AppTheme.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       AnimatedDefaultTextStyle(
                         duration: const Duration(milliseconds: 200),
                         style: TextStyle(
                           color: isSelected
-                              ? const Color(0xFF6366F1)
-                              : Colors.white,
+                              ? AppTheme.textOnPrimary
+                              : AppTheme.textPrimary,
                           fontSize: 14,
                           fontWeight:
                               isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -122,16 +118,16 @@ class HabitFilters extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF6366F1).withValues(alpha: 0.15)
-                                : Colors.white.withValues(alpha: 0.2),
+                                ? AppTheme.textOnPrimary.withValues(alpha: 0.2)
+                                : AppTheme.primaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             count.toString(),
                             style: TextStyle(
                               color: isSelected
-                                  ? const Color(0xFF6366F1)
-                                  : Colors.white,
+                                  ? AppTheme.textOnPrimary
+                                  : AppTheme.primaryColor,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),

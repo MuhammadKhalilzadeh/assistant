@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// 7-day bar chart showing daily water intake history
 class DailyHistoryWidget extends StatelessWidget {
@@ -20,9 +21,9 @@ class DailyHistoryWidget extends StatelessWidget {
     Widget content = Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,14 +32,14 @@ class DailyHistoryWidget extends StatelessWidget {
             children: [
               Icon(
                 Icons.bar_chart,
-                color: Colors.white.withValues(alpha: 0.8),
+                color: AppTheme.textSecondary,
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Last 7 Days',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -73,13 +74,13 @@ class DailyHistoryWidget extends StatelessWidget {
               Container(
                 width: 16,
                 height: 2,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: AppTheme.textTertiary,
               ),
               const SizedBox(width: 8),
               Text(
                 'Goal: ${dailyGoal}ml',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: AppTheme.textTertiary,
                   fontSize: 11,
                 ),
               ),
@@ -88,7 +89,7 @@ class DailyHistoryWidget extends StatelessWidget {
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.6),
+                  color: AppTheme.successColor.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -96,7 +97,7 @@ class DailyHistoryWidget extends StatelessWidget {
               Text(
                 'Goal met',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: AppTheme.textTertiary,
                   fontSize: 11,
                 ),
               ),
@@ -105,7 +106,7 @@ class DailyHistoryWidget extends StatelessWidget {
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF06B6D4).withValues(alpha: 0.6),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -113,7 +114,7 @@ class DailyHistoryWidget extends StatelessWidget {
               Text(
                 'In progress',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: AppTheme.textTertiary,
                   fontSize: 11,
                 ),
               ),
@@ -198,7 +199,7 @@ class _DayBarState extends State<_DayBar> with SingleTickerProviderStateMixin {
         Text(
           widget.intake > 0 ? '${(widget.intake / 1000).toStringAsFixed(1)}L' : '-',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: AppTheme.textSecondary,
             fontSize: 9,
             fontWeight: FontWeight.w500,
           ),
@@ -216,7 +217,7 @@ class _DayBarState extends State<_DayBar> with SingleTickerProviderStateMixin {
                 width: 28,
                 height: 90,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: AppTheme.backgroundColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
@@ -227,7 +228,7 @@ class _DayBarState extends State<_DayBar> with SingleTickerProviderStateMixin {
                 right: 0,
                 child: Container(
                   height: 2,
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: AppTheme.textTertiary.withValues(alpha: 0.3),
                 ),
               ),
               // Animated fill bar
@@ -243,12 +244,12 @@ class _DayBarState extends State<_DayBar> with SingleTickerProviderStateMixin {
                         end: Alignment.topCenter,
                         colors: widget.goalMet
                             ? [
-                                const Color(0xFF10B981).withValues(alpha: 0.8),
-                                const Color(0xFF10B981).withValues(alpha: 0.4),
+                                AppTheme.successColor.withValues(alpha: 0.8),
+                                AppTheme.successColor.withValues(alpha: 0.4),
                               ]
                             : [
-                                const Color(0xFF06B6D4).withValues(alpha: 0.8),
-                                const Color(0xFF06B6D4).withValues(alpha: 0.4),
+                                AppTheme.primaryColor.withValues(alpha: 0.8),
+                                AppTheme.primaryColor.withValues(alpha: 0.4),
                               ],
                       ),
                       borderRadius: BorderRadius.circular(8),
@@ -264,7 +265,7 @@ class _DayBarState extends State<_DayBar> with SingleTickerProviderStateMixin {
         Text(
           widget.dayName,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: AppTheme.textSecondary,
             fontSize: 11,
             fontWeight: FontWeight.w500,
           ),

@@ -409,143 +409,121 @@ class _FocusTimerPageState extends State<FocusTimerPage>
     setState(() {});
   }
 
-  LinearGradient _getGradientForMode() {
-    switch (_timerMode) {
-      case TimerMode.focus:
-        return AppTheme.primaryGradient;
-      case TimerMode.shortBreak:
-        return AppTheme.secondaryGradient;
-      case TimerMode.longBreak:
-        return const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFEC4899), // Pink
-            Color(0xFF8B5CF6), // Purple
-          ],
-        );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: _getGradientForMode(),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              TimerAppBar(
-                onSettingsTap: _openSettings,
-                streak: _focusStreak,
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 8),
+      backgroundColor: AppTheme.backgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            TimerAppBar(
+              onSettingsTap: _openSettings,
+              streak: _focusStreak,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: padding),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 8),
 
-                        // Streak display
-                        StreakDisplay(
-                          currentStreak: _focusStreak,
-                          bestStreak: _focusStreak + 3, // Mock best streak
-                        ),
+                      // Streak display
+                      StreakDisplay(
+                        currentStreak: _focusStreak,
+                        bestStreak: _focusStreak + 3, // Mock best streak
+                      ),
 
-                        const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                        // Timer mode toggle
-                        TimerModeToggle(
-                          currentMode: _timerMode,
-                          suggestedMode: _suggestedMode,
-                          onModeChanged: _setMode,
-                          isEnabled: _timerState != TimerState.running,
-                        ),
+                      // Timer mode toggle
+                      TimerModeToggle(
+                        currentMode: _timerMode,
+                        suggestedMode: _suggestedMode,
+                        onModeChanged: _setMode,
+                        isEnabled: _timerState != TimerState.running,
+                      ),
 
-                        const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                        // Task input (only show when idle and in focus mode)
-                        if (_timerState == TimerState.idle && _timerMode == TimerMode.focus)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: SessionTaskInput(
-                              currentTask: _currentTask,
-                              onTaskChanged: _setTask,
-                            ),
+                      // Task input (only show when idle and in focus mode)
+                      if (_timerState == TimerState.idle && _timerMode == TimerMode.focus)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: SessionTaskInput(
+                            currentTask: _currentTask,
+                            onTaskChanged: _setTask,
                           ),
+                        ),
 
-                        // Timer display
-                        TimerDisplay(
-                          remainingSeconds: _remainingSeconds,
-                          totalSeconds: _totalSeconds,
+                      // Timer display
+                      TimerDisplay(
+                        remainingSeconds: _remainingSeconds,
+                        totalSeconds: _totalSeconds,
+                        timerMode: _timerMode,
+                        timerState: _timerState,
+                        pulseAnimation: _pulseController,
+                        completionAnimation: _completionController,
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Duration selector (only show when idle)
+                      if (_timerState == TimerState.idle)
+                        DurationSelector(
                           timerMode: _timerMode,
-                          timerState: _timerState,
-                          pulseAnimation: _pulseController,
-                          completionAnimation: _completionController,
+                          selectedDuration: _totalSeconds ~/ 60,
+                          onDurationChanged: _setDuration,
                         ),
 
-                        const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                        // Duration selector (only show when idle)
-                        if (_timerState == TimerState.idle)
-                          DurationSelector(
-                            timerMode: _timerMode,
-                            selectedDuration: _totalSeconds ~/ 60,
-                            onDurationChanged: _setDuration,
-                          ),
+                      // Timer controls
+                      TimerControls(
+                        timerState: _timerState,
+                        onStart: _startTimer,
+                        onPause: _pauseTimer,
+                        onResume: _resumeTimer,
+                        onReset: _resetTimer,
+                        onSkip: _skipTimer,
+                      ),
 
-                        const SizedBox(height: 24),
+                      const SizedBox(height: 32),
 
-                        // Timer controls
-                        TimerControls(
-                          timerState: _timerState,
-                          onStart: _startTimer,
-                          onPause: _pauseTimer,
-                          onResume: _resumeTimer,
-                          onReset: _resetTimer,
-                          onSkip: _skipTimer,
-                        ),
+                      // Daily progress
+                      DailyProgress(
+                        completedSessions: _sessionsCompleted,
+                        goalSessions: _settings.dailyGoalSessions,
+                        timerMode: _timerMode,
+                      ),
 
-                        const SizedBox(height: 32),
+                      const SizedBox(height: 16),
 
-                        // Daily progress
-                        DailyProgress(
-                          completedSessions: _sessionsCompleted,
-                          goalSessions: _settings.dailyGoalSessions,
-                          timerMode: _timerMode,
-                        ),
+                      // Stats card
+                      StatsCard(
+                        sessionsToday: _sessionsCompleted,
+                        timerMode: _timerMode,
+                      ),
 
-                        const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                        // Stats card
-                        StatsCard(
-                          sessionsToday: _sessionsCompleted,
-                          timerMode: _timerMode,
-                        ),
+                      // Session history
+                      SessionHistory(
+                        sessions: _repository.focusSessions,
+                        onSessionDelete: _deleteSession,
+                      ),
 
-                        const SizedBox(height: 16),
-
-                        // Session history
-                        SessionHistory(
-                          sessions: _repository.focusSessions,
-                          onSessionDelete: _deleteSession,
-                        ),
-
-                        const SizedBox(height: 32),
-                      ],
-                    ),
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

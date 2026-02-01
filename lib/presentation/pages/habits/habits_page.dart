@@ -191,12 +191,9 @@ class _HabitsPageState extends State<HabitsPage>
     final habits = _filteredHabits;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
-          child: Column(
+        child: Column(
             children: [
               // App bar
               HabitAppBar(
@@ -258,11 +255,10 @@ class _HabitsPageState extends State<HabitsPage>
             ],
           ),
         ),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddHabitSheet(),
-        backgroundColor: Colors.white,
-        foregroundColor: AppTheme.primaryColor,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
     );
@@ -295,7 +291,7 @@ class _HabitsPageState extends State<HabitsPage>
         Text(
           title,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -303,13 +299,13 @@ class _HabitsPageState extends State<HabitsPage>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: AppTheme.primaryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             '$count ${count == 1 ? 'habit' : 'habits'}',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: AppTheme.primaryColor,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),

@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/habit_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class HabitCategoryChip extends StatelessWidget {
@@ -54,13 +55,10 @@ class HabitCategoryChip extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? color.withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.1),
+              ? AppTheme.primaryColor
+              : AppTheme.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? color : Colors.white.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
-          ),
+          boxShadow: AppTheme.cardShadow,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -68,13 +66,13 @@ class HabitCategoryChip extends StatelessWidget {
             Icon(
               _getCategoryIcon(category),
               size: 14,
-              color: isSelected ? color : Colors.white.withValues(alpha: 0.8),
+              color: isSelected ? AppTheme.textOnPrimary : color,
             ),
             const SizedBox(width: 6),
             Text(
               category.label,
               style: TextStyle(
-                color: isSelected ? color : Colors.white.withValues(alpha: 0.9),
+                color: isSelected ? AppTheme.textOnPrimary : AppTheme.textPrimary,
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
@@ -89,7 +87,7 @@ class HabitCategoryChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -167,15 +165,10 @@ class HabitCategorySelector extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isAllSelected
-              ? Colors.white
-              : Colors.white.withValues(alpha: 0.1),
+              ? AppTheme.primaryColor
+              : AppTheme.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isAllSelected
-                ? Colors.white
-                : Colors.white.withValues(alpha: 0.2),
-            width: isAllSelected ? 2 : 1,
-          ),
+          boxShadow: AppTheme.cardShadow,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -184,16 +177,16 @@ class HabitCategorySelector extends StatelessWidget {
               Icons.apps,
               size: 14,
               color: isAllSelected
-                  ? const Color(0xFF6366F1)
-                  : Colors.white.withValues(alpha: 0.8),
+                  ? AppTheme.textOnPrimary
+                  : AppTheme.textSecondary,
             ),
             const SizedBox(width: 6),
             Text(
               'All',
               style: TextStyle(
                 color: isAllSelected
-                    ? const Color(0xFF6366F1)
-                    : Colors.white.withValues(alpha: 0.9),
+                    ? AppTheme.textOnPrimary
+                    : AppTheme.textPrimary,
                 fontSize: 12,
                 fontWeight: isAllSelected ? FontWeight.w600 : FontWeight.w500,
               ),

@@ -194,12 +194,9 @@ class _TodosPageState extends State<TodosPage> with TickerProviderStateMixin {
     final overdueCount = todos.where(_isOverdue).length;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
-          child: Column(
+        child: Column(
             children: [
               // App bar
               TodoAppBar(
@@ -251,7 +248,7 @@ class _TodosPageState extends State<TodosPage> with TickerProviderStateMixin {
                           Text(
                             _getSectionTitle(),
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: AppTheme.textPrimary,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -272,11 +269,10 @@ class _TodosPageState extends State<TodosPage> with TickerProviderStateMixin {
             ],
           ),
         ),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddSheet,
-        backgroundColor: Colors.white,
-        foregroundColor: AppTheme.primaryColor,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
     );

@@ -119,32 +119,28 @@ class _MoodPageState extends State<MoodPage> {
     final entries = _repository.moodEntries;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.secondaryGradient,
-          ),
-          child: Column(
-            children: [
-              _buildAppBar(padding),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(padding),
-                    child: Column(
-                      children: [
-                        _buildMoodSelector(todayMood, padding),
-                        SizedBox(height: padding),
-                        _buildStreakCard(streak, padding),
-                        SizedBox(height: padding),
-                        _buildMoodHistory(entries, padding),
-                      ],
-                    ),
+        child: Column(
+          children: [
+            _buildAppBar(padding),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
+                    children: [
+                      _buildMoodSelector(todayMood, padding),
+                      SizedBox(height: padding),
+                      _buildStreakCard(streak, padding),
+                      SizedBox(height: padding),
+                      _buildMoodHistory(entries, padding),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -157,13 +153,13 @@ class _MoodPageState extends State<MoodPage> {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           ),
           const SizedBox(width: 8),
           const Text(
             'Mood',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -176,17 +172,13 @@ class _MoodPageState extends State<MoodPage> {
   Widget _buildMoodSelector(MoodEntryModel? todayMood, double padding) {
     return Container(
       padding: EdgeInsets.all(padding * 1.5),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         children: [
           Text(
             todayMood != null ? 'Today you felt' : 'How are you feeling?',
             style: const TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -211,20 +203,20 @@ class _MoodPageState extends State<MoodPage> {
               const SizedBox(height: 8),
               Text(
                 '"${todayMood.notes}"',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
                   fontStyle: FontStyle.italic,
                 ),
                 textAlign: TextAlign.center,
               ),
             ],
             const SizedBox(height: 16),
-            const Divider(color: Colors.white24),
+            const Divider(color: AppTheme.textTertiary),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Update your mood',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: AppTheme.textSecondary,
                 fontSize: 14,
               ),
             ),
@@ -243,7 +235,7 @@ class _MoodPageState extends State<MoodPage> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? _getMoodColor(mood).withValues(alpha: 0.3)
-                            : Colors.white.withValues(alpha: 0.1),
+                            : AppTheme.primaryColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                         border: isSelected
                             ? Border.all(color: _getMoodColor(mood), width: 2)
@@ -251,15 +243,15 @@ class _MoodPageState extends State<MoodPage> {
                       ),
                       child: Icon(
                         _getMoodIcon(mood),
-                        color: isSelected ? _getMoodColor(mood) : Colors.white,
+                        color: isSelected ? _getMoodColor(mood) : AppTheme.textSecondary,
                         size: 32,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       mood.name[0].toUpperCase() + mood.name.substring(1),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
                         fontSize: 11,
                       ),
                     ),
@@ -276,17 +268,13 @@ class _MoodPageState extends State<MoodPage> {
   Widget _buildStreakCard(int streak, double padding) {
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.orange.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -303,15 +291,15 @@ class _MoodPageState extends State<MoodPage> {
                 const Text(
                   'Mood Streak',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   'You\'ve logged your mood $streak days in a row!',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
                     fontSize: 13,
                   ),
                 ),
@@ -321,7 +309,7 @@ class _MoodPageState extends State<MoodPage> {
           Text(
             '$streak',
             style: const TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 32,
               fontWeight: FontWeight.bold,
             ),
@@ -342,7 +330,7 @@ class _MoodPageState extends State<MoodPage> {
         const Text(
           'Mood History',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -351,10 +339,7 @@ class _MoodPageState extends State<MoodPage> {
         ...entries.take(10).map((entry) => Container(
           margin: const EdgeInsets.only(bottom: 8),
           padding: EdgeInsets.all(padding),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
+          decoration: AppTheme.cardDecoration(),
           child: Row(
             children: [
               Container(
@@ -377,15 +362,15 @@ class _MoodPageState extends State<MoodPage> {
                     Text(
                       entry.moodLabel,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     if (entry.notes != null)
                       Text(
                         entry.notes!,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                        style: const TextStyle(
+                          color: AppTheme.textTertiary,
                           fontSize: 12,
                         ),
                         maxLines: 1,
@@ -396,8 +381,8 @@ class _MoodPageState extends State<MoodPage> {
               ),
               Text(
                 _formatDate(entry.recordedAt),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
+                style: const TextStyle(
+                  color: AppTheme.textTertiary,
                   fontSize: 12,
                 ),
               ),

@@ -81,9 +81,10 @@ class HabitDetailSheet extends StatelessWidget {
       maxChildSize: 0.95,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: AppTheme.backgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: AppTheme.elevatedShadow,
           ),
           child: SingleChildScrollView(
             controller: scrollController,
@@ -98,7 +99,7 @@ class HabitDetailSheet extends StatelessWidget {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.3),
+                        color: AppTheme.textTertiary.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -117,7 +118,7 @@ class HabitDetailSheet extends StatelessWidget {
                   const Text(
                     'Completion History',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -154,10 +155,10 @@ class HabitDetailSheet extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _categoryColor.withValues(alpha: 0.2),
+            color: _categoryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _categoryColor.withValues(alpha: 0.3),
+              color: _categoryColor.withValues(alpha: 0.2),
             ),
           ),
           child: Icon(
@@ -175,7 +176,7 @@ class HabitDetailSheet extends StatelessWidget {
               Text(
                 habit.name,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
@@ -197,7 +198,7 @@ class HabitDetailSheet extends StatelessWidget {
                 Text(
                   habit.description!,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: AppTheme.textSecondary,
                     fontSize: 13,
                   ),
                   maxLines: 2,
@@ -215,7 +216,7 @@ class HabitDetailSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: AppTheme.textTertiary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -223,14 +224,14 @@ class HabitDetailSheet extends StatelessWidget {
         children: [
           Icon(
             Icons.repeat,
-            color: Colors.white.withValues(alpha: 0.8),
+            color: AppTheme.textSecondary,
             size: 12,
           ),
           const SizedBox(width: 4),
           Text(
             habit.frequency.label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: AppTheme.textSecondary,
               fontSize: 10,
               fontWeight: FontWeight.w500,
             ),
@@ -252,15 +253,16 @@ class HabitDetailSheet extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: habit.isCompletedToday
-              ? const Color(0xFF10B981).withValues(alpha: 0.2)
-              : Colors.white.withValues(alpha: 0.1),
+              ? AppTheme.successColor.withValues(alpha: 0.1)
+              : AppTheme.cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: habit.isCompletedToday
-                ? const Color(0xFF10B981)
-                : Colors.white.withValues(alpha: 0.3),
+                ? AppTheme.successColor
+                : AppTheme.primaryColor,
             width: 2,
           ),
+          boxShadow: AppTheme.cardShadow,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -270,8 +272,8 @@ class HabitDetailSheet extends StatelessWidget {
                   ? Icons.check_circle
                   : Icons.circle_outlined,
               color: habit.isCompletedToday
-                  ? const Color(0xFF10B981)
-                  : Colors.white,
+                  ? AppTheme.successColor
+                  : AppTheme.primaryColor,
               size: 24,
             ),
             const SizedBox(width: 12),
@@ -281,8 +283,8 @@ class HabitDetailSheet extends StatelessWidget {
                   : 'Mark as Complete',
               style: TextStyle(
                 color: habit.isCompletedToday
-                    ? const Color(0xFF10B981)
-                    : Colors.white,
+                    ? AppTheme.successColor
+                    : AppTheme.primaryColor,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -292,7 +294,7 @@ class HabitDetailSheet extends StatelessWidget {
               Text(
                 '(Tap to undo)',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
+                  color: AppTheme.textTertiary,
                   fontSize: 12,
                 ),
               ),
@@ -308,17 +310,15 @@ class HabitDetailSheet extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: AppTheme.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.2),
-          ),
+          boxShadow: AppTheme.cardShadow,
         ),
         child: Row(
           children: [
             Icon(
               Icons.local_fire_department,
-              color: Colors.white.withValues(alpha: 0.5),
+              color: AppTheme.textTertiary,
               size: 24,
             ),
             const SizedBox(width: 12),
@@ -329,7 +329,7 @@ class HabitDetailSheet extends StatelessWidget {
                   const Text(
                     'No streak yet',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -337,7 +337,7 @@ class HabitDetailSheet extends StatelessWidget {
                   Text(
                     'Complete this habit to start building your streak!',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: AppTheme.textSecondary,
                       fontSize: 13,
                     ),
                   ),
@@ -356,32 +356,36 @@ class HabitDetailSheet extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: habit.streak > 0
             ? const LinearGradient(
-                colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
+                colors: [AppTheme.primaryColor, AppTheme.primaryLight],
               )
             : null,
-        color: habit.streak == 0 ? Colors.white.withValues(alpha: 0.1) : null,
+        color: habit.streak == 0 ? AppTheme.cardColor : null,
         borderRadius: BorderRadius.circular(16),
         boxShadow: habit.streak > 0
             ? [
                 BoxShadow(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
               ]
-            : null,
+            : AppTheme.cardShadow,
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: habit.streak > 0
+                  ? AppTheme.textOnPrimary.withValues(alpha: 0.2)
+                  : AppTheme.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.local_fire_department,
-              color: Colors.white,
+              color: habit.streak > 0
+                  ? AppTheme.textOnPrimary
+                  : AppTheme.textTertiary,
               size: 28,
             ),
           ),
@@ -396,8 +400,10 @@ class HabitDetailSheet extends StatelessWidget {
                       habit.streak > 0
                           ? '${habit.streak} Day Streak!'
                           : 'Streak Lost',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: habit.streak > 0
+                            ? AppTheme.textOnPrimary
+                            : AppTheme.textPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -410,7 +416,7 @@ class HabitDetailSheet extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: AppTheme.textOnPrimary.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Row(
@@ -418,14 +424,14 @@ class HabitDetailSheet extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.emoji_events,
-                              color: Color(0xFFFFD700),
+                              color: AppTheme.warningColor,
                               size: 12,
                             ),
                             SizedBox(width: 4),
                             Text(
                               'BEST',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppTheme.textOnPrimary,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -442,7 +448,9 @@ class HabitDetailSheet extends StatelessWidget {
                       ? 'Best streak: ${habit.bestStreak} days'
                       : 'Your best was ${habit.bestStreak} days',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: habit.streak > 0
+                        ? AppTheme.textOnPrimary.withValues(alpha: 0.8)
+                        : AppTheme.textSecondary,
                     fontSize: 13,
                   ),
                 ),
@@ -464,9 +472,9 @@ class HabitDetailSheet extends StatelessWidget {
               onEdit();
             },
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white,
+              foregroundColor: AppTheme.textPrimary,
               side: BorderSide(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: AppTheme.textTertiary.withValues(alpha: 0.3),
               ),
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
@@ -494,9 +502,9 @@ class HabitDetailSheet extends StatelessWidget {
               }
             },
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFEF4444),
+              foregroundColor: AppTheme.errorColor,
               side: const BorderSide(
-                color: Color(0xFFEF4444),
+                color: AppTheme.errorColor,
               ),
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
@@ -533,7 +541,7 @@ class HabitDetailSheet extends StatelessWidget {
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFFEF4444),
+                  foregroundColor: AppTheme.errorColor,
                 ),
                 child: const Text('Delete'),
               ),

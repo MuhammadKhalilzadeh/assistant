@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/habits/widgets/habit_filters.dart';
 import 'package:flutter/material.dart';
 
@@ -25,21 +26,21 @@ class HabitEmptyState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               content.icon,
               size: 48,
-              color: Colors.white.withValues(alpha: 0.5),
+              color: AppTheme.primaryColor.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 24),
           // Title
           Text(
             content.title,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -49,8 +50,8 @@ class HabitEmptyState extends StatelessWidget {
           // Description
           Text(
             content.description,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -124,25 +125,25 @@ class HabitEmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
+        color: AppTheme.infoColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+          color: AppTheme.infoColor.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
         children: [
           const Icon(
             Icons.lightbulb_outline,
-            color: Color(0xFF3B82F6),
+            color: AppTheme.infoColor,
             size: 20,
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               tip,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
                 fontSize: 13,
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/weather_forecast_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/weather/widgets/weather_condition_icon.dart';
 import 'package:assistant/presentation/pages/weather/widgets/weather_detail_sheet.dart';
 import 'package:flutter/material.dart';
@@ -75,10 +76,10 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
     Widget content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '7-Day Forecast',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -123,8 +124,9 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
         margin: const EdgeInsets.only(bottom: 8),
         padding: EdgeInsets.all(padding),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: AppTheme.cardColor,
           borderRadius: BorderRadius.circular(12),
+          boxShadow: AppTheme.cardShadow,
         ),
         child: Row(
           children: [
@@ -132,8 +134,8 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
               width: 70,
               child: Text(
                 _formatDay(daily.date),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -148,7 +150,7 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
               Icon(
                 Icons.water_drop,
                 size: 12,
-                color: Colors.lightBlue.shade200,
+                color: AppTheme.infoColor,
               ),
               const SizedBox(width: 2),
               SizedBox(
@@ -156,7 +158,7 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
                 child: Text(
                   '${daily.precipChance}%',
                   style: TextStyle(
-                    color: Colors.lightBlue.shade200,
+                    color: AppTheme.infoColor,
                     fontSize: 12,
                   ),
                 ),
@@ -167,7 +169,7 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
             Text(
               '${daily.low}°',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
+                color: AppTheme.textSecondary,
                 fontSize: 14,
               ),
             ),
@@ -178,8 +180,8 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
             const SizedBox(width: 8),
             Text(
               '${daily.high}°',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: AppTheme.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
@@ -187,7 +189,7 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
             const SizedBox(width: 8),
             Icon(
               Icons.chevron_right,
-              color: Colors.white.withValues(alpha: 0.5),
+              color: AppTheme.textTertiary,
               size: 20,
             ),
           ],
@@ -211,7 +213,7 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
             return Container(
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(2),
               ),
               child: Stack(
@@ -225,8 +227,8 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.blue.shade300,
-                            Colors.orange.shade300,
+                            AppTheme.infoColor,
+                            AppTheme.primaryColor,
                           ],
                         ),
                         borderRadius: BorderRadius.circular(2),

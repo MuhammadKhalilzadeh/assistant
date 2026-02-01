@@ -40,32 +40,28 @@ class ScreenTimePage extends StatelessWidget {
     final yesterdayTime = repository.yesterdayScreenTime;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
-          child: Column(
-            children: [
-              _buildAppBar(context, padding),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(padding),
-                    child: Column(
-                      children: [
-                        _buildSummaryCard(todayTime, yesterdayTime, padding),
-                        SizedBox(height: padding),
-                        _buildComparisonCard(todayTime, yesterdayTime, padding),
-                        SizedBox(height: padding),
-                        _buildAppBreakdown(todayTime, padding),
-                      ],
-                    ),
+        child: Column(
+          children: [
+            _buildAppBar(context, padding),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
+                    children: [
+                      _buildSummaryCard(todayTime, yesterdayTime, padding),
+                      SizedBox(height: padding),
+                      _buildComparisonCard(todayTime, yesterdayTime, padding),
+                      SizedBox(height: padding),
+                      _buildAppBreakdown(todayTime, padding),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -78,13 +74,13 @@ class ScreenTimePage extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           ),
           const SizedBox(width: 8),
           const Text(
             'Screen Time',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -102,17 +98,13 @@ class ScreenTimePage extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.all(padding * 1.5),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         children: [
           const Text(
             'Today\'s Screen Time',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -125,7 +117,7 @@ class ScreenTimePage extends StatelessWidget {
               Text(
                 '$hours',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 64,
                   fontWeight: FontWeight.bold,
                   height: 1,
@@ -134,7 +126,7 @@ class ScreenTimePage extends StatelessWidget {
               const Text(
                 'h ',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textSecondary,
                   fontSize: 24,
                   fontWeight: FontWeight.w300,
                 ),
@@ -142,7 +134,7 @@ class ScreenTimePage extends StatelessWidget {
               Text(
                 '$minutes',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
                   height: 1,
@@ -151,7 +143,7 @@ class ScreenTimePage extends StatelessWidget {
               const Text(
                 'm',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textSecondary,
                   fontSize: 24,
                   fontWeight: FontWeight.w300,
                 ),
@@ -162,12 +154,12 @@ class ScreenTimePage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.touch_app, color: Colors.white, size: 20),
+              const Icon(Icons.touch_app, color: AppTheme.primaryColor, size: 20),
               const SizedBox(width: 8),
               Text(
                 '$pickups pickups',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
                   fontSize: 14,
                 ),
               ),
@@ -187,11 +179,7 @@ class ScreenTimePage extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Row(
         children: [
           Container(
@@ -214,15 +202,15 @@ class ScreenTimePage extends StatelessWidget {
                 Text(
                   isLess ? 'Less than yesterday' : 'More than yesterday',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   '${isLess ? '-' : '+'}${_formatDuration(absDiff)} compared to yesterday',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
                     fontSize: 13,
                   ),
                 ),
@@ -243,13 +231,13 @@ class ScreenTimePage extends StatelessWidget {
             Icon(
               Icons.phone_android,
               size: 48,
-              color: Colors.white.withValues(alpha: 0.5),
+              color: AppTheme.textTertiary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 12),
-            Text(
+            const Text(
               'No app usage data',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: AppTheme.textSecondary,
                 fontSize: 16,
               ),
             ),
@@ -267,7 +255,7 @@ class ScreenTimePage extends StatelessWidget {
         const Text(
           'App Breakdown',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -281,10 +269,7 @@ class ScreenTimePage extends StatelessWidget {
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: EdgeInsets.all(padding),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: AppTheme.cardDecoration(),
             child: Column(
               children: [
                 Row(
@@ -309,14 +294,14 @@ class ScreenTimePage extends StatelessWidget {
                           Text(
                             app.appName,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: AppTheme.textPrimary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           Text(
                             app.category,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.6),
+                            style: const TextStyle(
+                              color: AppTheme.textTertiary,
                               fontSize: 12,
                             ),
                           ),
@@ -329,14 +314,14 @@ class ScreenTimePage extends StatelessWidget {
                         Text(
                           _formatDuration(app.minutesUsed),
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.textPrimary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           '$percentage%',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
+                          style: const TextStyle(
+                            color: AppTheme.textTertiary,
                             fontSize: 12,
                           ),
                         ),
@@ -349,7 +334,7 @@ class ScreenTimePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: percentage / 100,
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
+                    backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       _getCategoryColor(app.category),
                     ),

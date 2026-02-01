@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import '../focus_timer_page.dart';
 
 /// Segmented control for switching between Focus/Short Break/Long Break
@@ -22,9 +23,9 @@ class TimerModeToggle extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Row(
         children: TimerMode.values.map((mode) {
@@ -139,14 +140,14 @@ class _ModeButtonState extends State<_ModeButton>
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
               decoration: BoxDecoration(
                 color: widget.isSelected
-                    ? Colors.white
+                    ? AppTheme.primaryColor
                     : widget.isSuggested
-                        ? Colors.white.withValues(alpha: 0.2)
+                        ? AppTheme.primaryColor.withValues(alpha: 0.1)
                         : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: widget.isSuggested
                     ? Border.all(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: AppTheme.primaryColor.withValues(alpha: 0.5),
                         width: 1.5,
                       )
                     : null,
@@ -158,10 +159,10 @@ class _ModeButtonState extends State<_ModeButton>
                     _icon,
                     size: 16,
                     color: widget.isSelected
-                        ? const Color(0xFF6366F1)
-                        : Colors.white.withValues(
-                            alpha: widget.isEnabled ? 0.9 : 0.5,
-                          ),
+                        ? Colors.white
+                        : widget.isEnabled
+                            ? AppTheme.textPrimary
+                            : AppTheme.textTertiary,
                   ),
                   const SizedBox(width: 4),
                   Flexible(
@@ -169,10 +170,10 @@ class _ModeButtonState extends State<_ModeButton>
                       _label,
                       style: TextStyle(
                         color: widget.isSelected
-                            ? const Color(0xFF6366F1)
-                            : Colors.white.withValues(
-                                alpha: widget.isEnabled ? 0.9 : 0.5,
-                              ),
+                            ? Colors.white
+                            : widget.isEnabled
+                                ? AppTheme.textPrimary
+                                : AppTheme.textTertiary,
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -185,7 +186,7 @@ class _ModeButtonState extends State<_ModeButton>
                       width: 6,
                       height: 6,
                       decoration: const BoxDecoration(
-                        color: Colors.orange,
+                        color: AppTheme.primaryColor,
                         shape: BoxShape.circle,
                       ),
                     ),

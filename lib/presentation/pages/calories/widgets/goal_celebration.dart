@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 class GoalCelebration extends StatefulWidget {
   final VoidCallback onDismiss;
@@ -84,12 +85,12 @@ class _GoalCelebrationState extends State<GoalCelebration>
   }
 
   static const List<Color> _confettiColors = [
-    Color(0xFFFF6B6B),
-    Color(0xFFFFE66D),
-    Color(0xFF4ECDC4),
-    Color(0xFF45B7D1),
+    AppTheme.primaryColor,
+    AppTheme.warningColor,
+    AppTheme.successColor,
+    AppTheme.infoColor,
     Color(0xFFA78BFA),
-    Color(0xFFFB7185),
+    AppTheme.secondaryColor,
     Color(0xFF34D399),
   ];
 
@@ -160,14 +161,14 @@ class _GoalCelebrationState extends State<GoalCelebration>
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                Colors.amber.shade300,
-                                Colors.orange.shade400,
+                                AppTheme.primaryLight,
+                                AppTheme.primaryColor,
                               ],
                             ),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.amber.withValues(alpha: 0.5),
+                                color: AppTheme.primaryColor.withValues(alpha: 0.5),
                                 blurRadius: 30,
                                 spreadRadius: 5,
                               ),

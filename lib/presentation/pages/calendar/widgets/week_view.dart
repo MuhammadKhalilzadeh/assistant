@@ -145,14 +145,15 @@ class _WeekViewState extends State<WeekView> {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Colors.white
+                      ? AppTheme.primaryColor
                       : isToday
-                          ? Colors.white.withValues(alpha: 0.15)
+                          ? AppTheme.primaryColor.withValues(alpha: 0.1)
                           : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
                   border: isToday && !isSelected
-                      ? Border.all(color: Colors.white.withValues(alpha: 0.3))
+                      ? Border.all(color: AppTheme.primaryColor, width: 2)
                       : null,
+                  boxShadow: isSelected ? AppTheme.cardShadow : null,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -161,8 +162,8 @@ class _WeekViewState extends State<WeekView> {
                       _getDayName(date.weekday),
                       style: TextStyle(
                         color: isSelected
-                            ? AppTheme.primaryColor
-                            : Colors.white.withValues(alpha: 0.6),
+                            ? Colors.white.withValues(alpha: 0.9)
+                            : AppTheme.textSecondary,
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
@@ -171,7 +172,7 @@ class _WeekViewState extends State<WeekView> {
                     Text(
                       '${date.day}',
                       style: TextStyle(
-                        color: isSelected ? AppTheme.primaryColor : Colors.white,
+                        color: isSelected ? Colors.white : AppTheme.textPrimary,
                         fontSize: 18,
                         fontWeight: isToday || isSelected
                             ? FontWeight.bold
@@ -185,8 +186,8 @@ class _WeekViewState extends State<WeekView> {
                         height: 6,
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppTheme.primaryColor
-                              : Colors.white.withValues(alpha: 0.7),
+                              ? Colors.white
+                              : AppTheme.primaryColor,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -233,8 +234,8 @@ class _WeekViewState extends State<WeekView> {
               padding: const EdgeInsets.only(right: 8, top: 4),
               child: Text(
                 _formatHour(hour),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
+                style: const TextStyle(
+                  color: AppTheme.textTertiary,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
@@ -247,7 +248,7 @@ class _WeekViewState extends State<WeekView> {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: Colors.grey.shade200,
                     width: 1,
                   ),
                 ),
@@ -267,7 +268,7 @@ class _WeekViewState extends State<WeekView> {
                         decoration: BoxDecoration(
                           border: Border(
                             left: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.05),
+                              color: Colors.grey.shade100,
                               width: dayIndex == 0 ? 0 : 1,
                             ),
                           ),
@@ -340,7 +341,7 @@ class _WeekViewState extends State<WeekView> {
         child: Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: eventColor.withValues(alpha: 0.8),
+            color: eventColor,
             borderRadius: BorderRadius.circular(6),
             boxShadow: [
               BoxShadow(
@@ -408,11 +409,11 @@ class _WeekViewState extends State<WeekView> {
             width: 10,
             height: 10,
             decoration: BoxDecoration(
-              color: AppTheme.errorColor,
+              color: AppTheme.primaryColor,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.errorColor.withValues(alpha: 0.4),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.4),
                   blurRadius: 6,
                 ),
               ],
@@ -424,8 +425,8 @@ class _WeekViewState extends State<WeekView> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppTheme.errorColor,
-                    AppTheme.errorColor.withValues(alpha: 0),
+                    AppTheme.primaryColor,
+                    AppTheme.primaryColor.withValues(alpha: 0),
                   ],
                 ),
               ),

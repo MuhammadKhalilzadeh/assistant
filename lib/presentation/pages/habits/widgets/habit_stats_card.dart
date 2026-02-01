@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/habit_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class HabitStatsCard extends StatelessWidget {
@@ -31,11 +32,11 @@ class HabitStatsCard extends StatelessWidget {
 
   Color get _messageColor {
     if (habit.streak >= 7 || weeklyRate >= 0.7) {
-      return const Color(0xFF10B981);
+      return AppTheme.successColor;
     } else if (habit.streak >= 1 || weeklyRate >= 0.4) {
-      return const Color(0xFFF59E0B);
+      return AppTheme.warningColor;
     }
-    return const Color(0xFF3B82F6);
+    return AppTheme.infoColor;
   }
 
   @override
@@ -43,11 +44,9 @@ class HabitStatsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-        ),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,14 +56,14 @@ class HabitStatsCard extends StatelessWidget {
             children: [
               const Icon(
                 Icons.bar_chart,
-                color: Colors.white,
+                color: AppTheme.primaryColor,
                 size: 20,
               ),
               const SizedBox(width: 8),
               const Text(
                 'Statistics',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -77,13 +76,13 @@ class HabitStatsCard extends StatelessWidget {
             children: [
               Expanded(child: _buildStatItem(
                 icon: Icons.calendar_today,
-                iconColor: const Color(0xFF3B82F6),
+                iconColor: AppTheme.infoColor,
                 value: habit.totalCompletions.toString(),
                 label: 'Total Completions',
               )),
               Expanded(child: _buildStatItem(
                 icon: Icons.local_fire_department,
-                iconColor: const Color(0xFFF59E0B),
+                iconColor: AppTheme.primaryColor,
                 value: habit.streak.toString(),
                 label: 'Current Streak',
               )),
@@ -94,13 +93,13 @@ class HabitStatsCard extends StatelessWidget {
             children: [
               Expanded(child: _buildStatItem(
                 icon: Icons.emoji_events,
-                iconColor: const Color(0xFFFFD700),
+                iconColor: AppTheme.warningColor,
                 value: habit.bestStreak.toString(),
                 label: 'Best Streak',
               )),
               Expanded(child: _buildStatItem(
                 icon: Icons.percent,
-                iconColor: const Color(0xFF10B981),
+                iconColor: AppTheme.successColor,
                 value: '${(habit.completionRate * 100).round()}%',
                 label: 'Completion Rate',
               )),
@@ -130,7 +129,7 @@ class HabitStatsCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -143,7 +142,7 @@ class HabitStatsCard extends StatelessWidget {
               Text(
                 value,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -154,7 +153,7 @@ class HabitStatsCard extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: AppTheme.textTertiary,
               fontSize: 11,
             ),
           ),
@@ -173,7 +172,7 @@ class HabitStatsCard extends StatelessWidget {
             Text(
               'Weekly Completion',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
+                color: AppTheme.textSecondary,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
@@ -181,7 +180,7 @@ class HabitStatsCard extends StatelessWidget {
             Text(
               '${(weeklyRate * 100).round()}%',
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
@@ -193,7 +192,7 @@ class HabitStatsCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: weeklyRate,
-            backgroundColor: Colors.white.withValues(alpha: 0.1),
+            backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
             valueColor: AlwaysStoppedAnimation(_getProgressColor(weeklyRate)),
             minHeight: 8,
           ),
@@ -213,10 +212,10 @@ class HabitStatsCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: isAtBest
             ? const LinearGradient(
-                colors: [Color(0xFFFFD700), Color(0xFFF59E0B)],
+                colors: [AppTheme.warningColor, AppTheme.primaryColor],
               )
             : null,
-        color: isAtBest ? null : Colors.white.withValues(alpha: 0.05),
+        color: isAtBest ? null : AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -226,7 +225,7 @@ class HabitStatsCard extends StatelessWidget {
             children: [
               Icon(
                 isAtBest ? Icons.celebration : Icons.trending_up,
-                color: isAtBest ? Colors.white : const Color(0xFFF59E0B),
+                color: isAtBest ? AppTheme.textOnPrimary : AppTheme.primaryColor,
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -235,7 +234,7 @@ class HabitStatsCard extends StatelessWidget {
                     ? "You're at your best streak!"
                     : 'Progress to Best Streak',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: isAtBest ? AppTheme.textOnPrimary : AppTheme.textPrimary,
                   fontSize: 13,
                   fontWeight: isAtBest ? FontWeight.bold : FontWeight.w500,
                 ),
@@ -251,8 +250,8 @@ class HabitStatsCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: progressTowardsBest,
-                      backgroundColor: Colors.white.withValues(alpha: 0.1),
-                      valueColor: const AlwaysStoppedAnimation(Color(0xFFF59E0B)),
+                      backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
+                      valueColor: const AlwaysStoppedAnimation(AppTheme.primaryColor),
                       minHeight: 6,
                     ),
                   ),
@@ -261,7 +260,7 @@ class HabitStatsCard extends StatelessWidget {
                 Text(
                   '${habit.streak}/${habit.bestStreak}',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: AppTheme.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -274,7 +273,7 @@ class HabitStatsCard extends StatelessWidget {
                   ? '${habit.bestStreak - habit.streak} more days to beat your best!'
                   : 'Start a streak to make progress!',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
+                color: AppTheme.textTertiary,
                 fontSize: 11,
               ),
             ),
@@ -288,10 +287,10 @@ class HabitStatsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _messageColor.withValues(alpha: 0.15),
+        color: _messageColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _messageColor.withValues(alpha: 0.3),
+          color: _messageColor.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -306,7 +305,7 @@ class HabitStatsCard extends StatelessWidget {
             child: Text(
               _motivationalMessage,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: AppTheme.textSecondary,
                 fontSize: 13,
               ),
             ),
@@ -317,8 +316,8 @@ class HabitStatsCard extends StatelessWidget {
   }
 
   Color _getProgressColor(double progress) {
-    if (progress >= 0.8) return const Color(0xFF10B981);
-    if (progress >= 0.5) return const Color(0xFFF59E0B);
-    return const Color(0xFFEF4444);
+    if (progress >= 0.8) return AppTheme.successColor;
+    if (progress >= 0.5) return AppTheme.warningColor;
+    return AppTheme.errorColor;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 class DailyHistoryWidget extends StatelessWidget {
   final Map<String, int> last7DaysCalories;
@@ -22,21 +23,21 @@ class DailyHistoryWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.calendar_view_week, color: Colors.white, size: 20),
-              SizedBox(width: 8),
-              Text(
+              Icon(Icons.calendar_view_week, color: AppTheme.primaryColor, size: 20),
+              const SizedBox(width: 8),
+              const Text(
                 'Last 7 Days',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -64,7 +65,7 @@ class DailyHistoryWidget extends StatelessWidget {
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
-                                  color: Colors.white.withValues(alpha: 0.3),
+                                  color: AppTheme.textTertiary.withValues(alpha: 0.4),
                                   width: 1,
                                   style: BorderStyle.solid,
                                 ),
@@ -78,10 +79,10 @@ class DailyHistoryWidget extends StatelessWidget {
                     Positioned(
                       right: 0,
                       bottom: (goalCalories / chartMax) * 100 + 32,
-                      child: Text(
+                      child: const Text(
                         'Goal',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.4),
+                          color: AppTheme.textTertiary,
                           fontSize: 10,
                         ),
                       ),
@@ -145,13 +146,13 @@ class _DayBar extends StatelessWidget {
 
     Color barColor;
     if (isOverGoal) {
-      barColor = Colors.red.shade400;
+      barColor = AppTheme.errorColor;
     } else if (isWithinGoal) {
-      barColor = Colors.green.shade400;
+      barColor = AppTheme.successColor;
     } else if (calories > 0) {
-      barColor = Colors.amber.shade400;
+      barColor = AppTheme.warningColor;
     } else {
-      barColor = Colors.white.withValues(alpha: 0.2);
+      barColor = AppTheme.textTertiary.withValues(alpha: 0.3);
     }
 
     return Column(
@@ -163,8 +164,8 @@ class _DayBar extends StatelessWidget {
           child: animationValue > 0.5 && calories > 0
               ? Text(
                   '${(calories * animationValue).round()}',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
                     fontSize: 9,
                     fontWeight: FontWeight.w500,
                   ),
@@ -196,8 +197,8 @@ class _DayBar extends StatelessWidget {
         // Day label
         Text(
           day,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 11,
             fontWeight: FontWeight.w500,
           ),

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 
 enum WeatherCondition { sunny, cloudy, rainy, stormy, snowy, partlyCloudy }
 
+/// A reusable weather card widget
+///
+/// White background with dark text and red accents.
 class CustomWeatherCard extends StatelessWidget {
   final int temperature;
   final WeatherCondition condition;
@@ -11,7 +14,7 @@ class CustomWeatherCard extends StatelessWidget {
   final String location;
   final VoidCallback? onTap;
   final Color? backgroundColor;
-  final Color? foregroundColor;
+  final Color? accentColor;
   final double borderRadius;
   final bool enabled;
 
@@ -24,7 +27,7 @@ class CustomWeatherCard extends StatelessWidget {
     this.location = 'New York',
     this.onTap,
     this.backgroundColor,
-    this.foregroundColor,
+    this.accentColor,
     this.borderRadius = 20,
     this.enabled = true,
   });
@@ -65,8 +68,7 @@ class CustomWeatherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? AppTheme.primaryColor;
-    final Color fgColor = foregroundColor ?? Colors.white;
+    final Color accent = accentColor ?? AppTheme.primaryColor;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double responsivePadding = screenWidth * 0.05;
 
@@ -77,10 +79,7 @@ class CustomWeatherCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: backgroundColor == null
-                ? AppTheme.secondaryGradient
-                : null,
-            color: backgroundColor,
+            color: backgroundColor ?? Colors.white,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: AppTheme.cardShadow,
           ),
@@ -91,11 +90,11 @@ class CustomWeatherCard extends StatelessWidget {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildWeatherIcon(fgColor, constraints.maxWidth),
+                    _buildWeatherIcon(accent, constraints.maxWidth),
                     SizedBox(width: constraints.maxWidth * 0.04),
-                    Expanded(child: _buildTextSection(fgColor, constraints.maxWidth)),
+                    Expanded(child: _buildTextSection(constraints.maxWidth)),
                     SizedBox(width: constraints.maxWidth * 0.04),
-                    _buildHighLowBadge(bgColor, fgColor, constraints.maxWidth),
+                    _buildHighLowBadge(accent, constraints.maxWidth),
                   ],
                 );
               },
@@ -106,7 +105,7 @@ class CustomWeatherCard extends StatelessWidget {
     );
   }
 
-  Widget _buildWeatherIcon(Color fgColor, double maxWidth) {
+  Widget _buildWeatherIcon(Color accent, double maxWidth) {
     final double iconSize = (maxWidth * 0.1).clamp(28.0, 40.0);
     final double padding = iconSize * 0.25;
     final double containerRadius = (iconSize * 0.25).clamp(8.0, 12.0);
@@ -114,14 +113,14 @@ class CustomWeatherCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: fgColor,
+        color: accent.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(containerRadius),
       ),
-      child: Icon(_weatherIcon, color: backgroundColor ?? AppTheme.primaryColor, size: iconSize),
+      child: Icon(_weatherIcon, color: accent, size: iconSize),
     );
   }
 
-  Widget _buildTextSection(Color fgColor, double maxWidth) {
+  Widget _buildTextSection(double maxWidth) {
     final double titleFontSize = (maxWidth * 0.055).clamp(16.0, 22.0);
     final double subtitleFontSize = (maxWidth * 0.038).clamp(12.0, 16.0);
     final double spacing = (maxWidth * 0.015).clamp(4.0, 8.0);
@@ -133,7 +132,7 @@ class CustomWeatherCard extends StatelessWidget {
         Text(
           '$temperature° $_conditionText',
           style: TextStyle(
-            color: fgColor,
+            color: AppTheme.textPrimary,
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
           ),
@@ -142,7 +141,7 @@ class CustomWeatherCard extends StatelessWidget {
         Text(
           location,
           style: TextStyle(
-            color: fgColor,
+            color: AppTheme.textSecondary,
             fontSize: subtitleFontSize,
             fontWeight: FontWeight.w400,
           ),
@@ -151,7 +150,7 @@ class CustomWeatherCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHighLowBadge(Color bgColor, Color fgColor, double maxWidth) {
+  Widget _buildHighLowBadge(Color accent, double maxWidth) {
     final double badgeFontSize = (maxWidth * 0.035).clamp(12.0, 16.0);
     final double horizontalPadding = (maxWidth * 0.03).clamp(10.0, 16.0);
     final double verticalPadding = (maxWidth * 0.02).clamp(6.0, 10.0);
@@ -162,13 +161,13 @@ class CustomWeatherCard extends StatelessWidget {
         vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
-        color: fgColor,
+        color: accent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         'H:$high° L:$low°',
         style: TextStyle(
-          color: bgColor,
+          color: Colors.white,
           fontSize: badgeFontSize,
           fontWeight: FontWeight.w600,
         ),

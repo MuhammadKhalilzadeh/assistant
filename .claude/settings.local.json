@@ -22,7 +22,8 @@
       "WebFetch(domain:dart.dev)",
       "WebFetch(domain:medium.com)",
       "Bash(ls -la \"C:\\\\Workspace\\\\flutter-projects\\\\First\\\\assistant\\\\lib\\\\presentation\\\\pages\\\\calendar\"\" 2>/dev/null || echo \"Calendar dir structure not found \")",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(find \"C:\\\\Workspace\\\\flutter-projects\\\\First\\\\assistant\\\\lib\\\\presentation\" -type f -name \"*.dart\" -exec grep -l \"AppTheme\\\\|primaryGradient\\\\|secondaryGradient\\\\|0xFF6366F1\\\\|0xFF8B5CF6\\\\|0xFFEC4899\\\\|0xFF10B981\\\\|0xFF06B6D4\\\\|Colors\\\\.white\\\\.withValues\" {} ;)"
     ]
   }
 }

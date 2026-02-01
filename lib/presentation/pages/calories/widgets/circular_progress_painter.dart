@@ -69,14 +69,14 @@ class CircularProgressPainter extends CustomPainter {
       final tipY = center.dy + radius * math.sin(tipAngle);
 
       final glowPaint = Paint()
-        ..color = progressColor.withValues(alpha: 0.5)
+        ..color = progressColor.withValues(alpha: 0.4)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
 
       canvas.drawCircle(Offset(tipX, tipY), strokeWidth / 2, glowPaint);
 
       // Bright center of glow
       final brightGlowPaint = Paint()
-        ..color = Colors.white.withValues(alpha: 0.8);
+        ..color = Colors.white.withValues(alpha: 0.9);
 
       canvas.drawCircle(Offset(tipX, tipY), strokeWidth / 4, brightGlowPaint);
     }

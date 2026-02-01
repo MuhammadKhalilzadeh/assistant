@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Empty state widget for when there are no focus sessions
 class FocusEmptyState extends StatelessWidget {
@@ -14,9 +15,9 @@ class FocusEmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -25,12 +26,12 @@ class FocusEmptyState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               isFirstTime ? Icons.emoji_events_outlined : Icons.history_rounded,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: AppTheme.primaryColor,
               size: 32,
             ),
           ),
@@ -43,7 +44,7 @@ class FocusEmptyState extends StatelessWidget {
                 ? 'Welcome to Focus Timer!'
                 : 'No sessions yet today',
             style: const TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -57,8 +58,8 @@ class FocusEmptyState extends StatelessWidget {
             isFirstTime
                 ? 'Start your first focus session and boost your productivity. The Pomodoro technique helps you stay focused!'
                 : 'Complete a focus session to see your progress here. Every session counts!',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
               fontSize: 13,
               height: 1.4,
             ),
@@ -71,7 +72,7 @@ class FocusEmptyState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: Colors.amber.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -79,7 +80,7 @@ class FocusEmptyState extends StatelessWidget {
               children: [
                 Icon(
                   Icons.lightbulb_outline,
-                  color: Colors.amber.withValues(alpha: 0.8),
+                  color: Colors.amber.shade700,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
@@ -89,7 +90,7 @@ class FocusEmptyState extends StatelessWidget {
                         ? 'Tip: Start with 25 min sessions'
                         : 'Tip: Short breaks boost focus',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: Colors.amber.shade800,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),

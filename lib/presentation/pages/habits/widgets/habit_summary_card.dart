@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class HabitSummaryCard extends StatefulWidget {
@@ -76,9 +77,9 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         children: [
@@ -97,7 +98,7 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
                         Text(
                           "Today's Progress",
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: AppTheme.textPrimary,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -112,7 +113,7 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
                     Text(
                       '${widget.completedToday} of ${widget.totalToday} habits completed',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: AppTheme.textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -150,9 +151,9 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
                 child: CircularProgressIndicator(
                   value: 1.0,
                   strokeWidth: 8,
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                  backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
                   valueColor: AlwaysStoppedAnimation(
-                    Colors.white.withValues(alpha: 0.1),
+                    AppTheme.primaryColor.withValues(alpha: 0.05),
                   ),
                 ),
               ),
@@ -166,8 +167,8 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
                   backgroundColor: Colors.transparent,
                   valueColor: AlwaysStoppedAnimation(
                     value >= 1.0
-                        ? const Color(0xFF10B981)
-                        : Colors.white,
+                        ? AppTheme.successColor
+                        : AppTheme.primaryColor,
                   ),
                   strokeCap: StrokeCap.round,
                 ),
@@ -179,7 +180,7 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
                   Text(
                     '${(value * 100).round()}%',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -187,7 +188,7 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
                   if (value >= 1.0)
                     const Icon(
                       Icons.check,
-                      color: Color(0xFF10B981),
+                      color: AppTheme.successColor,
                       size: 16,
                     ),
                 ],
@@ -204,21 +205,21 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
       children: [
         _buildStatItem(
           icon: Icons.local_fire_department,
-          iconColor: const Color(0xFFF59E0B),
+          iconColor: AppTheme.primaryColor,
           value: '${widget.currentStreak}',
           label: 'Streak',
         ),
         const SizedBox(width: 16),
         _buildStatItem(
           icon: Icons.emoji_events,
-          iconColor: const Color(0xFFFFD700),
+          iconColor: AppTheme.warningColor,
           value: '${widget.bestStreak}',
           label: 'Best',
         ),
         const SizedBox(width: 16),
         _buildStatItem(
           icon: Icons.calendar_today,
-          iconColor: const Color(0xFF3B82F6),
+          iconColor: AppTheme.infoColor,
           value: '${(widget.weeklyRate * 100).round()}%',
           label: 'Week',
         ),
@@ -242,7 +243,7 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
             Text(
               value,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -250,7 +251,7 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
             Text(
               label,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
+                color: AppTheme.textTertiary,
                 fontSize: 10,
               ),
             ),
@@ -270,14 +271,14 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
             Text(
               'Weekly completion',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: AppTheme.textSecondary,
                 fontSize: 12,
               ),
             ),
             Text(
               '${(widget.weeklyRate * 100).round()}%',
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -294,7 +295,7 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: value,
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
                 valueColor: AlwaysStoppedAnimation(
                   _getProgressColor(value),
                 ),
@@ -308,9 +309,9 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
   }
 
   Color _getProgressColor(double progress) {
-    if (progress >= 0.8) return const Color(0xFF10B981); // Green
-    if (progress >= 0.5) return const Color(0xFFF59E0B); // Amber
-    return const Color(0xFFEF4444); // Red
+    if (progress >= 0.8) return AppTheme.successColor; // Green
+    if (progress >= 0.5) return AppTheme.warningColor; // Amber
+    return AppTheme.errorColor; // Red
   }
 
   Widget _buildCelebrationBadge() {
@@ -323,12 +324,12 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFFFD700), Color(0xFFF59E0B)],
+                colors: [AppTheme.warningColor, AppTheme.primaryColor],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFFD700).withValues(alpha: 0.5),
+                  color: AppTheme.warningColor.withValues(alpha: 0.5),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -337,12 +338,12 @@ class _HabitSummaryCardState extends State<HabitSummaryCard>
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.celebration, color: Colors.white, size: 14),
+                Icon(Icons.celebration, color: AppTheme.textOnPrimary, size: 14),
                 SizedBox(width: 4),
                 Text(
                   'Done!',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textOnPrimary,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),

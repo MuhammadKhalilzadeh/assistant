@@ -174,12 +174,9 @@ class _CalendarPageState extends State<CalendarPage>
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
-          child: Column(
+        child: Column(
             children: [
               // App bar with view toggle
               CalendarAppBar(
@@ -221,11 +218,10 @@ class _CalendarPageState extends State<CalendarPage>
             ],
           ),
         ),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _onAddEvent(),
-        backgroundColor: Colors.white,
-        foregroundColor: AppTheme.primaryColor,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
     );

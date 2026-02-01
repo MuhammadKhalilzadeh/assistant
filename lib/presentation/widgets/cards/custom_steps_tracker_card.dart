@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 /// A reusable steps tracker card widget
 ///
 /// This widget displays step tracking information with customizable
-/// current steps, goal, and progress visualization. It features a red background
-/// with white text and a progress bar, similar to Samsung Health's design.
+/// current steps, goal, and progress visualization. It features a white background
+/// with dark text and red accents.
 class CustomStepsTrackerCard extends StatelessWidget {
   /// Current number of steps
   final int currentSteps;
@@ -25,11 +25,11 @@ class CustomStepsTrackerCard extends StatelessWidget {
   /// Callback when the entire card is tapped
   final VoidCallback? onTap;
 
-  /// Background color (defaults to primaryColor - red)
+  /// Background color (defaults to white)
   final Color? backgroundColor;
 
-  /// Foreground/text color (defaults to white)
-  final Color? foregroundColor;
+  /// Accent color for icons and highlights (defaults to primaryColor - red)
+  final Color? accentColor;
 
   /// Color for the progress bar fill
   final Color? progressColor;
@@ -52,7 +52,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
     this.goalSuffix = 'steps',
     this.onTap,
     this.backgroundColor,
-    this.foregroundColor,
+    this.accentColor,
     this.progressColor,
     this.borderRadius = 20,
     this.icon = Icons.directions_walk,
@@ -69,11 +69,10 @@ class CustomStepsTrackerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? AppTheme.primaryColor;
-    final Color fgColor = foregroundColor ?? Colors.white;
-    // White with 50% opacity for progress fill
-    final Color progColor = progressColor ?? 
-        fgColor.withValues(alpha: 0.5);
+    final Color accent = accentColor ?? AppTheme.primaryColor;
+    // Accent with 50% opacity for progress fill
+    final Color progColor = progressColor ??
+        accent.withValues(alpha: 0.5);
     final double screenWidth = MediaQuery.of(context).size.width;
     final double responsivePadding = screenWidth * 0.05;
 
@@ -84,10 +83,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: backgroundColor == null
-                ? AppTheme.primaryGradient
-                : null,
-            color: backgroundColor,
+            color: backgroundColor ?? Colors.white,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: AppTheme.cardShadow,
           ),
@@ -99,7 +95,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Left section: Icon + Steps count + Goal
-                    _buildLeftSection(fgColor, constraints.maxWidth),
+                    _buildLeftSection(accent, constraints.maxWidth),
 
                     // Spacer to push progress bar to the far right
                     const Spacer(),
@@ -109,7 +105,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
                     // Right section: Progress bar + Percentage
                     Expanded(
                       flex: 4,
-                      child: _buildRightSection(bgColor, fgColor, progColor, constraints.maxWidth),
+                      child: _buildRightSection(accent, progColor, constraints.maxWidth),
                     ),
                   ],
                 );
@@ -121,7 +117,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLeftSection(Color fgColor, double maxWidth) {
+  Widget _buildLeftSection(Color accent, double maxWidth) {
     final double iconSize = (maxWidth * 0.08).clamp(20.0, 32.0);
     final double fontSize = (maxWidth * 0.07).clamp(20.0, 32.0);
     final double smallFontSize = (maxWidth * 0.04).clamp(12.0, 18.0);
@@ -135,7 +131,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildIconWithBorder(fgColor, iconSize),
+            _buildIconWithBorder(accent, iconSize),
             SizedBox(width: spacing),
             Flexible(
               child: FittedBox(
@@ -144,7 +140,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
                 child: Text(
                   '$currentSteps $stepsLabel',
                   style: TextStyle(
-                    color: fgColor,
+                    color: AppTheme.textPrimary,
                     fontSize: fontSize,
                     fontWeight: FontWeight.bold,
                   ),
@@ -161,7 +157,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
           child: Text(
             '$goalPrefix $goalSteps $goalSuffix',
             style: TextStyle(
-              color: fgColor,
+              color: AppTheme.textSecondary,
               fontSize: smallFontSize,
               fontWeight: FontWeight.w500,
             ),
@@ -171,39 +167,39 @@ class CustomStepsTrackerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIconWithBorder(Color fgColor, double iconSize) {
+  Widget _buildIconWithBorder(Color accent, double iconSize) {
     final double padding = iconSize * 0.3;
     final double borderWidth = (iconSize * 0.08).clamp(1.5, 2.5);
 
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        border: Border.all(color: fgColor, width: borderWidth),
+        border: Border.all(color: accent, width: borderWidth),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(
         icon,
-        color: fgColor,
+        color: accent,
         size: iconSize,
       ),
     );
   }
 
-  Widget _buildRightSection(Color bgColor, Color fgColor, Color progColor, double maxWidth) {
+  Widget _buildRightSection(Color accent, Color progColor, double maxWidth) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
         // Progress bar - fills available width
-        _buildProgressBar(fgColor, progColor),
+        _buildProgressBar(accent, progColor),
         SizedBox(height: (maxWidth * 0.02).clamp(6.0, 10.0)),
         // Percentage badge
-        _buildPercentageBadge(bgColor, fgColor, maxWidth),
+        _buildPercentageBadge(accent, maxWidth),
       ],
     );
   }
 
-  Widget _buildProgressBar(Color fgColor, Color progColor) {
+  Widget _buildProgressBar(Color accent, Color progColor) {
     final double barHeight = 20.0.clamp(16.0, 28.0);
     final double barBorderRadius = barHeight / 2;
     final double borderWidth = 2.5;
@@ -215,7 +211,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.transparent,
           border: Border.all(
-            color: fgColor,
+            color: accent,
             width: borderWidth,
           ),
           borderRadius: BorderRadius.circular(barBorderRadius),
@@ -247,7 +243,7 @@ class CustomStepsTrackerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPercentageBadge(Color bgColor, Color fgColor, double maxWidth) {
+  Widget _buildPercentageBadge(Color accent, double maxWidth) {
     final double badgeFontSize = (maxWidth * 0.035).clamp(12.0, 16.0);
     final double horizontalPadding = (maxWidth * 0.025).clamp(8.0, 12.0);
     final double verticalPadding = (maxWidth * 0.015).clamp(4.0, 8.0);
@@ -258,13 +254,13 @@ class CustomStepsTrackerCard extends StatelessWidget {
         vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
-        color: fgColor,
+        color: accent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         '$percentage%',
         style: TextStyle(
-          color: bgColor,
+          color: Colors.white,
           fontSize: badgeFontSize,
           fontWeight: FontWeight.w600,
         ),

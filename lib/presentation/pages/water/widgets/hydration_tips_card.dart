@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Rotating hydration tips card with tap-to-change functionality
 class HydrationTipsCard extends StatefulWidget {
@@ -124,9 +125,9 @@ class _HydrationTipsCardState extends State<HydrationTipsCard>
       child: Container(
         padding: EdgeInsets.all(widget.padding),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          color: AppTheme.cardColor,
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+          boxShadow: AppTheme.cardShadow,
         ),
         child: Row(
           children: [
@@ -140,12 +141,12 @@ class _HydrationTipsCardState extends State<HydrationTipsCard>
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF06B6D4).withValues(alpha: 0.2),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   tip.icon,
-                  color: const Color(0xFF06B6D4),
+                  color: AppTheme.primaryColor,
                   size: 24,
                 ),
               ),
@@ -159,14 +160,14 @@ class _HydrationTipsCardState extends State<HydrationTipsCard>
                     children: [
                       Icon(
                         Icons.lightbulb_outline,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: AppTheme.textTertiary,
                         size: 14,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'Hydration Tip',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: AppTheme.textTertiary,
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
@@ -174,7 +175,7 @@ class _HydrationTipsCardState extends State<HydrationTipsCard>
                       const Spacer(),
                       Icon(
                         Icons.touch_app,
-                        color: Colors.white.withValues(alpha: 0.3),
+                        color: AppTheme.textTertiary.withValues(alpha: 0.5),
                         size: 14,
                       ),
                     ],
@@ -185,8 +186,8 @@ class _HydrationTipsCardState extends State<HydrationTipsCard>
                     child: Text(
                       tip.text,
                       key: ValueKey(_currentTipIndex),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: AppTheme.textPrimary,
                         fontSize: 13,
                         height: 1.4,
                       ),

@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/weather_forecast_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class WeatherStatsCard extends StatelessWidget {
@@ -81,17 +82,17 @@ class WeatherStatsCard extends StatelessWidget {
     Widget card = Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Weekly Summary',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -104,7 +105,7 @@ class WeatherStatsCard extends StatelessWidget {
                   Icons.thermostat,
                   'Avg High',
                   '${stats['avgHigh']}°',
-                  Colors.orange,
+                  AppTheme.primaryColor,
                 ),
               ),
               Expanded(
@@ -112,7 +113,7 @@ class WeatherStatsCard extends StatelessWidget {
                   Icons.thermostat_outlined,
                   'Avg Low',
                   '${stats['avgLow']}°',
-                  Colors.lightBlue,
+                  AppTheme.infoColor,
                 ),
               ),
             ],
@@ -128,7 +129,7 @@ class WeatherStatsCard extends StatelessWidget {
                       ? _formatDay((stats['rainiestDay'] as DailyForecast).date)
                       : '-',
                   '${stats['rainiestChance']}%',
-                  Colors.blue,
+                  AppTheme.infoColor,
                 ),
               ),
               Expanded(
@@ -139,7 +140,7 @@ class WeatherStatsCard extends StatelessWidget {
                       ? _formatDay((stats['bestDay'] as DailyForecast).date)
                       : '-',
                   null,
-                  Colors.amber,
+                  AppTheme.warningColor,
                 ),
               ),
             ],
@@ -169,7 +170,7 @@ class WeatherStatsCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -182,7 +183,7 @@ class WeatherStatsCard extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: AppTheme.textSecondary,
                   fontSize: 11,
                 ),
               ),
@@ -193,8 +194,8 @@ class WeatherStatsCard extends StatelessWidget {
                 builder: (context, animValue, child) {
                   return Text(
                     '${animValue.round()}°',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: AppTheme.textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -219,7 +220,7 @@ class WeatherStatsCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -233,14 +234,14 @@ class WeatherStatsCard extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: AppTheme.textSecondary,
                     fontSize: 11,
                   ),
                 ),
                 Text(
                   day,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),

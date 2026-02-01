@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/todos/widgets/todo_filters.dart';
 import 'package:flutter/material.dart';
 
@@ -64,20 +65,20 @@ class TodoEmptyState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               _icon,
               size: 64,
-              color: Colors.white.withValues(alpha: 0.5),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 24),
           Text(
             _title,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
               fontSize: 20,
               fontWeight: FontWeight.w600,
             ),
@@ -86,8 +87,8 @@ class TodoEmptyState extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             _subtitle,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
               fontSize: 14,
             ),
             textAlign: TextAlign.center,

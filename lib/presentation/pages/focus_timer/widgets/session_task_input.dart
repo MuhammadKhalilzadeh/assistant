@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Task name input for focus sessions
 class SessionTaskInput extends StatefulWidget {
@@ -50,9 +51,9 @@ class _SessionTaskInputState extends State<SessionTaskInput> {
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +76,7 @@ class _SessionTaskInputState extends State<SessionTaskInput> {
                 children: [
                   Icon(
                     Icons.edit_note_rounded,
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: AppTheme.primaryColor,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -86,8 +87,8 @@ class _SessionTaskInputState extends State<SessionTaskInput> {
                           : 'What are you working on?',
                       style: TextStyle(
                         color: widget.currentTask.isNotEmpty
-                            ? Colors.white
-                            : Colors.white.withValues(alpha: 0.6),
+                            ? AppTheme.textPrimary
+                            : AppTheme.textTertiary,
                         fontSize: 14,
                         fontWeight: widget.currentTask.isNotEmpty
                             ? FontWeight.w500
@@ -105,12 +106,12 @@ class _SessionTaskInputState extends State<SessionTaskInput> {
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: AppTheme.textTertiary.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.close,
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: AppTheme.textSecondary,
                           size: 14,
                         ),
                       ),
@@ -120,7 +121,7 @@ class _SessionTaskInputState extends State<SessionTaskInput> {
                       _isExpanded
                           ? Icons.keyboard_arrow_up
                           : Icons.keyboard_arrow_down,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: AppTheme.textTertiary,
                       size: 20,
                     ),
                 ],
@@ -135,7 +136,7 @@ class _SessionTaskInputState extends State<SessionTaskInput> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Divider(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: AppTheme.textTertiary.withValues(alpha: 0.2),
                   height: 1,
                 ),
 
@@ -146,13 +147,13 @@ class _SessionTaskInputState extends State<SessionTaskInput> {
                     controller: _controller,
                     focusNode: _focusNode,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 14,
                     ),
                     decoration: InputDecoration(
                       hintText: 'Enter task name...',
                       hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.4),
+                        color: AppTheme.textTertiary,
                         fontSize: 14,
                       ),
                       border: InputBorder.none,
@@ -181,7 +182,7 @@ class _SessionTaskInputState extends State<SessionTaskInput> {
                       Text(
                         'Quick select',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: AppTheme.textTertiary,
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
@@ -205,16 +206,16 @@ class _SessionTaskInputState extends State<SessionTaskInput> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.1),
+                                color: AppTheme.backgroundColor,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.2),
+                                  color: AppTheme.primaryColor.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Text(
                                 suggestion,
                                 style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.8),
+                                  color: AppTheme.primaryColor,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),

@@ -105,11 +105,11 @@ class _AddEventSheetState extends State<AddEventSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: const ColorScheme.light(
               primary: AppTheme.primaryColor,
               onPrimary: Colors.white,
-              surface: Color(0xFF1E1E1E),
-              onSurface: Colors.white,
+              surface: Colors.white,
+              onSurface: AppTheme.textPrimary,
             ),
           ),
           child: child!,
@@ -129,11 +129,11 @@ class _AddEventSheetState extends State<AddEventSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: const ColorScheme.light(
               primary: AppTheme.primaryColor,
               onPrimary: Colors.white,
-              surface: Color(0xFF1E1E1E),
-              onSurface: Colors.white,
+              surface: Colors.white,
+              onSurface: AppTheme.textPrimary,
             ),
           ),
           child: child!,
@@ -163,11 +163,11 @@ class _AddEventSheetState extends State<AddEventSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: const ColorScheme.light(
               primary: AppTheme.primaryColor,
               onPrimary: Colors.white,
-              surface: Color(0xFF1E1E1E),
-              onSurface: Colors.white,
+              surface: Colors.white,
+              onSurface: AppTheme.textPrimary,
             ),
           ),
           child: child!,
@@ -256,9 +256,10 @@ class _AddEventSheetState extends State<AddEventSheet> {
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
-      decoration: const BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppTheme.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: AppTheme.elevatedShadow,
       ),
       child: SingleChildScrollView(
         padding: EdgeInsets.only(bottom: bottomPadding),
@@ -274,7 +275,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -288,7 +289,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
                     child: Text(
                       _isEditMode ? 'Edit Event' : 'New Event',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -297,7 +298,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
                   if (_isEditMode)
                     IconButton(
                       onPressed: _delete,
-                      icon: const Icon(Icons.delete_outline, color: Colors.white),
+                      icon: const Icon(Icons.delete_outline, color: AppTheme.errorColor),
                     ),
                 ],
               ),
@@ -316,7 +317,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
               const Text(
                 'Category',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -406,10 +407,10 @@ class _AddEventSheetState extends State<AddEventSheet> {
                   Expanded(
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(
+                      child: const Text(
                         'Cancel',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: AppTheme.textSecondary,
                           fontSize: 16,
                         ),
                       ),
@@ -421,8 +422,8 @@ class _AddEventSheetState extends State<AddEventSheet> {
                     child: ElevatedButton(
                       onPressed: _save,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppTheme.primaryColor,
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -461,7 +462,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
         Text(
           label,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -471,26 +472,26 @@ class _AddEventSheetState extends State<AddEventSheet> {
           controller: controller,
           autofocus: autofocus,
           maxLines: maxLines,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: AppTheme.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+            hintStyle: const TextStyle(color: AppTheme.textTertiary),
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: Colors.white.withValues(alpha: 0.6))
+                ? Icon(prefixIcon, color: AppTheme.textSecondary)
                 : null,
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.1),
+            fillColor: Colors.grey.shade50,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+              borderSide: BorderSide(color: Colors.grey.shade200),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+              borderSide: BorderSide(color: Colors.grey.shade200),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.white, width: 2),
+              borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
             ),
           ),
         ),
@@ -508,18 +509,18 @@ class _AddEventSheetState extends State<AddEventSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: Colors.grey.shade50,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          border: Border.all(color: Colors.grey.shade200),
         ),
         child: Row(
           children: [
-            Icon(icon, color: Colors.white.withValues(alpha: 0.6), size: 20),
+            Icon(icon, color: AppTheme.primaryColor, size: 20),
             const SizedBox(width: 12),
             Text(
               label,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontSize: 14,
               ),
             ),
@@ -539,18 +540,18 @@ class _AddEventSheetState extends State<AddEventSheet> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.8),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 14,
           ),
         ),
         Switch(
           value: value,
           onChanged: onChanged,
-          activeThumbColor: AppTheme.accentColor,
-          activeTrackColor: AppTheme.accentColor.withValues(alpha: 0.3),
-          inactiveThumbColor: Colors.white.withValues(alpha: 0.6),
-          inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
+          activeThumbColor: AppTheme.primaryColor,
+          activeTrackColor: AppTheme.primaryColor.withValues(alpha: 0.3),
+          inactiveThumbColor: Colors.grey.shade400,
+          inactiveTrackColor: Colors.grey.shade200,
         ),
       ],
     );

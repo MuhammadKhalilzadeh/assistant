@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class HabitCompletionCalendar extends StatefulWidget {
@@ -92,15 +93,15 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
 
   Color _getDateColor(DateTime date) {
     if (_isFuture(date)) {
-      return Colors.white.withValues(alpha: 0.05);
+      return AppTheme.textTertiary.withValues(alpha: 0.1);
     }
     if (_isCompleted(date)) {
       if (_isPartOfStreak(date)) {
-        return const Color(0xFFF59E0B); // Streak color
+        return AppTheme.primaryColor; // Streak color - red
       }
-      return const Color(0xFF10B981); // Completed color
+      return AppTheme.successColor; // Completed color - green
     }
-    return Colors.white.withValues(alpha: 0.1);
+    return AppTheme.textTertiary.withValues(alpha: 0.1);
   }
 
   @override
@@ -108,11 +109,9 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-        ),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         children: [
@@ -149,13 +148,13 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
           onPressed: _previousMonth,
           icon: Icon(
             Icons.chevron_left,
-            color: Colors.white.withValues(alpha: 0.8),
+            color: AppTheme.textSecondary,
           ),
         ),
         Text(
           '${monthNames[_displayMonth.month - 1]} ${_displayMonth.year}',
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -165,8 +164,8 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
           icon: Icon(
             Icons.chevron_right,
             color: canGoNext
-                ? Colors.white.withValues(alpha: 0.8)
-                : Colors.white.withValues(alpha: 0.2),
+                ? AppTheme.textSecondary
+                : AppTheme.textTertiary.withValues(alpha: 0.3),
           ),
         ),
       ],
@@ -185,7 +184,7 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
             day,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: AppTheme.textTertiary,
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -251,12 +250,12 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
         color: color,
         borderRadius: BorderRadius.circular(8),
         border: isToday
-            ? Border.all(color: Colors.white, width: 2)
+            ? Border.all(color: AppTheme.primaryColor, width: 2)
             : null,
         boxShadow: isStreak && isCompleted
             ? [
                 BoxShadow(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.4),
                   blurRadius: 4,
                   offset: const Offset(0, 1),
                 ),
@@ -271,10 +270,10 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
               dayNumber.toString(),
               style: TextStyle(
                 color: isFuture
-                    ? Colors.white.withValues(alpha: 0.3)
+                    ? AppTheme.textTertiary
                     : isCompleted
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.7),
+                        ? AppTheme.textOnPrimary
+                        : AppTheme.textSecondary,
                 fontSize: 12,
                 fontWeight: isToday || isCompleted
                     ? FontWeight.bold
@@ -282,9 +281,9 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
               ),
             ),
             if (isStreak && isCompleted)
-              Icon(
+              const Icon(
                 Icons.local_fire_department,
-                color: Colors.white,
+                color: AppTheme.textOnPrimary,
                 size: 10,
               ),
           ],
@@ -298,17 +297,17 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildLegendItem(
-          color: const Color(0xFF10B981),
+          color: AppTheme.successColor,
           label: 'Completed',
         ),
         const SizedBox(width: 16),
         _buildLegendItem(
-          color: const Color(0xFFF59E0B),
+          color: AppTheme.primaryColor,
           label: 'Current Streak',
         ),
         const SizedBox(width: 16),
         _buildLegendItem(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: AppTheme.textTertiary.withValues(alpha: 0.1),
           label: 'Missed',
           border: true,
         ),
@@ -331,7 +330,7 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
             color: color,
             borderRadius: BorderRadius.circular(3),
             border: border
-                ? Border.all(color: Colors.white.withValues(alpha: 0.3))
+                ? Border.all(color: AppTheme.textTertiary.withValues(alpha: 0.3))
                 : null,
           ),
         ),
@@ -339,7 +338,7 @@ class _HabitCompletionCalendarState extends State<HabitCompletionCalendar> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: AppTheme.textSecondary,
             fontSize: 10,
           ),
         ),

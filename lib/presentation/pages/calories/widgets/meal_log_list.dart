@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/calorie_entry_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'food_category_selector.dart';
@@ -29,14 +30,14 @@ class MealLogList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(Icons.restaurant_menu, color: Colors.white, size: 20),
-            SizedBox(width: 8),
-            Text(
+            Icon(Icons.restaurant_menu, color: AppTheme.primaryColor, size: 20),
+            const SizedBox(width: 8),
+            const Text(
               'Today\'s Meals',
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -87,21 +88,21 @@ class MealLogList extends StatelessWidget {
           Icon(
             Icons.restaurant_outlined,
             size: 56,
-            color: Colors.white.withValues(alpha: 0.3),
+            color: AppTheme.textTertiary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             'No meals logged today',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: AppTheme.textSecondary,
               fontSize: 16,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             'Tap + to add your first meal',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
+              color: AppTheme.textTertiary,
               fontSize: 14,
             ),
           ),
@@ -129,9 +130,9 @@ class _MealTypeSection extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         children: [
@@ -144,7 +145,7 @@ class _MealTypeSection extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: _getMealColor(mealType).withValues(alpha: 0.2),
+                    color: _getMealColor(mealType).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -161,15 +162,15 @@ class _MealTypeSection extends StatelessWidget {
                       Text(
                         _getMealLabel(mealType),
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                         ),
                       ),
                       Text(
                         '${entries.length} item${entries.length > 1 ? 's' : ''}',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -180,7 +181,7 @@ class _MealTypeSection extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _getMealColor(mealType).withValues(alpha: 0.2),
+                    color: _getMealColor(mealType).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -234,13 +235,13 @@ class _MealTypeSection extends StatelessWidget {
   Color _getMealColor(MealType type) {
     switch (type) {
       case MealType.breakfast:
-        return Colors.orange.shade400;
+        return AppTheme.warningColor;
       case MealType.lunch:
-        return Colors.green.shade400;
+        return AppTheme.successColor;
       case MealType.dinner:
-        return Colors.blue.shade400;
+        return AppTheme.infoColor;
       case MealType.snack:
-        return Colors.purple.shade400;
+        return AppTheme.primaryColor;
     }
   }
 }
@@ -267,7 +268,7 @@ class _MealEntryItem extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
-          color: Colors.red.shade400,
+          color: AppTheme.errorColor,
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(16),
             bottomRight: Radius.circular(16),
@@ -279,7 +280,7 @@ class _MealEntryItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+            top: BorderSide(color: AppTheme.textTertiary.withValues(alpha: 0.2)),
           ),
         ),
         child: Row(
@@ -293,7 +294,7 @@ class _MealEntryItem extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: FoodCategorySelector.getCategoryData(entry.foodCategory!)
                       .color
-                      .withValues(alpha: 0.2),
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -313,15 +314,15 @@ class _MealEntryItem extends StatelessWidget {
                   Text(
                     entry.foodName,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     _formatTime(entry.loggedAt),
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.4),
+                    style: const TextStyle(
+                      color: AppTheme.textTertiary,
                       fontSize: 11,
                     ),
                   ),
@@ -331,8 +332,8 @@ class _MealEntryItem extends StatelessWidget {
             // Calories
             Text(
               '${entry.calories} cal',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),

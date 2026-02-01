@@ -132,18 +132,13 @@ class _TimerControlsState extends State<TimerControls>
                   width: 88,
                   height: 88,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.primaryColor,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
+                        color: AppTheme.primaryColor.withValues(alpha: 0.4),
                         blurRadius: 15,
                         offset: const Offset(0, 6),
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        blurRadius: 20,
-                        offset: const Offset(0, 0),
                       ),
                     ],
                   ),
@@ -161,14 +156,14 @@ class _TimerControlsState extends State<TimerControls>
                         child: Icon(
                           _primaryIcon,
                           key: ValueKey(_primaryIcon),
-                          color: AppTheme.primaryColor,
+                          color: Colors.white,
                           size: 40,
                         ),
                       ),
                       Text(
                         _primaryLabel,
-                        style: TextStyle(
-                          color: AppTheme.primaryColor,
+                        style: const TextStyle(
+                          color: Colors.white,
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                         ),
@@ -262,24 +257,22 @@ class _SecondaryButtonState extends State<_SecondaryButton>
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppTheme.cardColor,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.3),
-                ),
+                boxShadow: AppTheme.cardShadow,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     widget.icon,
-                    color: Colors.white,
+                    color: AppTheme.primaryColor,
                     size: 24,
                   ),
                   Text(
                     widget.label,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
                       fontSize: 8,
                       fontWeight: FontWeight.w500,
                     ),

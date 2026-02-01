@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/calorie_entry_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'food_category_selector.dart';
@@ -88,13 +89,10 @@ class _AddMealSheetState extends State<AddMealSheet> {
       maxChildSize: 0.95,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF2D2D3A), Color(0xFF1A1A24)],
-            ),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: AppTheme.backgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: AppTheme.elevatedShadow,
           ),
           child: Column(
             children: [
@@ -104,7 +102,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: AppTheme.textTertiary.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -114,12 +112,12 @@ class _AddMealSheetState extends State<AddMealSheet> {
                 child: Row(
                   children: [
                     const Icon(Icons.add_circle_outline,
-                        color: Colors.white, size: 28),
+                        color: AppTheme.primaryColor, size: 28),
                     const SizedBox(width: 12),
                     const Text(
                       'Add Meal',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -127,7 +125,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                     const Spacer(),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: const Icon(Icons.close, color: AppTheme.textSecondary),
                     ),
                   ],
                 ),
@@ -209,13 +207,13 @@ class _AddMealSheetState extends State<AddMealSheet> {
                               _showMacros
                                   ? Icons.expand_less
                                   : Icons.expand_more,
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: AppTheme.textSecondary,
                             ),
                             const SizedBox(width: 8),
-                            Text(
+                            const Text(
                               'Add Macros (Optional)',
                               style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
+                                color: AppTheme.textSecondary,
                                 fontSize: 14,
                               ),
                             ),
@@ -231,7 +229,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                               child: _buildMacroInput(
                                 controller: _proteinController,
                                 label: 'Protein',
-                                color: Colors.red.shade400,
+                                color: AppTheme.primaryColor,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -239,7 +237,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                               child: _buildMacroInput(
                                 controller: _carbsController,
                                 label: 'Carbs',
-                                color: Colors.blue.shade400,
+                                color: AppTheme.infoColor,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -247,7 +245,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                               child: _buildMacroInput(
                                 controller: _fatController,
                                 label: 'Fat',
-                                color: Colors.amber.shade400,
+                                color: AppTheme.warningColor,
                               ),
                             ),
                           ],
@@ -266,9 +264,9 @@ class _AddMealSheetState extends State<AddMealSheet> {
                                   ? _addMeal
                                   : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF6B6B),
+                            backgroundColor: AppTheme.primaryColor,
                             disabledBackgroundColor:
-                                Colors.white.withValues(alpha: 0.1),
+                                AppTheme.textTertiary.withValues(alpha: 0.3),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -297,8 +295,8 @@ class _AddMealSheetState extends State<AddMealSheet> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.8),
+      style: const TextStyle(
+        color: AppTheme.textSecondary,
         fontSize: 14,
         fontWeight: FontWeight.w500,
       ),
@@ -315,20 +313,21 @@ class _AddMealSheetState extends State<AddMealSheet> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        border: Border.all(color: AppTheme.textTertiary.withValues(alpha: 0.3)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
         textAlign: textAlign,
-        style: const TextStyle(color: Colors.white, fontSize: 16),
+        style: const TextStyle(color: AppTheme.textPrimary, fontSize: 16),
         onChanged: onChanged,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
-          prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: 0.6)),
+          hintStyle: TextStyle(color: AppTheme.textTertiary),
+          prefixIcon: Icon(icon, color: AppTheme.textSecondary),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -347,11 +346,12 @@ class _AddMealSheetState extends State<AddMealSheet> {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: AppTheme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          border: Border.all(color: AppTheme.textTertiary.withValues(alpha: 0.3)),
+          boxShadow: AppTheme.cardShadow,
         ),
-        child: Icon(icon, color: Colors.white),
+        child: Icon(icon, color: AppTheme.textPrimary),
       ),
     );
   }
@@ -371,14 +371,15 @@ class _AddMealSheetState extends State<AddMealSheet> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFFFF6B6B)
-                    : Colors.white.withValues(alpha: 0.1),
+                    ? AppTheme.primaryColor
+                    : AppTheme.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected
-                      ? const Color(0xFFFF6B6B)
-                      : Colors.white.withValues(alpha: 0.2),
+                      ? AppTheme.primaryColor
+                      : AppTheme.textTertiary.withValues(alpha: 0.3),
                 ),
+                boxShadow: isSelected ? null : AppTheme.cardShadow,
               ),
               child: Column(
                 children: [
@@ -386,7 +387,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                     _getMealIcon(type),
                     color: isSelected
                         ? Colors.white
-                        : Colors.white.withValues(alpha: 0.6),
+                        : AppTheme.textSecondary,
                     size: 20,
                   ),
                   const SizedBox(height: 4),
@@ -395,7 +396,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                     style: TextStyle(
                       color: isSelected
                           ? Colors.white
-                          : Colors.white.withValues(alpha: 0.6),
+                          : AppTheme.textSecondary,
                       fontSize: 11,
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.normal,
@@ -429,7 +430,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: color.withValues(alpha: 0.3)),
           ),

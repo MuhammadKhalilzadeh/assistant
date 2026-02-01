@@ -170,9 +170,10 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.9,
       ),
-      decoration: const BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppTheme.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: AppTheme.elevatedShadow,
       ),
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomPadding),
@@ -189,7 +190,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.3),
+                      color: AppTheme.textTertiary.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -202,7 +203,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     Text(
                       _isEditing ? 'Edit Habit' : 'New Habit',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -215,7 +216,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                         },
                         icon: const Icon(
                           Icons.delete_outline_rounded,
-                          color: Color(0xFFEF4444),
+                          color: AppTheme.errorColor,
                         ),
                       ),
                   ],
@@ -236,24 +237,24 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: AppTheme.backgroundColor,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: AppTheme.textTertiary.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             Icons.add,
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: AppTheme.textSecondary,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'Add description',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: AppTheme.textSecondary,
                               fontSize: 14,
                             ),
                           ),
@@ -300,14 +301,14 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.3),
+                              color: AppTheme.textTertiary.withValues(alpha: 0.3),
                             ),
                           ),
                         ),
                         child: const Text(
                           'Cancel',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.textSecondary,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -320,8 +321,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                       child: ElevatedButton(
                         onPressed: _handleSave,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppTheme.primaryColor,
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: AppTheme.textOnPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -351,7 +352,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
     return Text(
       title,
       style: const TextStyle(
-        color: Colors.white,
+        color: AppTheme.textPrimary,
         fontSize: 16,
         fontWeight: FontWeight.w600,
       ),
@@ -371,7 +372,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
         Text(
           label,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -381,30 +382,30 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
           controller: controller,
           autofocus: autofocus,
           maxLines: maxLines,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: AppTheme.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+            hintStyle: const TextStyle(
+              color: AppTheme.textTertiary,
             ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.1),
+            fillColor: AppTheme.backgroundColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppTheme.textTertiary.withValues(alpha: 0.2),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppTheme.textTertiary.withValues(alpha: 0.2),
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: Colors.white,
+                color: AppTheme.primaryColor,
                 width: 2,
               ),
             ),
@@ -418,10 +419,10 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
+          color: AppTheme.textTertiary.withValues(alpha: 0.2),
         ),
       ),
       child: Wrap(
@@ -436,21 +437,22 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.1),
+                    ? AppTheme.primaryColor
+                    : AppTheme.cardColor,
                 borderRadius: BorderRadius.circular(12),
+                boxShadow: isSelected ? AppTheme.cardShadow : null,
                 border: Border.all(
                   color: isSelected
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.2),
+                      ? AppTheme.primaryColor
+                      : AppTheme.textTertiary.withValues(alpha: 0.2),
                   width: isSelected ? 2 : 1,
                 ),
               ),
               child: Icon(
                 entry.value,
                 color: isSelected
-                    ? AppTheme.primaryColor
-                    : Colors.white.withValues(alpha: 0.8),
+                    ? AppTheme.textOnPrimary
+                    : AppTheme.textSecondary,
                 size: 24,
               ),
             ),
@@ -475,18 +477,18 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: isSelected
-                  ? color.withValues(alpha: 0.3)
-                  : Colors.white.withValues(alpha: 0.1),
+                  ? color.withValues(alpha: 0.15)
+                  : AppTheme.cardColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected ? color : Colors.white.withValues(alpha: 0.2),
+                color: isSelected ? color : AppTheme.textTertiary.withValues(alpha: 0.2),
                 width: isSelected ? 2 : 1,
               ),
             ),
             child: Text(
               category.label,
               style: TextStyle(
-                color: isSelected ? color : Colors.white.withValues(alpha: 0.8),
+                color: isSelected ? color : AppTheme.textSecondary,
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
@@ -511,13 +513,13 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: isSelected
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.1),
+                  ? AppTheme.primaryColor
+                  : AppTheme.cardColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isSelected
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.2),
+                    ? AppTheme.primaryColor
+                    : AppTheme.textTertiary.withValues(alpha: 0.2),
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -528,8 +530,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                   frequency.label,
                   style: TextStyle(
                     color: isSelected
-                        ? AppTheme.primaryColor
-                        : Colors.white,
+                        ? AppTheme.textOnPrimary
+                        : AppTheme.textPrimary,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -538,8 +540,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                   frequency.description,
                   style: TextStyle(
                     color: isSelected
-                        ? AppTheme.primaryColor.withValues(alpha: 0.7)
-                        : Colors.white.withValues(alpha: 0.6),
+                        ? AppTheme.textOnPrimary.withValues(alpha: 0.7)
+                        : AppTheme.textTertiary,
                     fontSize: 10,
                   ),
                 ),
@@ -558,7 +560,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
         Text(
           'Select Days',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: AppTheme.textSecondary,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -576,13 +578,13 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                 height: 44,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.1),
+                      ? AppTheme.primaryColor
+                      : AppTheme.cardColor,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.2),
+                        ? AppTheme.primaryColor
+                        : AppTheme.textTertiary.withValues(alpha: 0.2),
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -591,8 +593,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                   _dayLabels[index],
                   style: TextStyle(
                     color: isSelected
-                        ? AppTheme.primaryColor
-                        : Colors.white.withValues(alpha: 0.8),
+                        ? AppTheme.textOnPrimary
+                        : AppTheme.textSecondary,
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   ),

@@ -91,7 +91,7 @@ class EventCategoryChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? category.color
-              : category.color.withValues(alpha: 0.2),
+              : category.color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
           border: isSelected
               ? null
@@ -118,7 +118,7 @@ class EventCategoryChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? category.color
-              : Colors.white.withValues(alpha: 0.1),
+              : category.color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
           border: Border.all(
             color: isSelected
@@ -126,6 +126,15 @@ class EventCategoryChip extends StatelessWidget {
                 : category.color.withValues(alpha: 0.5),
             width: 1.5,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: category.color.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -143,7 +152,7 @@ class EventCategoryChip extends StatelessWidget {
               Text(
                 category.label,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.8),
+                  color: isSelected ? Colors.white : AppTheme.textPrimary,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -212,9 +221,9 @@ class CategoryFilterBar extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -222,13 +231,13 @@ class CategoryFilterBar extends StatelessWidget {
                     Icon(
                       Icons.close,
                       size: 16,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: AppTheme.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       'Clear',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: AppTheme.textSecondary,
                         fontSize: 13,
                       ),
                     ),

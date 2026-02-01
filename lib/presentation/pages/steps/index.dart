@@ -15,32 +15,28 @@ class StepsPage extends StatelessWidget {
     final stepRecords = repository.stepRecords;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
-          child: Column(
-            children: [
-              _buildAppBar(context, padding),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(padding),
-                    child: Column(
-                      children: [
-                        _buildTodayProgress(todaySteps, screenWidth, padding),
-                        SizedBox(height: padding),
-                        _buildStatsRow(todaySteps, padding),
-                        SizedBox(height: padding),
-                        _buildWeeklyChart(stepRecords, padding),
-                      ],
-                    ),
+        child: Column(
+          children: [
+            _buildAppBar(context, padding),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
+                    children: [
+                      _buildTodayProgress(todaySteps, screenWidth, padding),
+                      SizedBox(height: padding),
+                      _buildStatsRow(todaySteps, padding),
+                      SizedBox(height: padding),
+                      _buildWeeklyChart(stepRecords, padding),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -53,13 +49,13 @@ class StepsPage extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           ),
           const SizedBox(width: 8),
           const Text(
             'Steps',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -76,17 +72,13 @@ class StepsPage extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.all(padding * 1.5),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         children: [
           const Text(
             'Today\'s Steps',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -101,20 +93,20 @@ class StepsPage extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.directions_walk, color: Colors.white, size: 32),
+                    const Icon(Icons.directions_walk, color: AppTheme.primaryColor, size: 32),
                     const SizedBox(height: 8),
                     Text(
                       _formatNumber(steps),
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontSize: 40,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       'of ${_formatNumber(goal)}',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
                         fontSize: 14,
                       ),
                     ),
@@ -128,8 +120,8 @@ class StepsPage extends StatelessWidget {
             progress >= 1.0
                 ? 'Goal achieved! Keep it up!'
                 : '${_formatNumber(goal - steps)} steps to go',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
               fontSize: 16,
             ),
           ),
@@ -144,11 +136,7 @@ class StepsPage extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -163,20 +151,20 @@ class StepsPage extends StatelessWidget {
   Widget _buildStatItem(IconData icon, String value, String label) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 24),
+        Icon(icon, color: AppTheme.primaryColor, size: 24),
         const SizedBox(height: 8),
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 12,
           ),
         ),
@@ -211,7 +199,7 @@ class StepsPage extends StatelessWidget {
         const Text(
           'This Week',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -219,11 +207,7 @@ class StepsPage extends StatelessWidget {
         const SizedBox(height: 16),
         Container(
           padding: EdgeInsets.all(padding),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-          ),
+          decoration: AppTheme.cardDecoration(),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -237,7 +221,7 @@ class StepsPage extends StatelessWidget {
                     width: 24,
                     height: height,
                     decoration: BoxDecoration(
-                      color: isToday ? Colors.white : Colors.white.withValues(alpha: 0.4),
+                      color: isToday ? AppTheme.primaryColor : AppTheme.primaryColor.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -245,7 +229,7 @@ class StepsPage extends StatelessWidget {
                   Text(
                     entry.key,
                     style: TextStyle(
-                      color: isToday ? Colors.white : Colors.white.withValues(alpha: 0.7),
+                      color: isToday ? AppTheme.textPrimary : AppTheme.textSecondary,
                       fontSize: 12,
                       fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -283,7 +267,7 @@ class _StepsProgressPainter extends CustomPainter {
     final radius = size.width / 2 - 10;
 
     final bgPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.2)
+      ..color = AppTheme.primaryColor.withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 12
       ..strokeCap = StrokeCap.round;
@@ -291,7 +275,7 @@ class _StepsProgressPainter extends CustomPainter {
     canvas.drawCircle(center, radius, bgPaint);
 
     final progressPaint = Paint()
-      ..color = Colors.white
+      ..color = AppTheme.primaryColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 12
       ..strokeCap = StrokeCap.round;

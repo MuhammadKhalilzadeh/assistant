@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:assistant/data/mock/models/weather_forecast_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class WeatherConditionIcon extends StatefulWidget {
@@ -108,16 +109,16 @@ class _WeatherIconPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width * 0.25;
 
-    // Sun circle
+    // Sun circle with red accent
     final sunPaint = Paint()
-      ..color = Colors.amber
+      ..color = AppTheme.primaryColor
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(center, radius, sunPaint);
 
     // Sun rays with rotation animation
     final rayPaint = Paint()
-      ..color = Colors.amber
+      ..color = AppTheme.primaryLight
       ..strokeWidth = size.width * 0.04
       ..strokeCap = StrokeCap.round;
 
@@ -142,7 +143,7 @@ class _WeatherIconPainter extends CustomPainter {
 
   void _paintCloudy(Canvas canvas, Size size) {
     final cloudPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.9)
+      ..color = AppTheme.textSecondary.withValues(alpha: 0.6)
       ..style = PaintingStyle.fill;
 
     // Animate cloud drift
@@ -184,14 +185,14 @@ class _WeatherIconPainter extends CustomPainter {
   void _paintRainy(Canvas canvas, Size size) {
     // Draw cloud
     final cloudPaint = Paint()
-      ..color = Colors.grey.shade400
+      ..color = AppTheme.textSecondary.withValues(alpha: 0.5)
       ..style = PaintingStyle.fill;
 
     _drawCloud(canvas, size, Offset(0, -size.height * 0.1), cloudPaint);
 
-    // Draw rain drops
+    // Draw rain drops with primary color accent
     final rainPaint = Paint()
-      ..color = Colors.lightBlue.shade300
+      ..color = AppTheme.infoColor.withValues(alpha: 0.8)
       ..strokeWidth = size.width * 0.03
       ..strokeCap = StrokeCap.round;
 
@@ -213,16 +214,16 @@ class _WeatherIconPainter extends CustomPainter {
   void _paintStormy(Canvas canvas, Size size) {
     // Draw dark cloud
     final cloudPaint = Paint()
-      ..color = Colors.grey.shade600
+      ..color = AppTheme.textSecondary.withValues(alpha: 0.7)
       ..style = PaintingStyle.fill;
 
     _drawCloud(canvas, size, Offset(0, -size.height * 0.1), cloudPaint);
 
-    // Lightning flash effect
+    // Lightning flash effect with primary color
     final flashOpacity = ((math.sin(animationValue * 8 * math.pi) + 1) / 2);
     if (flashOpacity > 0.7) {
       final lightningPaint = Paint()
-        ..color = Colors.yellow.withValues(alpha: flashOpacity)
+        ..color = AppTheme.warningColor.withValues(alpha: flashOpacity)
         ..strokeWidth = size.width * 0.04
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
@@ -238,7 +239,7 @@ class _WeatherIconPainter extends CustomPainter {
 
     // Rain
     final rainPaint = Paint()
-      ..color = Colors.lightBlue.shade400
+      ..color = AppTheme.infoColor.withValues(alpha: 0.7)
       ..strokeWidth = size.width * 0.025
       ..strokeCap = StrokeCap.round;
 
@@ -258,14 +259,14 @@ class _WeatherIconPainter extends CustomPainter {
   void _paintSnowy(Canvas canvas, Size size) {
     // Draw cloud
     final cloudPaint = Paint()
-      ..color = Colors.grey.shade300
+      ..color = AppTheme.textSecondary.withValues(alpha: 0.4)
       ..style = PaintingStyle.fill;
 
     _drawCloud(canvas, size, Offset(0, -size.height * 0.1), cloudPaint);
 
-    // Draw snowflakes
+    // Draw snowflakes with subtle primary tint
     final snowPaint = Paint()
-      ..color = Colors.white
+      ..color = AppTheme.textSecondary.withValues(alpha: 0.6)
       ..style = PaintingStyle.fill;
 
     final flakeCount = 6;
@@ -285,19 +286,19 @@ class _WeatherIconPainter extends CustomPainter {
   }
 
   void _paintPartlyCloudy(Canvas canvas, Size size) {
-    // Draw sun behind cloud
+    // Draw sun behind cloud with primary color
     final sunCenter = Offset(size.width * 0.65, size.height * 0.35);
     final sunRadius = size.width * 0.18;
 
     final sunPaint = Paint()
-      ..color = Colors.amber
+      ..color = AppTheme.primaryColor
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(sunCenter, sunRadius, sunPaint);
 
     // Sun rays
     final rayPaint = Paint()
-      ..color = Colors.amber.withValues(alpha: 0.8)
+      ..color = AppTheme.primaryLight.withValues(alpha: 0.8)
       ..strokeWidth = size.width * 0.025
       ..strokeCap = StrokeCap.round;
 
@@ -321,7 +322,7 @@ class _WeatherIconPainter extends CustomPainter {
 
     // Draw cloud in front
     final cloudPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.95)
+      ..color = AppTheme.textSecondary.withValues(alpha: 0.5)
       ..style = PaintingStyle.fill;
 
     final drift = math.sin(animationValue * 2 * math.pi) * size.width * 0.02;

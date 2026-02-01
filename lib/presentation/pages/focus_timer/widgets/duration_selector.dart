@@ -43,9 +43,9 @@ class DurationSelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,14 +54,14 @@ class DurationSelector extends StatelessWidget {
             children: [
               Icon(
                 Icons.timer_outlined,
-                color: Colors.white.withValues(alpha: 0.8),
+                color: AppTheme.primaryColor,
                 size: 18,
               ),
               const SizedBox(width: 8),
               Text(
                 _label,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -152,19 +152,19 @@ class _DurationChipState extends State<_DurationChip>
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
                 color: widget.isSelected
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.1),
+                    ? AppTheme.primaryColor
+                    : AppTheme.backgroundColor,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: widget.isSelected
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.3),
+                      ? AppTheme.primaryColor
+                      : AppTheme.textTertiary.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
                 boxShadow: widget.isSelected
                     ? [
                         BoxShadow(
-                          color: Colors.white.withValues(alpha: 0.3),
+                          color: AppTheme.primaryColor.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -175,8 +175,8 @@ class _DurationChipState extends State<_DurationChip>
                 '${widget.duration} min',
                 style: TextStyle(
                   color: widget.isSelected
-                      ? AppTheme.primaryColor
-                      : Colors.white,
+                      ? Colors.white
+                      : AppTheme.textPrimary,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),

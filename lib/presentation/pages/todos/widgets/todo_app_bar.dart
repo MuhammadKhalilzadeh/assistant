@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class TodoAppBar extends StatefulWidget {
@@ -74,11 +75,18 @@ class _TodoAppBarState extends State<TodoAppBar>
       child: Row(
         children: [
           // Back button
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: AppTheme.cardShadow,
+            ),
+            child: IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           // Title or Search field
           Expanded(
             child: AnimatedSwitcher(
@@ -100,24 +108,32 @@ class _TodoAppBarState extends State<TodoAppBar>
                   : _buildTitle(),
             ),
           ),
+          const SizedBox(width: 8),
           // Search toggle button
-          IconButton(
-            onPressed: widget.onSearchToggle,
-            icon: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              transitionBuilder: (child, animation) {
-                return RotationTransition(
-                  turns: Tween(begin: 0.5, end: 1.0).animate(animation),
-                  child: FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  ),
-                );
-              },
-              child: Icon(
-                widget.isSearching ? Icons.close : Icons.search,
-                key: ValueKey(widget.isSearching),
-                color: Colors.white,
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: AppTheme.cardShadow,
+            ),
+            child: IconButton(
+              onPressed: widget.onSearchToggle,
+              icon: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (child, animation) {
+                  return RotationTransition(
+                    turns: Tween(begin: 0.5, end: 1.0).animate(animation),
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Icon(
+                  widget.isSearching ? Icons.close : Icons.search,
+                  key: ValueKey(widget.isSearching),
+                  color: AppTheme.primaryColor,
+                ),
               ),
             ),
           ),
@@ -131,7 +147,7 @@ class _TodoAppBarState extends State<TodoAppBar>
       'Tasks',
       key: ValueKey('title'),
       style: TextStyle(
-        color: Colors.white,
+        color: AppTheme.textPrimary,
         fontSize: 24,
         fontWeight: FontWeight.bold,
       ),
@@ -143,28 +159,29 @@ class _TodoAppBarState extends State<TodoAppBar>
       key: const ValueKey('search'),
       height: 44,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
+          color: Colors.grey.shade200,
         ),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: TextField(
         controller: _searchController,
         autofocus: true,
         onChanged: _onSearchTextChanged,
         style: const TextStyle(
-          color: Colors.white,
+          color: AppTheme.textPrimary,
           fontSize: 16,
         ),
         decoration: InputDecoration(
           hintText: 'Search tasks...',
-          hintStyle: TextStyle(
-            color: Colors.white.withValues(alpha: 0.5),
+          hintStyle: const TextStyle(
+            color: AppTheme.textTertiary,
           ),
-          prefixIcon: Icon(
+          prefixIcon: const Icon(
             Icons.search,
-            color: Colors.white.withValues(alpha: 0.5),
+            color: AppTheme.primaryColor,
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(

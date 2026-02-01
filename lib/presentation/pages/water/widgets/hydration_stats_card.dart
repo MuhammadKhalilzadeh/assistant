@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:assistant/data/mock/models/water_log_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// 2x2 grid displaying weekly hydration statistics with animations
 class HydrationStatsCard extends StatelessWidget {
@@ -19,9 +20,9 @@ class HydrationStatsCard extends StatelessWidget {
     Widget content = Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,14 +31,14 @@ class HydrationStatsCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.analytics_outlined,
-                color: Colors.white.withValues(alpha: 0.8),
+                color: AppTheme.textSecondary,
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Weekly Stats',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -50,7 +51,7 @@ class HydrationStatsCard extends StatelessWidget {
               Expanded(
                 child: _StatItem(
                   icon: Icons.water_drop,
-                  iconColor: const Color(0xFF06B6D4),
+                  iconColor: AppTheme.primaryColor,
                   label: 'Daily Avg',
                   value: '${stats.weeklyAverageMl.toInt()}',
                   unit: 'ml',
@@ -60,7 +61,7 @@ class HydrationStatsCard extends StatelessWidget {
               Expanded(
                 child: _StatItem(
                   icon: Icons.local_fire_department,
-                  iconColor: const Color(0xFFEF4444),
+                  iconColor: AppTheme.errorColor,
                   label: 'Streak',
                   value: '${stats.currentStreak}',
                   unit: 'days',
@@ -74,7 +75,7 @@ class HydrationStatsCard extends StatelessWidget {
               Expanded(
                 child: _StatItem(
                   icon: Icons.emoji_events,
-                  iconColor: const Color(0xFFF59E0B),
+                  iconColor: AppTheme.warningColor,
                   label: 'Best Streak',
                   value: '${stats.bestStreak}',
                   unit: 'days',
@@ -84,7 +85,7 @@ class HydrationStatsCard extends StatelessWidget {
               Expanded(
                 child: _StatItem(
                   icon: Icons.check_circle,
-                  iconColor: const Color(0xFF10B981),
+                  iconColor: AppTheme.successColor,
                   label: 'Completion',
                   value: '${(stats.goalCompletionRate * 100).toInt()}',
                   unit: '%',
@@ -164,7 +165,7 @@ class _StatItemState extends State<_StatItem>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -175,7 +176,7 @@ class _StatItemState extends State<_StatItem>
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: widget.iconColor.withValues(alpha: 0.2),
+                  color: widget.iconColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -189,7 +190,7 @@ class _StatItemState extends State<_StatItem>
                 child: Text(
                   widget.label,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: AppTheme.textTertiary,
                     fontSize: 11,
                   ),
                   maxLines: 1,
@@ -214,8 +215,8 @@ class _StatItemState extends State<_StatItem>
                     children: [
                       TextSpan(
                         text: '$value',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppTheme.textPrimary,
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
@@ -223,7 +224,7 @@ class _StatItemState extends State<_StatItem>
                       TextSpan(
                         text: ' ${widget.unit}',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: AppTheme.textTertiary,
                           fontSize: 12,
                         ),
                       ),

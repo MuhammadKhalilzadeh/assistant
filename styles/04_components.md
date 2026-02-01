@@ -7,15 +7,15 @@ This document covers the styling rules for all reusable components in the app.
 ### CustomButton
 Location: `lib/presentation/widgets/buttons/custom_button.dart`
 
-#### Default Style (White Background)
+#### Default Style (Red Background)
 ```dart
 CustomButton(
   text: 'Sign In',
   onPressed: () {},
 )
 ```
-- Background: `AppTheme.surfaceColor` (white)
-- Text: `AppTheme.primaryColor` (indigo)
+- Background: `AppTheme.primaryColor` (Red #D32F2F)
+- Text: `AppTheme.textOnPrimary` (white)
 - Border radius: `AppTheme.borderRadiusMedium` (12px)
 - Padding: 24px horizontal, 16px vertical
 - Font: 16px, weight 600, 0.5 letter spacing
@@ -29,7 +29,7 @@ CustomButton(
   onPressed: () {},
 )
 ```
-- Background: `AppTheme.primaryGradient`
+- Background: `AppTheme.primaryGradient` (Red gradient)
 - Text: `AppTheme.textOnPrimary` (white)
 
 #### With Icon
@@ -65,7 +65,7 @@ CustomButton(
 ### CustomTextField
 Location: `lib/presentation/widgets/textfields/custom_text_field.dart`
 
-Designed for use on gradient backgrounds with glassmorphism effect.
+Designed for use on light backgrounds with clean styling.
 
 #### Default Style
 ```dart
@@ -79,35 +79,36 @@ CustomTextField(
 #### Styling Details
 | Property | Value |
 |----------|-------|
-| Background | `Colors.white.withValues(alpha: 0.15)` |
-| Border (default) | `Colors.white.withValues(alpha: 0.2)`, 1px |
-| Border (focused) | `Colors.white.withValues(alpha: 0.5)`, 2px |
+| Background | `AppTheme.surfaceColor` (white) |
+| Border (default) | `Colors.grey.shade200`, 1px |
+| Border (focused) | `AppTheme.primaryColor` (red), 2px |
 | Border radius | `AppTheme.borderRadiusMedium` (12px) |
-| Text color | `Colors.white` |
-| Hint color | `Colors.white.withValues(alpha: 0.7)` |
-| Label color | `Colors.white` |
-| Icon color | `Colors.white.withValues(alpha: 0.9)` |
+| Text color | `AppTheme.textPrimary` |
+| Hint color | `AppTheme.textTertiary` |
+| Label color | `AppTheme.textPrimary` |
+| Icon color | `AppTheme.textSecondary` |
 | Content padding | 16px horizontal & vertical |
 | Font size | 16px |
 
 #### Focus Animation
 - Duration: 300ms
-- Focus shadow: White at 0.2 alpha, 8px blur, 2px Y offset
+- Focus shadow: Primary color at 0.1 alpha, 8px blur, 2px Y offset
 
 ---
 
 ## Cards
 
-### Glass Effect Cards (on gradients)
+### White Elevated Cards
 15 card variants located in `lib/presentation/widgets/cards/`
 
 #### Common Properties
 | Property | Value |
 |----------|-------|
 | Border radius | 20px (default) |
-| Background | Gradient (primary or secondary) |
+| Background | White (`AppTheme.cardColor`) |
 | Shadow | `AppTheme.cardShadow` |
-| Foreground | White text and icons |
+| Text | Dark (`AppTheme.textPrimary`) |
+| Accent | Red (`AppTheme.primaryColor`) |
 
 #### Card Structure Template
 ```dart
@@ -118,10 +119,7 @@ Material(
     borderRadius: BorderRadius.circular(borderRadius),
     child: Ink(
       decoration: BoxDecoration(
-        gradient: backgroundColor == null
-            ? AppTheme.primaryGradient  // or secondaryGradient
-            : null,
-        color: backgroundColor,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: AppTheme.cardShadow,
       ),
@@ -158,19 +156,19 @@ Row(
 Container(
   padding: EdgeInsets.all(iconSize * 0.3),
   decoration: BoxDecoration(
-    border: Border.all(color: fgColor, width: borderWidth),
+    border: Border.all(color: AppTheme.primaryColor, width: borderWidth),
     borderRadius: BorderRadius.circular(8),
   ),
-  child: Icon(icon, color: fgColor, size: iconSize),
+  child: Icon(icon, color: AppTheme.primaryColor, size: iconSize),
 )
 ```
 
-#### Filled Icon Container (Weather)
+#### Filled Icon Container
 ```dart
 Container(
   padding: EdgeInsets.all(padding),
   decoration: BoxDecoration(
-    color: fgColor,  // White
+    color: AppTheme.primaryColor.withValues(alpha: 0.1),
     borderRadius: BorderRadius.circular(containerRadius),
   ),
   child: Icon(icon, color: AppTheme.primaryColor, size: iconSize),
@@ -183,10 +181,10 @@ Container(
   width: buttonSize,
   height: buttonSize,
   decoration: BoxDecoration(
-    color: fgColor.withValues(alpha: 0.2),  // White 20%
+    color: AppTheme.primaryColor.withValues(alpha: 0.1),
     shape: BoxShape.circle,
   ),
-  child: Icon(Icons.add, color: fgColor, size: iconSize),
+  child: Icon(Icons.add, color: AppTheme.primaryColor, size: iconSize),
 )
 ```
 
@@ -198,13 +196,13 @@ Container(
     vertical: verticalPadding,      // 6-10px
   ),
   decoration: BoxDecoration(
-    color: fgColor,  // White
+    color: AppTheme.primaryColor,
     borderRadius: BorderRadius.circular(12),
   ),
   child: Text(
     'H:28° L:18°',
     style: TextStyle(
-      color: bgColor,  // Gradient color
+      color: Colors.white,
       fontSize: badgeFontSize,
       fontWeight: FontWeight.w600,
     ),
@@ -216,15 +214,15 @@ Container(
 
 ## Summary Cards (inside detail pages)
 
-Glass-effect card for displaying aggregated information:
+White elevated card for displaying aggregated information:
 
 ```dart
 Container(
   padding: EdgeInsets.all(padding),
   decoration: BoxDecoration(
-    color: Colors.white.withValues(alpha: 0.15),
+    color: Colors.white,
     borderRadius: BorderRadius.circular(20),
-    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+    boxShadow: AppTheme.cardShadow,
   ),
   child: /* content */,
 )
@@ -240,9 +238,9 @@ For todo items, message items, etc.:
 Container(
   margin: const EdgeInsets.only(bottom: 12),
   decoration: BoxDecoration(
-    color: Colors.white.withValues(alpha: 0.15),
+    color: Colors.white,
     borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+    boxShadow: AppTheme.cardShadow,
   ),
   child: ListTile(
     contentPadding: EdgeInsets.symmetric(horizontal: padding, vertical: 8),
@@ -255,7 +253,7 @@ Container(
 
 ## Checkbox Style
 
-Custom circular checkbox on gradient backgrounds:
+Custom circular checkbox on light backgrounds:
 
 ```dart
 Container(
@@ -264,15 +262,15 @@ Container(
   decoration: BoxDecoration(
     shape: BoxShape.circle,
     color: isCompleted
-        ? Colors.white
-        : Colors.white.withValues(alpha: 0.2),
+        ? AppTheme.successColor  // Green for completed
+        : Colors.transparent,
     border: Border.all(
-      color: Colors.white,
+      color: isCompleted ? AppTheme.successColor : AppTheme.textTertiary,
       width: 2,
     ),
   ),
   child: isCompleted
-      ? Icon(Icons.check, color: AppTheme.primaryColor, size: 18)
+      ? Icon(Icons.check, color: Colors.white, size: 18)
       : null,
 )
 ```
@@ -287,8 +285,8 @@ ClipRRect(
   borderRadius: BorderRadius.circular(8),
   child: LinearProgressIndicator(
     value: progress,
-    backgroundColor: Colors.white.withValues(alpha: 0.2),
-    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+    backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
+    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
     minHeight: 8,
   ),
 )
@@ -301,7 +299,7 @@ SizedBox(
   width: 20,
   child: CircularProgressIndicator(
     strokeWidth: 2,
-    valueColor: AlwaysStoppedAnimation<Color>(buttonTextColor),
+    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
   ),
 )
 ```
@@ -313,13 +311,13 @@ Container(
   height: 60,
   decoration: BoxDecoration(
     shape: BoxShape.circle,
-    color: Colors.white.withValues(alpha: 0.2),
+    color: AppTheme.primaryColor.withValues(alpha: 0.1),
   ),
   child: Center(
     child: Text(
       '75%',
       style: TextStyle(
-        color: Colors.white,
+        color: AppTheme.primaryColor,
         fontSize: 16,
         fontWeight: FontWeight.bold,
       ),
@@ -350,12 +348,13 @@ Container(
 | Property | Value |
 |----------|-------|
 | Background | `AppTheme.surfaceColor` (white) |
-| Selected color | `AppTheme.primaryColor` |
+| Selected color | `AppTheme.primaryColor` (red) |
 | Unselected color | `AppTheme.textSecondary` |
 | Selected label | 12px, weight 600 |
 | Unselected label | 12px, weight 400 |
 | Elevation | 0 (uses boxShadow instead) |
 | Corner radius | 16px top corners only |
+| Selected indicator | Red pill background |
 
 ---
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 class CaloriesAppBar extends StatelessWidget {
   final int currentCalories;
@@ -18,13 +19,13 @@ class CaloriesAppBar extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppTheme.cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              boxShadow: AppTheme.cardShadow,
             ),
             child: IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
             ),
           ),
           const SizedBox(width: 16),
@@ -32,7 +33,7 @@ class CaloriesAppBar extends StatelessWidget {
             child: Text(
               'Calorie Tracker',
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -41,23 +42,23 @@ class CaloriesAppBar extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.2)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.local_fire_department,
-                  color: Colors.orange.shade300,
+                  color: AppTheme.primaryColor,
                   size: 18,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   '$currentCalories',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.primaryColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -68,13 +69,13 @@ class CaloriesAppBar extends StatelessWidget {
           const SizedBox(width: 8),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppTheme.cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              boxShadow: AppTheme.cardShadow,
             ),
             child: IconButton(
               onPressed: onSettingsTap,
-              icon: const Icon(Icons.settings_outlined, color: Colors.white),
+              icon: const Icon(Icons.settings_outlined, color: AppTheme.textPrimary),
             ),
           ),
         ],

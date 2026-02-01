@@ -1,44 +1,44 @@
 import 'package:flutter/material.dart';
 
 /// Modern, professional theme configuration for the Assistant app
-/// 
+///
 /// This theme provides a cohesive design system with:
-/// - Modern color palette with gradients
+/// - Clean red/white color palette
 /// - Material Design 3 principles
 /// - Professional typography
 /// - Consistent spacing and elevations
 class AppTheme {
-  // Primary Color Palette - Modern gradient-based design
-  static const Color primaryColor = Color(0xFF6366F1); // Indigo
-  static const Color primaryDark = Color(0xFF4F46E5);
-  static const Color primaryLight = Color(0xFF818CF8);
-  
+  // Primary Color Palette - Red-based design
+  static const Color primaryColor = Color(0xFFD32F2F); // Red 700
+  static const Color primaryDark = Color(0xFFB71C1C); // Red 900
+  static const Color primaryLight = Color(0xFFEF5350); // Red 400
+
   // Secondary Colors
-  static const Color secondaryColor = Color(0xFFEC4899); // Pink
-  static const Color accentColor = Color(0xFF10B981); // Emerald
-  
-  // Gradient Colors
+  static const Color secondaryColor = Color(0xFFFF8A80); // Red Accent 100
+  static const Color accentColor = Color(0xFFFF5252); // Red Accent 200
+
+  // Gradient Colors (subtle, used sparingly for headers/accents)
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF6366F1), // Indigo
-      Color(0xFF8B5CF6), // Purple
-      Color(0xFFEC4899), // Pink
+      Color(0xFFD32F2F), // Red 700
+      Color(0xFFE53935), // Red 600
     ],
   );
-  
+
+  // Light red gradient for subtle backgrounds
   static const LinearGradient secondaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF10B981), // Emerald
-      Color(0xFF06B6D4), // Cyan
+      Color(0xFFFFEBEE), // Red 50
+      Color(0xFFFFCDD2), // Red 100
     ],
   );
-  
+
   // Neutral Colors
-  static const Color backgroundColor = Color(0xFFF8FAFC);
+  static const Color backgroundColor = Color(0xFFFFF5F5); // Light pink tint
   static const Color surfaceColor = Color(0xFFFFFFFF);
   static const Color cardColor = Color(0xFFFFFFFF);
   
@@ -309,7 +309,7 @@ class AppTheme {
     );
   }
   
-  /// Helper method to create glassmorphism effect
+  /// Helper method to create glassmorphism effect (legacy, prefer elevatedCard)
   static Widget glassmorphismContainer({
     required Widget child,
     double? borderRadius,
@@ -337,5 +337,37 @@ class AppTheme {
       ),
     );
   }
+
+  /// Helper method to create elevated white card with shadow
+  static BoxDecoration get elevatedCardDecoration => BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(borderRadiusCard),
+        boxShadow: cardShadow,
+      );
+
+  /// Helper method to create elevated card container
+  static Widget elevatedCard({
+    required Widget child,
+    double? borderRadius,
+    EdgeInsetsGeometry? padding,
+    Color? color,
+  }) {
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: color ?? cardColor,
+        borderRadius: BorderRadius.circular(borderRadius ?? borderRadiusCard),
+        boxShadow: cardShadow,
+      ),
+      child: child,
+    );
+  }
+
+  /// Card decoration for standard white cards with subtle shadow
+  static BoxDecoration cardDecoration({double? borderRadius}) => BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(borderRadius ?? borderRadiusCard),
+        boxShadow: cardShadow,
+      );
 }
 

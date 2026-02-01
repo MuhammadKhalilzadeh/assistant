@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/weather_forecast_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class WeatherAlertsCard extends StatefulWidget {
@@ -38,11 +39,11 @@ class _WeatherAlertsCardState extends State<WeatherAlertsCard> {
   Color _getSeverityColor(AlertSeverity severity) {
     switch (severity) {
       case AlertSeverity.low:
-        return Colors.yellow;
+        return AppTheme.warningColor;
       case AlertSeverity.moderate:
         return Colors.orange;
       case AlertSeverity.high:
-        return Colors.red;
+        return AppTheme.errorColor;
       case AlertSeverity.extreme:
         return Colors.purple;
     }
@@ -76,9 +77,9 @@ class _WeatherAlertsCardState extends State<WeatherAlertsCard> {
     Widget card = Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,14 +88,14 @@ class _WeatherAlertsCardState extends State<WeatherAlertsCard> {
             children: [
               Icon(
                 Icons.warning_amber,
-                color: Colors.orange,
+                color: AppTheme.warningColor,
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Weather Alerts',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -103,13 +104,13 @@ class _WeatherAlertsCardState extends State<WeatherAlertsCard> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.3),
+                  color: AppTheme.warningColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   '${widget.alerts.length}',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -158,10 +159,10 @@ class _WeatherAlertsCardState extends State<WeatherAlertsCard> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: severityColor.withValues(alpha: 0.15),
+          color: severityColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: severityColor.withValues(alpha: 0.4),
+            color: severityColor.withValues(alpha: 0.3),
           ),
         ),
         child: Column(
@@ -172,7 +173,7 @@ class _WeatherAlertsCardState extends State<WeatherAlertsCard> {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: severityColor.withValues(alpha: 0.3),
+                    color: severityColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -188,8 +189,8 @@ class _WeatherAlertsCardState extends State<WeatherAlertsCard> {
                     children: [
                       Text(
                         alert.title,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppTheme.textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
@@ -197,7 +198,7 @@ class _WeatherAlertsCardState extends State<WeatherAlertsCard> {
                       Text(
                         _formatTimeRange(alert.startTime, alert.endTime),
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: AppTheme.textSecondary,
                           fontSize: 11,
                         ),
                       ),
@@ -208,7 +209,7 @@ class _WeatherAlertsCardState extends State<WeatherAlertsCard> {
                   isExpanded
                       ? Icons.keyboard_arrow_up
                       : Icons.keyboard_arrow_down,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: AppTheme.textSecondary,
                   size: 20,
                 ),
               ],
@@ -220,7 +221,7 @@ class _WeatherAlertsCardState extends State<WeatherAlertsCard> {
                 child: Text(
                   alert.description,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.85),
+                    color: AppTheme.textSecondary,
                     fontSize: 13,
                   ),
                 ),

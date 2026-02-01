@@ -31,34 +31,30 @@ class HeartRatePage extends StatelessWidget {
     final records = repository.heartRateRecords;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
-          child: Column(
-            children: [
-              _buildAppBar(context, padding),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(padding),
-                    child: Column(
-                      children: [
-                        _buildCurrentHeartRate(latestRecord, screenWidth, padding),
-                        SizedBox(height: padding),
-                        _buildStatsRow(latestRecord, restingBpm, padding),
-                        SizedBox(height: padding),
-                        _buildZonesInfo(padding),
-                        SizedBox(height: padding),
-                        _buildHistory(records, padding),
-                      ],
-                    ),
+        child: Column(
+          children: [
+            _buildAppBar(context, padding),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
+                    children: [
+                      _buildCurrentHeartRate(latestRecord, screenWidth, padding),
+                      SizedBox(height: padding),
+                      _buildStatsRow(latestRecord, restingBpm, padding),
+                      SizedBox(height: padding),
+                      _buildZonesInfo(padding),
+                      SizedBox(height: padding),
+                      _buildHistory(records, padding),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -71,13 +67,13 @@ class HeartRatePage extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           ),
           const SizedBox(width: 8),
           const Text(
             'Heart Rate',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -94,17 +90,13 @@ class HeartRatePage extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.all(padding * 1.5),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         children: [
           const Text(
             'Current Heart Rate',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -128,7 +120,7 @@ class HeartRatePage extends StatelessWidget {
                       Text(
                         '$bpm',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontSize: 64,
                           fontWeight: FontWeight.bold,
                           height: 1,
@@ -139,7 +131,7 @@ class HeartRatePage extends StatelessWidget {
                         child: Text(
                           'BPM',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.textSecondary,
                             fontSize: 20,
                             fontWeight: FontWeight.w300,
                           ),
@@ -169,8 +161,8 @@ class HeartRatePage extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'Last updated ${_formatTimeAgo(record.recordedAt)}',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
+              style: const TextStyle(
+                color: AppTheme.textTertiary,
                 fontSize: 12,
               ),
             ),
@@ -183,11 +175,7 @@ class HeartRatePage extends StatelessWidget {
   Widget _buildStatsRow(HeartRateRecordModel? latest, int resting, double padding) {
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -202,20 +190,20 @@ class HeartRatePage extends StatelessWidget {
   Widget _buildStatItem(IconData icon, String value, String label) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 24),
+        Icon(icon, color: AppTheme.primaryColor, size: 24),
         const SizedBox(height: 8),
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 12,
           ),
         ),
@@ -234,18 +222,14 @@ class HeartRatePage extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Heart Rate Zones',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -268,15 +252,15 @@ class HeartRatePage extends StatelessWidget {
                   child: Text(
                     zone.$3,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
                 Text(
                   zone.$2,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
                     fontSize: 14,
                   ),
                 ),
@@ -299,7 +283,7 @@ class HeartRatePage extends StatelessWidget {
         const Text(
           'Recent Readings',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -308,10 +292,7 @@ class HeartRatePage extends StatelessWidget {
         ...records.take(10).map((record) => Container(
           margin: const EdgeInsets.only(bottom: 8),
           padding: EdgeInsets.all(padding),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
+          decoration: AppTheme.cardDecoration(),
           child: Row(
             children: [
               Icon(
@@ -324,7 +305,7 @@ class HeartRatePage extends StatelessWidget {
                 child: Text(
                   '${record.bpm} BPM',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -347,8 +328,8 @@ class HeartRatePage extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 _formatTimeAgo(record.recordedAt),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
+                style: const TextStyle(
+                  color: AppTheme.textTertiary,
                   fontSize: 12,
                 ),
               ),

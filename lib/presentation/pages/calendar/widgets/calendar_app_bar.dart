@@ -61,14 +61,14 @@ class CalendarAppBar extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: onBackPressed ?? () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
               ),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
                   'Calendar',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -148,23 +148,26 @@ class _TodayButtonState extends State<_TodayButton>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: AppTheme.primaryColor,
             borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: Row(
+          child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: AppTheme.accentColor,
-                  shape: BoxShape.circle,
-                ),
+              Icon(
+                Icons.today,
+                size: 16,
+                color: Colors.white,
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Today',
                 style: TextStyle(
                   color: Colors.white,
@@ -194,7 +197,7 @@ class _ViewToggle extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
       ),
       child: Row(
@@ -208,9 +211,10 @@ class _ViewToggle extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Colors.white
+                      ? AppTheme.cardColor
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppTheme.borderRadiusSmall),
+                  boxShadow: isSelected ? AppTheme.cardShadow : null,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -220,7 +224,7 @@ class _ViewToggle extends StatelessWidget {
                       size: 16,
                       color: isSelected
                           ? AppTheme.primaryColor
-                          : Colors.white.withValues(alpha: 0.6),
+                          : AppTheme.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -228,7 +232,7 @@ class _ViewToggle extends StatelessWidget {
                       style: TextStyle(
                         color: isSelected
                             ? AppTheme.primaryColor
-                            : Colors.white.withValues(alpha: 0.6),
+                            : AppTheme.textSecondary,
                         fontSize: 12,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                       ),

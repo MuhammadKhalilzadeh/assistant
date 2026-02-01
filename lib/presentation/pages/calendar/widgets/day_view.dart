@@ -130,8 +130,9 @@ class _DayViewState extends State<DayView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Row(
         children: [
@@ -142,7 +143,7 @@ class _DayViewState extends State<DayView> {
                 curve: Curves.easeOut,
               );
             },
-            icon: const Icon(Icons.chevron_left, color: Colors.white),
+            icon: const Icon(Icons.chevron_left, color: AppTheme.textPrimary),
             visualDensity: VisualDensity.compact,
           ),
           Expanded(
@@ -151,7 +152,7 @@ class _DayViewState extends State<DayView> {
                 Text(
                   _formatDate(widget.selectedDate),
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -171,7 +172,7 @@ class _DayViewState extends State<DayView> {
                       child: Text(
                         'Go to today',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: AppTheme.primaryColor,
                           fontSize: 12,
                           decoration: TextDecoration.underline,
                         ),
@@ -188,7 +189,7 @@ class _DayViewState extends State<DayView> {
                 curve: Curves.easeOut,
               );
             },
-            icon: const Icon(Icons.chevron_right, color: Colors.white),
+            icon: const Icon(Icons.chevron_right, color: AppTheme.textPrimary),
             visualDensity: VisualDensity.compact,
           ),
         ],
@@ -207,16 +208,17 @@ class _DayViewState extends State<DayView> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'All Day',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: AppTheme.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -279,8 +281,8 @@ class _DayViewState extends State<DayView> {
                 padding: const EdgeInsets.only(right: 12, top: 4),
                 child: Text(
                   _formatHour(hour),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
+                  style: const TextStyle(
+                    color: AppTheme.textTertiary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -293,11 +295,11 @@ class _DayViewState extends State<DayView> {
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.1),
+                      color: Colors.grey.shade200,
                       width: 1,
                     ),
                     left: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.1),
+                      color: Colors.grey.shade200,
                       width: 1,
                     ),
                   ),
@@ -350,7 +352,7 @@ class _DayViewState extends State<DayView> {
           margin: const EdgeInsets.symmetric(vertical: 2),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: eventColor.withValues(alpha: 0.9),
+            color: eventColor,
             borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
             boxShadow: [
               BoxShadow(
@@ -431,11 +433,11 @@ class _DayViewState extends State<DayView> {
             width: 10,
             height: 10,
             decoration: BoxDecoration(
-              color: AppTheme.errorColor,
+              color: AppTheme.primaryColor,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.errorColor.withValues(alpha: 0.4),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.4),
                   blurRadius: 6,
                 ),
               ],
@@ -445,10 +447,10 @@ class _DayViewState extends State<DayView> {
             child: Container(
               height: 2,
               decoration: BoxDecoration(
-                color: AppTheme.errorColor,
+                color: AppTheme.primaryColor,
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.errorColor.withValues(alpha: 0.4),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.4),
                     blurRadius: 4,
                   ),
                 ],

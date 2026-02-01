@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Goal achievement celebration overlay with confetti animation
 class GoalCelebration extends StatefulWidget {
@@ -83,12 +84,12 @@ class _GoalCelebrationState extends State<GoalCelebration>
 
   Color _getRandomColor() {
     final colors = [
-      const Color(0xFF10B981), // Green
-      const Color(0xFF06B6D4), // Cyan
-      const Color(0xFFF59E0B), // Amber
-      const Color(0xFFEC4899), // Pink
-      const Color(0xFF6366F1), // Indigo
-      const Color(0xFFFFFFFF), // White
+      AppTheme.primaryColor, // Red
+      AppTheme.primaryLight, // Light red
+      AppTheme.warningColor, // Amber
+      AppTheme.successColor, // Green
+      AppTheme.infoColor, // Blue
+      AppTheme.cardColor, // White
     ];
     return colors[_random.nextInt(colors.length)];
   }
@@ -134,18 +135,11 @@ class _GoalCelebrationState extends State<GoalCelebration>
                         vertical: 32,
                       ),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFF10B981),
-                            Color(0xFF06B6D4),
-                          ],
-                        ),
+                        color: AppTheme.cardColor,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF10B981).withValues(alpha: 0.4),
+                            color: AppTheme.primaryColor.withValues(alpha: 0.3),
                             blurRadius: 30,
                             spreadRadius: 5,
                           ),
@@ -158,21 +152,21 @@ class _GoalCelebrationState extends State<GoalCelebration>
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: AppTheme.primaryColor.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.emoji_events,
-                              color: Colors.white,
+                              color: AppTheme.primaryColor,
                               size: 48,
                             ),
                           ),
                           const SizedBox(height: 20),
                           // Main text
-                          const Text(
+                          Text(
                             'Goal Achieved!',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppTheme.textPrimary,
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
                             ),
@@ -181,7 +175,7 @@ class _GoalCelebrationState extends State<GoalCelebration>
                           Text(
                             'You\'ve reached your daily hydration goal!',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.9),
+                              color: AppTheme.textSecondary,
                               fontSize: 14,
                             ),
                             textAlign: TextAlign.center,
@@ -195,7 +189,7 @@ class _GoalCelebrationState extends State<GoalCelebration>
                                 padding: const EdgeInsets.symmetric(horizontal: 4),
                                 child: Icon(
                                   Icons.water_drop,
-                                  color: Colors.white.withValues(alpha: 0.8),
+                                  color: AppTheme.primaryColor.withValues(alpha: 0.8),
                                   size: 20,
                                 ),
                               );

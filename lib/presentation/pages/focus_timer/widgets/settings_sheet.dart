@@ -55,8 +55,9 @@ class _SettingsSheetState extends State<SettingsSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: AppTheme.primaryGradient,
+        color: AppTheme.cardColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: AppTheme.elevatedShadow,
       ),
       child: SafeArea(
         child: Column(
@@ -68,7 +69,7 @@ class _SettingsSheetState extends State<SettingsSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: AppTheme.textTertiary.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -80,14 +81,14 @@ class _SettingsSheetState extends State<SettingsSheet> {
                 children: [
                   const Icon(
                     Icons.settings_outlined,
-                    color: Colors.white,
+                    color: AppTheme.primaryColor,
                     size: 24,
                   ),
                   const SizedBox(width: 12),
                   const Text(
                     'Timer Settings',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -98,12 +99,12 @@ class _SettingsSheetState extends State<SettingsSheet> {
                     icon: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: AppTheme.textTertiary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.close,
-                        color: Colors.white,
+                        color: AppTheme.textSecondary,
                         size: 18,
                       ),
                     ),
@@ -120,7 +121,7 @@ class _SettingsSheetState extends State<SettingsSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Duration settings
-                    _SectionHeader(title: 'Durations'),
+                    const _SectionHeader(title: 'Durations'),
                     const SizedBox(height: 12),
 
                     _DurationSlider(
@@ -168,7 +169,7 @@ class _SettingsSheetState extends State<SettingsSheet> {
                     const SizedBox(height: 24),
 
                     // Pomodoro settings
-                    _SectionHeader(title: 'Pomodoro'),
+                    const _SectionHeader(title: 'Pomodoro'),
                     const SizedBox(height: 12),
 
                     _DurationSlider(
@@ -202,7 +203,7 @@ class _SettingsSheetState extends State<SettingsSheet> {
                     const SizedBox(height: 24),
 
                     // Auto-start settings
-                    _SectionHeader(title: 'Auto-start'),
+                    const _SectionHeader(title: 'Auto-start'),
                     const SizedBox(height: 12),
 
                     _ToggleSetting(
@@ -232,7 +233,7 @@ class _SettingsSheetState extends State<SettingsSheet> {
                     const SizedBox(height: 24),
 
                     // Notifications settings
-                    _SectionHeader(title: 'Notifications'),
+                    const _SectionHeader(title: 'Notifications'),
                     const SizedBox(height: 12),
 
                     _ToggleSetting(
@@ -278,8 +279,8 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title.toUpperCase(),
-      style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.6),
+      style: const TextStyle(
+        color: AppTheme.textTertiary,
         fontSize: 12,
         fontWeight: FontWeight.w600,
         letterSpacing: 1,
@@ -315,9 +316,9 @@ class _DurationSlider extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+        border: Border.all(color: AppTheme.textTertiary.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,14 +327,14 @@ class _DurationSlider extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: AppTheme.primaryColor,
                 size: 18,
               ),
               const SizedBox(width: 8),
               Text(
                 label,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -343,13 +344,13 @@ class _DurationSlider extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   unit.isNotEmpty ? '$value $unit' : '$value',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.primaryColor,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -361,10 +362,10 @@ class _DurationSlider extends StatelessWidget {
           SliderTheme(
             data: SliderThemeData(
               trackHeight: 4,
-              activeTrackColor: Colors.white,
-              inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
-              thumbColor: Colors.white,
-              overlayColor: Colors.white.withValues(alpha: 0.2),
+              activeTrackColor: AppTheme.primaryColor,
+              inactiveTrackColor: AppTheme.textTertiary.withValues(alpha: 0.2),
+              thumbColor: AppTheme.primaryColor,
+              overlayColor: AppTheme.primaryColor.withValues(alpha: 0.2),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
             ),
             child: Slider(
@@ -405,15 +406,15 @@ class _ToggleSetting extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+        border: Border.all(color: AppTheme.textTertiary.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
           Icon(
             icon,
-            color: Colors.white.withValues(alpha: 0.7),
+            color: AppTheme.primaryColor,
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -424,7 +425,7 @@ class _ToggleSetting extends StatelessWidget {
                 Text(
                   label,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -432,8 +433,8 @@ class _ToggleSetting extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
+                  style: const TextStyle(
+                    color: AppTheme.textTertiary,
                     fontSize: 12,
                   ),
                 ),
@@ -448,9 +449,9 @@ class _ToggleSetting extends StatelessWidget {
               onChanged(val);
             },
             activeThumbColor: Colors.white,
-            activeTrackColor: const Color(0xFF10B981),
-            inactiveThumbColor: Colors.white.withValues(alpha: 0.8),
-            inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+            activeTrackColor: AppTheme.primaryColor,
+            inactiveThumbColor: AppTheme.textTertiary,
+            inactiveTrackColor: AppTheme.textTertiary.withValues(alpha: 0.3),
           ),
         ],
       ),

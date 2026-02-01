@@ -1,5 +1,6 @@
 import 'package:assistant/data/mock/models/weather_forecast_model.dart';
 import 'package:assistant/data/mock/repositories/mock_repository.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/weather/widgets/sun_times_card.dart';
 import 'package:assistant/presentation/pages/weather/widgets/weather_condition_icon.dart';
 import 'package:flutter/material.dart';
@@ -88,10 +89,10 @@ class WeatherDetailSheet extends StatelessWidget {
   }
 
   Color _getUVColor(int uvIndex) {
-    if (uvIndex <= 2) return Colors.green;
-    if (uvIndex <= 5) return Colors.yellow;
+    if (uvIndex <= 2) return AppTheme.successColor;
+    if (uvIndex <= 5) return AppTheme.warningColor;
     if (uvIndex <= 7) return Colors.orange;
-    if (uvIndex <= 10) return Colors.red;
+    if (uvIndex <= 10) return AppTheme.errorColor;
     return Colors.purple;
   }
 
@@ -109,14 +110,7 @@ class WeatherDetailSheet extends StatelessWidget {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.indigo.shade800,
-                Colors.purple.shade900,
-              ],
-            ),
+            color: AppTheme.backgroundColor,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
@@ -127,7 +121,7 @@ class WeatherDetailSheet extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -166,8 +160,8 @@ class WeatherDetailSheet extends StatelessWidget {
       children: [
         Text(
           _formatDate(daily.date),
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: AppTheme.textPrimary,
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -175,7 +169,7 @@ class WeatherDetailSheet extends StatelessWidget {
         Text(
           weather.location,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: AppTheme.textSecondary,
             fontSize: 14,
           ),
         ),
@@ -187,9 +181,9 @@ class WeatherDetailSheet extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(padding * 1.5),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -203,7 +197,7 @@ class WeatherDetailSheet extends StatelessWidget {
               Text(
                 _getConditionText(daily.condition),
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: AppTheme.textSecondary,
                   fontSize: 16,
                 ),
               ),
@@ -212,8 +206,8 @@ class WeatherDetailSheet extends StatelessWidget {
                 children: [
                   Text(
                     '${daily.high}°',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: AppTheme.textPrimary,
                       fontSize: 42,
                       fontWeight: FontWeight.bold,
                     ),
@@ -221,7 +215,7 @@ class WeatherDetailSheet extends StatelessWidget {
                   Text(
                     ' / ${daily.low}°',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: AppTheme.textSecondary,
                       fontSize: 28,
                     ),
                   ),
@@ -238,17 +232,17 @@ class WeatherDetailSheet extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Day Details',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -297,12 +291,12 @@ class WeatherDetailSheet extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.white.withValues(alpha: 0.8), size: 20),
+          Icon(icon, color: AppTheme.primaryColor, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -311,14 +305,14 @@ class WeatherDetailSheet extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: AppTheme.textSecondary,
                     fontSize: 11,
                   ),
                 ),
                 Text(
                   value,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
@@ -337,7 +331,7 @@ class WeatherDetailSheet extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -368,14 +362,14 @@ class WeatherDetailSheet extends StatelessWidget {
                 Text(
                   'UV Index',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: AppTheme.textSecondary,
                     fontSize: 11,
                   ),
                 ),
                 Text(
                   _getUVLabel(uvIndex),
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
@@ -402,17 +396,17 @@ class WeatherDetailSheet extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Hourly Breakdown',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -430,7 +424,7 @@ class WeatherDetailSheet extends StatelessWidget {
                   margin: const EdgeInsets.only(right: 8),
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: AppTheme.backgroundColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -439,7 +433,7 @@ class WeatherDetailSheet extends StatelessWidget {
                       Text(
                         _formatHour(hour.time),
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: AppTheme.textSecondary,
                           fontSize: 10,
                         ),
                       ),
@@ -450,8 +444,8 @@ class WeatherDetailSheet extends StatelessWidget {
                       ),
                       Text(
                         '${hour.temperature}°',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppTheme.textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),

@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/calorie_entry_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class NutritionStatsCard extends StatelessWidget {
@@ -19,21 +20,21 @@ class NutritionStatsCard extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            color: AppTheme.cardColor,
+            borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.analytics_outlined, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
-                  Text(
+                  Icon(Icons.analytics_outlined, color: AppTheme.primaryColor, size: 20),
+                  const SizedBox(width: 8),
+                  const Text(
                     'Weekly Stats',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -46,7 +47,7 @@ class NutritionStatsCard extends StatelessWidget {
                   Expanded(
                     child: _StatItem(
                       icon: Icons.trending_up,
-                      iconColor: Colors.blue.shade400,
+                      iconColor: AppTheme.infoColor,
                       label: 'Avg Calories',
                       value:
                           '${(stats.weeklyAverageCalories * animation.value).round()}',
@@ -57,7 +58,7 @@ class NutritionStatsCard extends StatelessWidget {
                   Expanded(
                     child: _StatItem(
                       icon: Icons.local_fire_department,
-                      iconColor: Colors.orange.shade400,
+                      iconColor: AppTheme.primaryColor,
                       label: 'Current Streak',
                       value:
                           '${(stats.currentStreak * animation.value).round()} days',
@@ -72,7 +73,7 @@ class NutritionStatsCard extends StatelessWidget {
                   Expanded(
                     child: _StatItem(
                       icon: Icons.emoji_events,
-                      iconColor: Colors.amber.shade400,
+                      iconColor: AppTheme.warningColor,
                       label: 'Best Streak',
                       value:
                           '${(stats.bestStreak * animation.value).round()} days',
@@ -83,7 +84,7 @@ class NutritionStatsCard extends StatelessWidget {
                   Expanded(
                     child: _StatItem(
                       icon: Icons.check_circle_outline,
-                      iconColor: Colors.green.shade400,
+                      iconColor: AppTheme.successColor,
                       label: 'Goal Rate',
                       value:
                           '${(stats.goalCompletionRate * 100 * animation.value).round()}%',
@@ -120,7 +121,7 @@ class _StatItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -129,7 +130,7 @@ class _StatItem extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.2),
+              color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: iconColor, size: 20),
@@ -142,15 +143,15 @@ class _StatItem extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   label,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
                     fontSize: 11,
                   ),
                 ),

@@ -99,34 +99,30 @@ class _WorkoutPageState extends State<WorkoutPage> {
     final sessions = _repository.workoutSessions;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
-          child: Column(
-            children: [
-              _buildAppBar(padding),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(padding),
-                    child: Column(
-                      children: [
-                        _buildTimerCard(screenWidth, padding),
-                        SizedBox(height: padding),
-                        _buildWorkoutTypeSelector(padding),
-                        SizedBox(height: padding),
-                        _buildTodayStats(todayMinutes, todaySessions, padding),
-                        SizedBox(height: padding),
-                        _buildRecentWorkouts(sessions, padding),
-                      ],
-                    ),
+        child: Column(
+          children: [
+            _buildAppBar(padding),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
+                    children: [
+                      _buildTimerCard(screenWidth, padding),
+                      SizedBox(height: padding),
+                      _buildWorkoutTypeSelector(padding),
+                      SizedBox(height: padding),
+                      _buildTodayStats(todayMinutes, todaySessions, padding),
+                      SizedBox(height: padding),
+                      _buildRecentWorkouts(sessions, padding),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -139,13 +135,13 @@ class _WorkoutPageState extends State<WorkoutPage> {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           ),
           const SizedBox(width: 8),
           const Text(
             'Workout',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -161,23 +157,19 @@ class _WorkoutPageState extends State<WorkoutPage> {
 
     return Container(
       padding: EdgeInsets.all(padding * 1.5),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         children: [
           Icon(
             _workoutIcons[_selectedType],
-            color: Colors.white,
+            color: AppTheme.primaryColor,
             size: 48,
           ),
           const SizedBox(height: 8),
           Text(
             _getWorkoutTypeName(_selectedType),
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
               fontSize: 16,
             ),
           ),
@@ -185,7 +177,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
           Text(
             '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
             style: const TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 64,
               fontWeight: FontWeight.bold,
               fontFamily: 'monospace',
@@ -198,11 +190,11 @@ class _WorkoutPageState extends State<WorkoutPage> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.primaryColor,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -210,7 +202,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
               ),
               child: Icon(
                 _isRunning ? Icons.stop : Icons.play_arrow,
-                color: AppTheme.primaryColor,
+                color: Colors.white,
                 size: 40,
               ),
             ),
@@ -223,18 +215,14 @@ class _WorkoutPageState extends State<WorkoutPage> {
   Widget _buildWorkoutTypeSelector(double padding) {
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Workout Type',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -252,7 +240,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
+                    color: isSelected ? AppTheme.primaryColor : AppTheme.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -260,14 +248,14 @@ class _WorkoutPageState extends State<WorkoutPage> {
                     children: [
                       Icon(
                         _workoutIcons[type],
-                        color: isSelected ? AppTheme.primaryColor : Colors.white,
+                        color: isSelected ? Colors.white : AppTheme.primaryColor,
                         size: 18,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         _getWorkoutTypeName(type),
                         style: TextStyle(
-                          color: isSelected ? AppTheme.primaryColor : Colors.white,
+                          color: isSelected ? Colors.white : AppTheme.primaryColor,
                           fontWeight: FontWeight.w500,
                           fontSize: 13,
                         ),
@@ -286,11 +274,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
   Widget _buildTodayStats(int minutes, int sessions, double padding) {
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -305,20 +289,20 @@ class _WorkoutPageState extends State<WorkoutPage> {
   Widget _buildStatItem(IconData icon, String value, String label) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 24),
+        Icon(icon, color: AppTheme.primaryColor, size: 24),
         const SizedBox(height: 8),
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 12,
           ),
         ),
@@ -337,7 +321,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
         const Text(
           'Recent Workouts',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -346,21 +330,18 @@ class _WorkoutPageState extends State<WorkoutPage> {
         ...sessions.take(5).map((session) => Container(
           margin: const EdgeInsets.only(bottom: 8),
           padding: EdgeInsets.all(padding),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
+          decoration: AppTheme.cardDecoration(),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   _workoutIcons[session.type],
-                  color: Colors.white,
+                  color: AppTheme.primaryColor,
                   size: 24,
                 ),
               ),
@@ -372,14 +353,14 @@ class _WorkoutPageState extends State<WorkoutPage> {
                     Text(
                       _getWorkoutTypeName(session.type),
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
                       _formatDate(session.startTime),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                      style: const TextStyle(
+                        color: AppTheme.textTertiary,
                         fontSize: 12,
                       ),
                     ),
@@ -392,14 +373,14 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   Text(
                     '${session.durationMinutes}m',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     '${session.caloriesBurned} cal',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
+                    style: const TextStyle(
+                      color: AppTheme.textTertiary,
                       fontSize: 12,
                     ),
                   ),

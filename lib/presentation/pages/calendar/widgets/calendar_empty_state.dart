@@ -29,20 +29,20 @@ class CalendarEmptyState extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 40,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: AppTheme.primaryColor.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 24),
             Text(
               title,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
+              style: const TextStyle(
+                color: AppTheme.textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -51,8 +51,8 @@ class CalendarEmptyState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               subtitle,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -62,7 +62,7 @@ class CalendarEmptyState extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onAddEvent,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                  backgroundColor: AppTheme.primaryColor,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(

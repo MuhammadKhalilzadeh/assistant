@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:assistant/data/mock/models/focus_session_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Individual session card for the history list
 class SessionItem extends StatelessWidget {
@@ -42,10 +43,10 @@ class SessionItem extends StatelessWidget {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        color: Colors.red.withValues(alpha: 0.3),
+        color: AppTheme.errorColor.withValues(alpha: 0.3),
         child: const Icon(
           Icons.delete_outline,
-          color: Colors.white,
+          color: AppTheme.errorColor,
         ),
       ),
       child: GestureDetector(
@@ -54,7 +55,7 @@ class SessionItem extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08),
+            color: AppTheme.backgroundColor,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -65,8 +66,8 @@ class SessionItem extends StatelessWidget {
                 height: 36,
                 decoration: BoxDecoration(
                   color: session.isCompleted
-                      ? const Color(0xFF10B981).withValues(alpha: 0.2)
-                      : Colors.orange.withValues(alpha: 0.2),
+                      ? AppTheme.successColor.withValues(alpha: 0.1)
+                      : Colors.orange.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -74,7 +75,7 @@ class SessionItem extends StatelessWidget {
                       ? Icons.check_rounded
                       : Icons.timer_outlined,
                   color: session.isCompleted
-                      ? const Color(0xFF10B981)
+                      ? AppTheme.successColor
                       : Colors.orange,
                   size: 18,
                 ),
@@ -90,7 +91,7 @@ class SessionItem extends StatelessWidget {
                     Text(
                       session.task ?? 'Focus Session',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
@@ -103,13 +104,13 @@ class SessionItem extends StatelessWidget {
                         Icon(
                           Icons.timer_outlined,
                           size: 12,
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: AppTheme.textTertiary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           _formattedDuration,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
                             fontSize: 12,
                           ),
                         ),
@@ -117,13 +118,13 @@ class SessionItem extends StatelessWidget {
                         Icon(
                           Icons.access_time,
                           size: 12,
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: AppTheme.textTertiary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           _formattedTime,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
+                          style: const TextStyle(
+                            color: AppTheme.textSecondary,
                             fontSize: 12,
                           ),
                         ),
@@ -139,7 +140,7 @@ class SessionItem extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.2),
+                    color: Colors.amber.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -154,7 +155,7 @@ class SessionItem extends StatelessWidget {
                       Text(
                         '+10',
                         style: TextStyle(
-                          color: Colors.amber.shade200,
+                          color: Colors.amber.shade700,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),

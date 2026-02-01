@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 /// Filter options for the todo list
@@ -84,15 +85,16 @@ class TodoFilters extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.2),
+                        ? AppTheme.primaryColor
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.3),
+                          ? AppTheme.primaryColor
+                          : Colors.grey.shade200,
                       width: 1,
                     ),
+                    boxShadow: isSelected ? AppTheme.cardShadow : null,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -101,8 +103,8 @@ class TodoFilters extends StatelessWidget {
                         duration: const Duration(milliseconds: 200),
                         style: TextStyle(
                           color: isSelected
-                              ? const Color(0xFF6366F1)
-                              : Colors.white,
+                              ? Colors.white
+                              : AppTheme.textSecondary,
                           fontSize: 14,
                           fontWeight:
                               isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -119,16 +121,16 @@ class TodoFilters extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF6366F1).withValues(alpha: 0.15)
-                                : Colors.white.withValues(alpha: 0.2),
+                                ? Colors.white.withValues(alpha: 0.2)
+                                : AppTheme.primaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             count.toString(),
                             style: TextStyle(
                               color: isSelected
-                                  ? const Color(0xFF6366F1)
-                                  : Colors.white,
+                                  ? Colors.white
+                                  : AppTheme.primaryColor,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),

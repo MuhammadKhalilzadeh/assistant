@@ -162,15 +162,12 @@ class _WaterPageState extends State<WaterPage> with TickerProviderStateMixin {
     final last7Days = _repository.getLast7DaysIntake();
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
             // Main content
-            Container(
-              decoration: const BoxDecoration(
-                gradient: AppTheme.secondaryGradient,
-              ),
-              child: Column(
+            Column(
                 children: [
                   // App bar
                   WaterAppBar(
@@ -249,7 +246,6 @@ class _WaterPageState extends State<WaterPage> with TickerProviderStateMixin {
                   ),
                 ],
               ),
-            ),
 
             // Celebration overlay
             if (_showCelebration)
@@ -261,8 +257,8 @@ class _WaterPageState extends State<WaterPage> with TickerProviderStateMixin {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddWaterSheet,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF10B981),
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text(
           'Custom',

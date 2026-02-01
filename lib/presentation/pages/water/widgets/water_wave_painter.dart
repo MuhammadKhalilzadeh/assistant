@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// CustomPainter for animated wave effect in water progress display
 class WaterWavePainter extends CustomPainter {
@@ -11,8 +12,8 @@ class WaterWavePainter extends CustomPainter {
   WaterWavePainter({
     required this.progress,
     required this.wavePhase,
-    this.primaryColor = const Color(0xFF06B6D4),
-    this.secondaryColor = const Color(0xFF10B981),
+    this.primaryColor = AppTheme.primaryColor,
+    this.secondaryColor = AppTheme.primaryLight,
   });
 
   @override
@@ -25,14 +26,14 @@ class WaterWavePainter extends CustomPainter {
       ..addOval(Rect.fromCircle(center: center, radius: radius));
     canvas.clipPath(clipPath);
 
-    // Background gradient
+    // Background - light pink tint
     final bgPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          Colors.white.withValues(alpha: 0.1),
-          Colors.white.withValues(alpha: 0.05),
+          AppTheme.backgroundColor,
+          const Color(0xFFFFEBEE),
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, bgPaint);
@@ -91,7 +92,7 @@ class WaterWavePainter extends CustomPainter {
 
     // Draw circular border
     final borderPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.3)
+      ..color = AppTheme.primaryColor.withValues(alpha: 0.3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
     canvas.drawCircle(center, radius, borderPaint);

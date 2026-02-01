@@ -109,12 +109,12 @@ class _HabitItemState extends State<HabitItem>
     return Dismissible(
       key: Key(widget.habit.id),
       background: _buildSwipeBackground(
-        color: const Color(0xFF10B981),
+        color: AppTheme.successColor,
         icon: Icons.check_rounded,
         alignment: Alignment.centerLeft,
       ),
       secondaryBackground: _buildSwipeBackground(
-        color: const Color(0xFFEF4444),
+        color: AppTheme.errorColor,
         icon: Icons.delete_outline_rounded,
         alignment: Alignment.centerRight,
       ),
@@ -139,11 +139,14 @@ class _HabitItemState extends State<HabitItem>
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: widget.habit.isCompletedToday ? 0.25 : 0.15),
+            color: widget.habit.isCompletedToday
+                ? AppTheme.successColor.withValues(alpha: 0.05)
+                : AppTheme.cardColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: widget.habit.isCompletedToday ? 0.4 : 0.2),
-            ),
+            boxShadow: AppTheme.cardShadow,
+            border: widget.habit.isCompletedToday
+                ? Border.all(color: AppTheme.successColor.withValues(alpha: 0.3))
+                : null,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
@@ -165,7 +168,7 @@ class _HabitItemState extends State<HabitItem>
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: _categoryColor.withValues(alpha: 0.2),
+                            color: _categoryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
@@ -184,8 +187,8 @@ class _HabitItemState extends State<HabitItem>
                                 widget.habit.name,
                                 style: TextStyle(
                                   color: widget.habit.isCompletedToday
-                                      ? Colors.white.withValues(alpha: 0.7)
-                                      : Colors.white,
+                                      ? AppTheme.textSecondary
+                                      : AppTheme.textPrimary,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                   decoration: widget.habit.isCompletedToday
@@ -215,7 +218,7 @@ class _HabitItemState extends State<HabitItem>
                                 Text(
                                   widget.habit.description!,
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.6),
+                                    color: AppTheme.textTertiary,
                                     fontSize: 12,
                                   ),
                                   maxLines: 1,
@@ -238,17 +241,19 @@ class _HabitItemState extends State<HabitItem>
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: widget.habit.isCompletedToday
-                                    ? Colors.white
-                                    : Colors.white.withValues(alpha: 0.2),
+                                    ? AppTheme.successColor
+                                    : AppTheme.cardColor,
                                 border: Border.all(
-                                  color: Colors.white,
+                                  color: widget.habit.isCompletedToday
+                                      ? AppTheme.successColor
+                                      : AppTheme.primaryColor,
                                   width: 2,
                                 ),
                               ),
                               child: widget.habit.isCompletedToday
                                   ? const Icon(
                                       Icons.check,
-                                      color: AppTheme.primaryColor,
+                                      color: AppTheme.textOnPrimary,
                                       size: 20,
                                     )
                                   : null,
@@ -275,13 +280,13 @@ class _HabitItemState extends State<HabitItem>
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
+          colors: [AppTheme.primaryColor, AppTheme.primaryLight],
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: isAtBest
             ? [
                 BoxShadow(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.4),
                   blurRadius: 4,
                   offset: const Offset(0, 1),
                 ),
@@ -293,14 +298,14 @@ class _HabitItemState extends State<HabitItem>
         children: [
           const Icon(
             Icons.local_fire_department,
-            color: Colors.white,
+            color: AppTheme.textOnPrimary,
             size: 12,
           ),
           const SizedBox(width: 3),
           Text(
             '${widget.habit.streak}',
             style: const TextStyle(
-              color: Colors.white,
+              color: AppTheme.textOnPrimary,
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
@@ -309,7 +314,7 @@ class _HabitItemState extends State<HabitItem>
             const SizedBox(width: 4),
             const Icon(
               Icons.emoji_events,
-              color: Color(0xFFFFD700),
+              color: AppTheme.warningColor,
               size: 10,
             ),
           ],
@@ -333,7 +338,7 @@ class _HabitItemState extends State<HabitItem>
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Icon(
         icon,
-        color: Colors.white,
+        color: AppTheme.textOnPrimary,
         size: 28,
       ),
     );
@@ -355,7 +360,7 @@ class _HabitItemState extends State<HabitItem>
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFFEF4444),
+                  foregroundColor: AppTheme.errorColor,
                 ),
                 child: const Text('Delete'),
               ),

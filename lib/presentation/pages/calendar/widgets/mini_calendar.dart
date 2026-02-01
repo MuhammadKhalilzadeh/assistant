@@ -89,8 +89,8 @@ class _MiniCalendarState extends State<MiniCalendar> {
         Center(
           child: Text(
             name,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+            style: const TextStyle(
+              color: AppTheme.textTertiary,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -122,17 +122,24 @@ class _MiniCalendarState extends State<MiniCalendar> {
             margin: const EdgeInsets.all(2),
             decoration: BoxDecoration(
               color: isSelected
-                  ? Colors.white
+                  ? AppTheme.primaryColor
                   : isToday
-                      ? Colors.white.withValues(alpha: 0.2)
+                      ? AppTheme.primaryColor.withValues(alpha: 0.1)
                       : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
+              border: isToday && !isSelected
+                  ? Border.all(color: AppTheme.primaryColor, width: 2)
+                  : null,
             ),
             child: Center(
               child: Text(
                 '$day',
                 style: TextStyle(
-                  color: isSelected ? AppTheme.primaryColor : Colors.white,
+                  color: isSelected
+                      ? Colors.white
+                      : isToday
+                          ? AppTheme.primaryColor
+                          : AppTheme.textPrimary,
                   fontSize: 14,
                   fontWeight: isToday || isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
@@ -151,19 +158,19 @@ class _MiniCalendarState extends State<MiniCalendar> {
           children: [
             IconButton(
               onPressed: _previousMonth,
-              icon: const Icon(Icons.chevron_left, color: Colors.white),
+              icon: const Icon(Icons.chevron_left, color: AppTheme.textPrimary),
             ),
             Text(
               _formatMonth(_focusedMonth),
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
             IconButton(
               onPressed: _nextMonth,
-              icon: const Icon(Icons.chevron_right, color: Colors.white),
+              icon: const Icon(Icons.chevron_right, color: AppTheme.textPrimary),
             ),
           ],
         ),
@@ -215,9 +222,10 @@ class _MiniCalendarSheetState extends State<_MiniCalendarSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppTheme.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: AppTheme.elevatedShadow,
       ),
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -227,7 +235,7 @@ class _MiniCalendarSheetState extends State<_MiniCalendarSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: Colors.grey.shade300,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -235,7 +243,7 @@ class _MiniCalendarSheetState extends State<_MiniCalendarSheet> {
           const Text(
             'Select Date',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -257,10 +265,10 @@ class _MiniCalendarSheetState extends State<_MiniCalendarSheet> {
               Expanded(
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(
+                  child: const Text(
                     'Cancel',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: AppTheme.textSecondary,
                       fontSize: 16,
                     ),
                   ),
@@ -271,8 +279,8 @@ class _MiniCalendarSheetState extends State<_MiniCalendarSheet> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context, _selectedDate),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppTheme.primaryColor,
+                    backgroundColor: AppTheme.primaryColor,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

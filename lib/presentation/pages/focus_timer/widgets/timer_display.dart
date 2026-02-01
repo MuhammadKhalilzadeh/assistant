@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import '../focus_timer_page.dart';
 
 /// Animated circular timer display with mode-based styling
@@ -48,13 +49,17 @@ class TimerDisplay extends StatelessWidget {
   }
 
   Color get _ringColor {
+    // Use red for active state, otherwise use mode-based colors
+    if (timerState == TimerState.running) {
+      return AppTheme.primaryColor;
+    }
     switch (timerMode) {
       case TimerMode.focus:
-        return Colors.white;
+        return AppTheme.primaryColor;
       case TimerMode.shortBreak:
-        return Colors.white;
+        return AppTheme.successColor;
       case TimerMode.longBreak:
-        return Colors.white;
+        return const Color(0xFFEC4899);
     }
   }
 
@@ -74,16 +79,9 @@ class TimerDisplay extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(timerSize * 0.08),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        boxShadow: AppTheme.elevatedShadow,
       ),
       child: AnimatedBuilder(
         animation: Listenable.merge([pulseAnimation, completionAnimation]),
@@ -113,7 +111,7 @@ class TimerDisplay extends StatelessWidget {
                       strokeWidth: strokeWidth,
                       backgroundColor: Colors.transparent,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white.withValues(alpha: 0.2),
+                        AppTheme.textTertiary.withValues(alpha: 0.3),
                       ),
                     ),
                   ),
@@ -152,13 +150,13 @@ class TimerDisplay extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: _ringColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           _modeLabel,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: _ringColor,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
@@ -172,18 +170,13 @@ class TimerDisplay extends StatelessWidget {
                       Text(
                         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: timerState == TimerState.running
+                              ? AppTheme.primaryColor
+                              : AppTheme.textPrimary,
                           fontSize: timerSize * 0.22,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'monospace',
                           letterSpacing: 2,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
                         ),
                       ),
 
@@ -192,8 +185,8 @@ class TimerDisplay extends StatelessWidget {
                       // Status message
                       Text(
                         _statusMessage,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -215,7 +208,7 @@ class TimerDisplay extends StatelessWidget {
                             width: 8,
                             height: 8,
                             decoration: const BoxDecoration(
-                              color: Colors.white,
+                              color: AppTheme.primaryColor,
                               shape: BoxShape.circle,
                             ),
                           ),

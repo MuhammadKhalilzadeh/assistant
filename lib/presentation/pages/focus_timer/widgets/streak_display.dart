@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Focus streak counter with flame icon
 class StreakDisplay extends StatelessWidget {
@@ -20,9 +21,9 @@ class StreakDisplay extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -42,7 +43,7 @@ class StreakDisplay extends StatelessWidget {
                   Text(
                     '$currentStreak day${currentStreak != 1 ? 's' : ''} streak',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -55,13 +56,13 @@ class StreakDisplay extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.amber.withValues(alpha: 0.2),
+                        color: Colors.amber.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text(
+                      child: Text(
                         'BEST',
                         style: TextStyle(
-                          color: Colors.amber,
+                          color: Colors.amber.shade700,
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
@@ -75,8 +76,8 @@ class StreakDisplay extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Best: $bestStreak days',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
+                  style: const TextStyle(
+                    color: AppTheme.textTertiary,
                     fontSize: 11,
                   ),
                 ),
@@ -91,12 +92,12 @@ class StreakDisplay extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.shield_outlined,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: AppTheme.primaryColor,
                 size: 16,
               ),
             ),
@@ -181,13 +182,13 @@ class _AnimatedFlameState extends State<_AnimatedFlame>
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: widget.isActive
-                    ? Colors.orange.withValues(alpha: 0.2)
-                    : Colors.white.withValues(alpha: 0.1),
+                    ? Colors.orange.withValues(alpha: 0.1)
+                    : AppTheme.textTertiary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.local_fire_department,
-                color: widget.isActive ? Colors.orange : Colors.white54,
+                color: widget.isActive ? Colors.orange : AppTheme.textTertiary,
                 size: 24,
               ),
             ),

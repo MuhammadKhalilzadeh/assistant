@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:assistant/data/mock/models/focus_session_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'session_item.dart';
 import 'focus_empty_state.dart';
 
@@ -29,9 +30,9 @@ class SessionHistory extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,14 +44,14 @@ class SessionHistory extends StatelessWidget {
               children: [
                 Icon(
                   Icons.history_rounded,
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: AppTheme.primaryColor,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
                 const Text(
                   'Recent Sessions',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -60,13 +61,13 @@ class SessionHistory extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     '${completedSessions.length} total',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: AppTheme.primaryColor,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -77,7 +78,7 @@ class SessionHistory extends StatelessWidget {
           ),
 
           Divider(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: AppTheme.textTertiary.withValues(alpha: 0.2),
             height: 1,
           ),
 
@@ -92,7 +93,7 @@ class SessionHistory extends StatelessWidget {
                     Text(
                       entry.key,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: AppTheme.textTertiary,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.5,
@@ -102,7 +103,7 @@ class SessionHistory extends StatelessWidget {
                     Text(
                       _formatTotalTime(entry.value),
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: AppTheme.textTertiary,
                         fontSize: 11,
                       ),
                     ),

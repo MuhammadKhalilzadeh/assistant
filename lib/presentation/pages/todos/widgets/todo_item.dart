@@ -136,12 +136,12 @@ class _TodoItemState extends State<TodoItem>
     return Dismissible(
       key: Key(widget.todo.id),
       background: _buildSwipeBackground(
-        color: const Color(0xFF10B981),
+        color: AppTheme.successColor,
         icon: Icons.check_rounded,
         alignment: Alignment.centerLeft,
       ),
       secondaryBackground: _buildSwipeBackground(
-        color: const Color(0xFFEF4444),
+        color: AppTheme.errorColor,
         icon: Icons.delete_outline_rounded,
         alignment: Alignment.centerRight,
       ),
@@ -165,11 +165,12 @@ class _TodoItemState extends State<TodoItem>
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.grey.shade200,
             ),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
@@ -199,17 +200,19 @@ class _TodoItemState extends State<TodoItem>
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: widget.todo.isCompleted
-                                    ? Colors.white
-                                    : Colors.white.withValues(alpha: 0.2),
+                                    ? AppTheme.successColor
+                                    : Colors.white,
                                 border: Border.all(
-                                  color: Colors.white,
+                                  color: widget.todo.isCompleted
+                                      ? AppTheme.successColor
+                                      : AppTheme.textTertiary,
                                   width: 2,
                                 ),
                               ),
                               child: widget.todo.isCompleted
                                   ? const Icon(
                                       Icons.check,
-                                      color: AppTheme.primaryColor,
+                                      color: Colors.white,
                                       size: 18,
                                     )
                                   : null,
@@ -226,8 +229,8 @@ class _TodoItemState extends State<TodoItem>
                                 widget.todo.title,
                                 style: TextStyle(
                                   color: widget.todo.isCompleted
-                                      ? Colors.white.withValues(alpha: 0.5)
-                                      : Colors.white,
+                                      ? AppTheme.textTertiary
+                                      : AppTheme.textPrimary,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                   decoration: widget.todo.isCompleted
@@ -241,8 +244,8 @@ class _TodoItemState extends State<TodoItem>
                                 const SizedBox(height: 4),
                                 Text(
                                   widget.todo.description!,
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.7),
+                                  style: const TextStyle(
+                                    color: AppTheme.textSecondary,
                                     fontSize: 13,
                                   ),
                                   maxLines: 1,
@@ -266,8 +269,8 @@ class _TodoItemState extends State<TodoItem>
                                       icon: Icons.calendar_today_rounded,
                                       label: _getRelativeDueDate(),
                                       color: _isOverdue
-                                          ? const Color(0xFFEF4444)
-                                          : Colors.white,
+                                          ? AppTheme.errorColor
+                                          : AppTheme.textSecondary,
                                       isOverdue: _isOverdue,
                                     ),
                                   ],
@@ -297,7 +300,7 @@ class _TodoItemState extends State<TodoItem>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -306,13 +309,13 @@ class _TodoItemState extends State<TodoItem>
           Icon(
             icon,
             size: 12,
-            color: isOverdue ? color : Colors.white.withValues(alpha: 0.9),
+            color: color,
           ),
           const SizedBox(width: 4),
           Text(
             label,
             style: TextStyle(
-              color: isOverdue ? color : Colors.white.withValues(alpha: 0.9),
+              color: color,
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -358,7 +361,7 @@ class _TodoItemState extends State<TodoItem>
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFFEF4444),
+                  foregroundColor: AppTheme.errorColor,
                 ),
                 child: const Text('Delete'),
               ),

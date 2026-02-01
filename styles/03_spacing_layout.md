@@ -36,30 +36,26 @@ This ensures:
 ### Standard Screen Template
 ```dart
 Scaffold(
+  backgroundColor: AppTheme.backgroundColor,  // Light pink #FFF5F5
   body: SafeArea(
-    child: Container(
-      decoration: const BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-      ),
-      child: Column(
-        children: [
-          // Custom AppBar
-          _buildAppBar(padding),
-          // Content
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(padding),
-                child: Column(
-                  children: [
-                    // Content here
-                  ],
-                ),
+    child: Column(
+      children: [
+        // Custom AppBar
+        _buildAppBar(padding),
+        // Content
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(padding),
+              child: Column(
+                children: [
+                  // White cards with shadows
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     ),
   ),
 )
@@ -110,15 +106,21 @@ Padding(
 
 Where `responsivePadding = screenWidth * 0.05`
 
-### Glass Cards (on gradients)
+### White Elevated Cards (Primary Pattern)
 ```dart
 Container(
   padding: EdgeInsets.all(padding),  // Same as screen padding
   decoration: BoxDecoration(
-    color: Colors.white.withValues(alpha: 0.15),
+    color: Colors.white,
     borderRadius: BorderRadius.circular(20),
-    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+    boxShadow: AppTheme.cardShadow,
   ),
+)
+
+// Or use helper
+AppTheme.elevatedCard(
+  padding: EdgeInsets.all(padding),
+  child: /* content */,
 )
 ```
 
@@ -257,14 +259,12 @@ Scaffold(
 )
 ```
 
-For gradient backgrounds that should extend behind status bar:
+For screens with solid light background:
 ```dart
 Scaffold(
+  backgroundColor: AppTheme.backgroundColor,
   body: SafeArea(
-    child: Container(
-      decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
-      child: /* content */,
-    ),
+    child: /* content */,
   ),
 )
 ```

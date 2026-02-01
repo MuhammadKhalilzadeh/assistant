@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:assistant/data/mock/models/water_log_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Today's water log list with swipe-to-delete functionality
 class WaterLogList extends StatelessWidget {
@@ -37,17 +38,17 @@ class WaterLogList extends StatelessWidget {
   Color _getColor(BeverageType type) {
     switch (type) {
       case BeverageType.water:
-        return const Color(0xFF06B6D4);
+        return AppTheme.primaryColor;
       case BeverageType.coffee:
         return const Color(0xFF8B5A2B);
       case BeverageType.tea:
-        return const Color(0xFFF59E0B);
+        return AppTheme.warningColor;
       case BeverageType.juice:
         return const Color(0xFFEA580C);
       case BeverageType.milk:
-        return Colors.white;
+        return AppTheme.textSecondary;
       case BeverageType.other:
-        return const Color(0xFF6366F1);
+        return AppTheme.infoColor;
     }
   }
 
@@ -66,14 +67,14 @@ class WaterLogList extends StatelessWidget {
           children: [
             Icon(
               Icons.history,
-              color: Colors.white.withValues(alpha: 0.8),
+              color: AppTheme.textSecondary,
               size: 20,
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               "Today's Logs",
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -83,13 +84,13 @@ class WaterLogList extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '${logs.length} entries',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: AppTheme.primaryColor,
                     fontSize: 12,
                   ),
                 ),
@@ -139,22 +140,22 @@ class WaterLogList extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         children: [
           Icon(
             Icons.water_drop_outlined,
             size: 48,
-            color: Colors.white.withValues(alpha: 0.4),
+            color: AppTheme.textTertiary,
           ),
           const SizedBox(height: 12),
           Text(
             'No water logged today',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: AppTheme.textSecondary,
               fontSize: 16,
             ),
           ),
@@ -162,7 +163,7 @@ class WaterLogList extends StatelessWidget {
           Text(
             'Tap the buttons above to start tracking',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
+              color: AppTheme.textTertiary,
               fontSize: 12,
             ),
           ),
@@ -245,30 +246,30 @@ class _WaterLogItemState extends State<_WaterLogItem>
           background: Container(
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.3),
+              color: AppTheme.errorColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
-            child: const Icon(
+            child: Icon(
               Icons.delete_outline,
-              color: Colors.white,
+              color: AppTheme.errorColor,
             ),
           ),
           child: Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: EdgeInsets.all(widget.padding),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: AppTheme.cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              boxShadow: AppTheme.cardShadow,
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: widget.color.withValues(alpha: 0.2),
+                    color: widget.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -286,8 +287,8 @@ class _WaterLogItemState extends State<_WaterLogItem>
                         children: [
                           Text(
                             '${widget.log.amountMl}ml',
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: AppTheme.textPrimary,
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
                             ),
@@ -299,7 +300,7 @@ class _WaterLogItemState extends State<_WaterLogItem>
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: widget.color.withValues(alpha: 0.2),
+                              color: widget.color.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -318,7 +319,7 @@ class _WaterLogItemState extends State<_WaterLogItem>
                         Text(
                           widget.log.note!,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
+                            color: AppTheme.textTertiary,
                             fontSize: 12,
                           ),
                           maxLines: 1,
@@ -331,7 +332,7 @@ class _WaterLogItemState extends State<_WaterLogItem>
                 Text(
                   widget.timeString,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: AppTheme.textTertiary,
                     fontSize: 12,
                   ),
                 ),

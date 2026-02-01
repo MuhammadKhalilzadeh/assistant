@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 /// A reusable sleep duration tracker card widget
 ///
 /// This widget displays sleep tracking information with customizable
-/// duration, time range, and action callbacks. It features a red background
-/// with white text and interactive elements, similar to Samsung Health's design.
+/// duration, time range, and action callbacks. It features a white background
+/// with dark text and red accents.
 class CustomSleepDurationTrackerCard extends StatelessWidget {
   /// The sleep duration to display (e.g., "11h 30m")
   final String duration;
@@ -22,11 +22,11 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
   /// Callback when the entire card is tapped
   final VoidCallback? onTap;
 
-  /// Background color (defaults to primaryColor - red)
+  /// Background color (defaults to white)
   final Color? backgroundColor;
 
-  /// Foreground/text color (defaults to white)
-  final Color? foregroundColor;
+  /// Accent color for icons and highlights (defaults to primaryColor - red)
+  final Color? accentColor;
 
   /// Border radius for the card
   final double borderRadius;
@@ -48,7 +48,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
     this.onRecordPressed,
     this.onTap,
     this.backgroundColor,
-    this.foregroundColor,
+    this.accentColor,
     this.borderRadius = 20,
     this.icon = Icons.bed,
     this.padding = const EdgeInsets.all(20),
@@ -57,8 +57,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? AppTheme.primaryColor;
-    final Color fgColor = foregroundColor ?? Colors.white;
+    final Color accent = accentColor ?? AppTheme.primaryColor;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double responsivePadding = screenWidth * 0.05; // 5% of screen width
 
@@ -69,10 +68,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: backgroundColor == null
-                ? AppTheme.secondaryGradient
-                : null,
-            color: backgroundColor,
+            color: backgroundColor ?? Colors.white,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: AppTheme.cardShadow,
           ),
@@ -86,7 +82,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
                     // Left section: Icon + Duration + Record Button
                     Flexible(
                       flex: 2,
-                      child: _buildLeftSection(bgColor, fgColor, constraints.maxWidth),
+                      child: _buildLeftSection(accent, constraints.maxWidth),
                     ),
 
                     SizedBox(width: constraints.maxWidth * 0.03),
@@ -94,7 +90,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
                     // Right section: Time range pill
                     Flexible(
                       flex: 1,
-                      child: _buildTimeRangePill(bgColor, fgColor, constraints.maxWidth),
+                      child: _buildTimeRangePill(accent, constraints.maxWidth),
                     ),
                   ],
                 );
@@ -106,7 +102,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLeftSection(Color bgColor, Color fgColor, double maxWidth) {
+  Widget _buildLeftSection(Color accent, double maxWidth) {
     final double iconSize = (maxWidth * 0.08).clamp(20.0, 32.0);
     final double fontSize = (maxWidth * 0.07).clamp(20.0, 32.0);
     final double spacing = (maxWidth * 0.03).clamp(8.0, 16.0);
@@ -119,7 +115,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildIconWithBorder(fgColor, iconSize),
+            _buildIconWithBorder(accent, iconSize),
             SizedBox(width: spacing),
             Flexible(
               child: FittedBox(
@@ -128,7 +124,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
                 child: Text(
                   duration,
                   style: TextStyle(
-                    color: fgColor,
+                    color: AppTheme.textPrimary,
                     fontSize: fontSize,
                     fontWeight: FontWeight.bold,
                   ),
@@ -139,30 +135,30 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
         ),
         SizedBox(height: spacing),
         // Record button
-        _buildRecordButton(bgColor, fgColor, maxWidth),
+        _buildRecordButton(accent, maxWidth),
       ],
     );
   }
 
-  Widget _buildIconWithBorder(Color fgColor, double iconSize) {
+  Widget _buildIconWithBorder(Color accent, double iconSize) {
     final double padding = iconSize * 0.3;
     final double borderWidth = (iconSize * 0.08).clamp(1.5, 2.5);
 
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        border: Border.all(color: fgColor, width: borderWidth),
+        border: Border.all(color: accent, width: borderWidth),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(
         icon,
-        color: fgColor,
+        color: accent,
         size: iconSize,
       ),
     );
   }
 
-  Widget _buildRecordButton(Color bgColor, Color fgColor, double maxWidth) {
+  Widget _buildRecordButton(Color accent, double maxWidth) {
     final double buttonFontSize = (maxWidth * 0.035).clamp(12.0, 16.0);
     final double horizontalPadding = (maxWidth * 0.05).clamp(16.0, 24.0);
     final double verticalPadding = (maxWidth * 0.025).clamp(8.0, 12.0);
@@ -172,10 +168,10 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
       child: ElevatedButton(
         onPressed: enabled ? onRecordPressed : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: fgColor,
-          foregroundColor: bgColor,
-          disabledBackgroundColor: fgColor.withValues(alpha: 0.5),
-          disabledForegroundColor: bgColor.withValues(alpha: 0.5),
+          backgroundColor: accent,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: accent.withValues(alpha: 0.5),
+          disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
@@ -199,7 +195,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeRangePill(Color bgColor, Color fgColor, double maxWidth) {
+  Widget _buildTimeRangePill(Color accent, double maxWidth) {
     final double pillFontSize = (maxWidth * 0.06).clamp(16.0, 24.0);
     final double horizontalPadding = (maxWidth * 0.04).clamp(12.0, 20.0);
     final double verticalPadding = (maxWidth * 0.03).clamp(10.0, 16.0);
@@ -214,7 +210,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
         vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
-        color: fgColor,
+        color: accent,
         borderRadius: BorderRadius.circular(16),
       ),
       child: FittedBox(
@@ -223,7 +219,7 @@ class CustomSleepDurationTrackerCard extends StatelessWidget {
         child: Text(
           timeRange,
           style: TextStyle(
-            color: bgColor,
+            color: Colors.white,
             fontSize: pillFontSize,
             fontWeight: FontWeight.bold,
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:assistant/data/mock/models/water_log_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Horizontal beverage type selector with icons and labels
 class BeverageTypeSelector extends StatelessWidget {
@@ -32,17 +33,17 @@ class BeverageTypeSelector extends StatelessWidget {
   Color _getColor(BeverageType type) {
     switch (type) {
       case BeverageType.water:
-        return const Color(0xFF06B6D4); // Cyan
+        return AppTheme.primaryColor; // Red
       case BeverageType.coffee:
         return const Color(0xFF8B5A2B); // Brown
       case BeverageType.tea:
-        return const Color(0xFFF59E0B); // Amber
+        return AppTheme.warningColor; // Amber
       case BeverageType.juice:
         return const Color(0xFFEA580C); // Orange
       case BeverageType.milk:
-        return const Color(0xFFF5F5F5); // White
+        return AppTheme.textSecondary; // Gray
       case BeverageType.other:
-        return const Color(0xFF6366F1); // Indigo
+        return AppTheme.infoColor; // Blue
     }
   }
 
@@ -68,13 +69,13 @@ class BeverageTypeSelector extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? color.withValues(alpha: 0.3)
-                    : Colors.white.withValues(alpha: 0.1),
+                    ? color.withValues(alpha: 0.15)
+                    : AppTheme.backgroundColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isSelected
                       ? color
-                      : Colors.white.withValues(alpha: 0.2),
+                      : AppTheme.textTertiary.withValues(alpha: 0.2),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -86,7 +87,7 @@ class BeverageTypeSelector extends StatelessWidget {
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
                       _getIcon(type),
-                      color: isSelected ? color : Colors.white.withValues(alpha: 0.8),
+                      color: isSelected ? color : AppTheme.textSecondary,
                       size: 28,
                     ),
                   ),
@@ -94,7 +95,7 @@ class BeverageTypeSelector extends StatelessWidget {
                   Text(
                     type.displayName,
                     style: TextStyle(
-                      color: isSelected ? color : Colors.white.withValues(alpha: 0.7),
+                      color: isSelected ? color : AppTheme.textSecondary,
                       fontSize: 11,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                     ),

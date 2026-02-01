@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class SunTimesCard extends StatelessWidget {
@@ -47,9 +48,9 @@ class SunTimesCard extends StatelessWidget {
     Widget card = Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,10 +58,10 @@ class SunTimesCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Sun Times',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -68,7 +69,7 @@ class SunTimesCard extends StatelessWidget {
               Text(
                 'Daylight: ${_getDaylightDuration()}',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: AppTheme.textSecondary,
                   fontSize: 12,
                 ),
               ),
@@ -117,7 +118,7 @@ class SunTimesCard extends StatelessWidget {
   Widget _buildTimeLabel(IconData icon, String label, String time) {
     return Row(
       children: [
-        Icon(icon, color: Colors.amber, size: 18),
+        Icon(icon, color: AppTheme.primaryColor, size: 18),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,14 +126,14 @@ class SunTimesCard extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: AppTheme.textSecondary,
                 fontSize: 11,
               ),
             ),
             Text(
               time,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: AppTheme.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -162,7 +163,7 @@ class _SunArcPainter extends CustomPainter {
 
     // Draw horizon line
     final horizonPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.3)
+      ..color = Colors.grey.shade300
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
@@ -176,12 +177,12 @@ class _SunArcPainter extends CustomPainter {
     final endX = size.width * 0.95;
     final arcWidth = endX - startX;
 
-    // Draw gradient arc
+    // Draw gradient arc with primary color
     final gradientShader = LinearGradient(
       colors: [
-        Colors.orange.shade300,
-        Colors.amber,
-        Colors.orange.shade400,
+        AppTheme.primaryLight,
+        AppTheme.primaryColor,
+        AppTheme.primaryDark,
       ],
       stops: const [0.0, 0.5, 1.0],
     ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
@@ -194,7 +195,7 @@ class _SunArcPainter extends CustomPainter {
 
     // Draw dotted line for future path
     final futurePaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.3)
+      ..color = Colors.grey.shade300
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -234,21 +235,21 @@ class _SunArcPainter extends CustomPainter {
 
       // Sun glow
       final glowPaint = Paint()
-        ..color = Colors.amber.withValues(alpha: 0.3)
+        ..color = AppTheme.primaryColor.withValues(alpha: 0.3)
         ..style = PaintingStyle.fill;
 
       canvas.drawCircle(Offset(sunX, sunY), 16, glowPaint);
 
       // Sun
       final sunPaint = Paint()
-        ..color = Colors.amber
+        ..color = AppTheme.primaryColor
         ..style = PaintingStyle.fill;
 
       canvas.drawCircle(Offset(sunX, sunY), 10, sunPaint);
 
       // Sun border
       final borderPaint = Paint()
-        ..color = Colors.orange
+        ..color = AppTheme.primaryDark
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2;
 

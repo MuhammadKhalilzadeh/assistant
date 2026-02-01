@@ -154,36 +154,32 @@ class _SleepPageState extends State<SleepPage> {
     final sleepRecords = _repository.sleepRecords;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.secondaryGradient,
-          ),
-          child: Column(
-            children: [
-              _buildAppBar(padding),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(padding),
-                    child: Column(
-                      children: [
-                        _buildLastNightCard(lastNight, padding),
-                        SizedBox(height: padding),
-                        _buildSleepHistory(sleepRecords, padding),
-                      ],
-                    ),
+        child: Column(
+          children: [
+            _buildAppBar(padding),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
+                    children: [
+                      _buildLastNightCard(lastNight, padding),
+                      SizedBox(height: padding),
+                      _buildSleepHistory(sleepRecords, padding),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddSleepDialog,
-        backgroundColor: Colors.white,
-        foregroundColor: AppTheme.accentColor,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
     );
@@ -196,13 +192,13 @@ class _SleepPageState extends State<SleepPage> {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           ),
           const SizedBox(width: 8),
           const Text(
             'Sleep',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -216,31 +212,27 @@ class _SleepPageState extends State<SleepPage> {
     if (lastNight == null) {
       return Container(
         padding: EdgeInsets.all(padding * 1.5),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-        ),
+        decoration: AppTheme.cardDecoration(),
         child: Column(
           children: [
             Icon(
               Icons.bedtime,
               size: 48,
-              color: Colors.white.withValues(alpha: 0.5),
+              color: AppTheme.textTertiary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 12),
-            Text(
+            const Text(
               'No sleep data yet',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: AppTheme.textSecondary,
                 fontSize: 16,
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Tap + to log your sleep',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
+                color: AppTheme.textTertiary,
                 fontSize: 14,
               ),
             ),
@@ -255,17 +247,13 @@ class _SleepPageState extends State<SleepPage> {
 
     return Container(
       padding: EdgeInsets.all(padding * 1.5),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Column(
         children: [
           const Text(
             'Last Night',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -278,7 +266,7 @@ class _SleepPageState extends State<SleepPage> {
               Text(
                 '$hoursInt',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 64,
                   fontWeight: FontWeight.bold,
                   height: 1,
@@ -287,7 +275,7 @@ class _SleepPageState extends State<SleepPage> {
               const Text(
                 'h ',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textSecondary,
                   fontSize: 24,
                   fontWeight: FontWeight.w300,
                 ),
@@ -295,7 +283,7 @@ class _SleepPageState extends State<SleepPage> {
               Text(
                 '$minutes',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
                   height: 1,
@@ -304,7 +292,7 @@ class _SleepPageState extends State<SleepPage> {
               const Text(
                 'm',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textSecondary,
                   fontSize: 24,
                   fontWeight: FontWeight.w300,
                 ),
@@ -342,20 +330,20 @@ class _SleepPageState extends State<SleepPage> {
   Widget _buildTimeInfo(IconData icon, String label, String time) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 24),
+        Icon(icon, color: AppTheme.primaryColor, size: 24),
         const SizedBox(height: 4),
         Text(
           time,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 12,
           ),
         ),
@@ -374,7 +362,7 @@ class _SleepPageState extends State<SleepPage> {
         const Text(
           'Sleep History',
           style: TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -388,10 +376,7 @@ class _SleepPageState extends State<SleepPage> {
           return Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: EdgeInsets.all(padding),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
+            decoration: AppTheme.cardDecoration(),
             child: Row(
               children: [
                 Container(
@@ -410,14 +395,14 @@ class _SleepPageState extends State<SleepPage> {
                       Text(
                         _formatDate(record.wakeTime),
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       Text(
                         '${_formatTime(record.bedTime)} - ${_formatTime(record.wakeTime)}',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
+                        style: const TextStyle(
+                          color: AppTheme.textTertiary,
                           fontSize: 12,
                         ),
                       ),
@@ -430,7 +415,7 @@ class _SleepPageState extends State<SleepPage> {
                     Text(
                       '${hoursInt}h ${minutes}m',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

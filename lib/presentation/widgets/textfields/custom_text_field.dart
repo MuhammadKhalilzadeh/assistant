@@ -2,9 +2,9 @@ import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 /// A reusable custom text field widget
-/// 
+///
 /// This widget provides a consistent styling and behavior for text fields
-/// throughout the application. It can be customized with various parameters.
+/// throughout the application. Designed for light backgrounds with red accents.
 class CustomTextField extends StatefulWidget {
   /// The label text displayed above the text field
   final String? label;
@@ -117,10 +117,10 @@ class _CustomTextFieldState extends State<CustomTextField>
           Text(
             widget.label!,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
-              fontSize: 16,
-            ),
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.textPrimary,
+                  fontSize: 16,
+                ),
           ),
           const SizedBox(height: AppTheme.spacingSM),
         ],
@@ -130,18 +130,19 @@ class _CustomTextFieldState extends State<CustomTextField>
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+                    color: AppTheme.surfaceColor,
+                    borderRadius:
+                        BorderRadius.circular(AppTheme.borderRadiusMedium),
                     border: Border.all(
                       color: _isFocused
-                          ? Colors.white.withValues(alpha: 0.5)
-                          : Colors.white.withValues(alpha: 0.2),
+                          ? AppTheme.primaryColor
+                          : Colors.grey.shade200,
                       width: _isFocused ? 2 : 1,
                     ),
                     boxShadow: _isFocused
                         ? [
                             BoxShadow(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: AppTheme.primaryColor.withValues(alpha: 0.1),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -159,20 +160,20 @@ class _CustomTextFieldState extends State<CustomTextField>
                     onFieldSubmitted: widget.onSubmitted,
                     focusNode: _focusNode,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                       fontSize: 16,
                     ),
                     decoration: InputDecoration(
                       hintText: widget.hint,
                       hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: AppTheme.textTertiary,
                         fontSize: 16,
                       ),
-                      prefixIcon: widget.prefixIcon != null 
+                      prefixIcon: widget.prefixIcon != null
                           ? Icon(
                               widget.prefixIcon,
-                              color: Colors.white.withValues(alpha: 0.9),
-                            ) 
+                              color: AppTheme.textSecondary,
+                            )
                           : null,
                       suffixIcon: widget.suffixIcon,
                       border: InputBorder.none,

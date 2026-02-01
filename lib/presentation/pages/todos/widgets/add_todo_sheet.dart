@@ -126,7 +126,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
 
     return Container(
       decoration: const BoxDecoration(
-        gradient: AppTheme.primaryGradient,
+        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Padding(
@@ -144,7 +144,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.3),
+                      color: Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -157,7 +157,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                     Text(
                       _isEditing ? 'Edit Task' : 'New Task',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -170,7 +170,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                         },
                         icon: const Icon(
                           Icons.delete_outline_rounded,
-                          color: Color(0xFFEF4444),
+                          color: AppTheme.errorColor,
                         ),
                       ),
                   ],
@@ -191,24 +191,24 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: AppTheme.primaryColor.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Colors.grey.shade200,
                         ),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             Icons.add,
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: AppTheme.primaryColor,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'Add description',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: AppTheme.primaryColor,
                               fontSize: 14,
                             ),
                           ),
@@ -228,7 +228,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                 const Text(
                   'Priority',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -239,19 +239,19 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                     _buildPriorityChip(
                       priority: 1,
                       label: 'High',
-                      color: const Color(0xFFEF4444),
+                      color: AppTheme.errorColor,
                     ),
                     const SizedBox(width: 12),
                     _buildPriorityChip(
                       priority: 2,
                       label: 'Medium',
-                      color: const Color(0xFFF59E0B),
+                      color: AppTheme.warningColor,
                     ),
                     const SizedBox(width: 12),
                     _buildPriorityChip(
                       priority: 3,
                       label: 'Low',
-                      color: const Color(0xFF10B981),
+                      color: AppTheme.successColor,
                     ),
                   ],
                 ),
@@ -260,7 +260,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                 const Text(
                   'Due Date',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -271,17 +271,17 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: Colors.grey.shade200,
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.calendar_today_rounded,
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: AppTheme.primaryColor,
                           size: 20,
                         ),
                         const SizedBox(width: 12),
@@ -291,9 +291,9 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                                 ? _formatDate(_dueDate!)
                                 : 'No due date',
                             style: TextStyle(
-                              color: Colors.white.withValues(
-                                alpha: _dueDate != null ? 1.0 : 0.6,
-                              ),
+                              color: _dueDate != null
+                                  ? AppTheme.textPrimary
+                                  : AppTheme.textTertiary,
                               fontSize: 14,
                             ),
                           ),
@@ -303,7 +303,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                             onTap: () => setState(() => _dueDate = null),
                             child: Icon(
                               Icons.close_rounded,
-                              color: Colors.white.withValues(alpha: 0.6),
+                              color: AppTheme.textTertiary,
                               size: 20,
                             ),
                           ),
@@ -323,14 +323,14 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.3),
+                              color: Colors.grey.shade300,
                             ),
                           ),
                         ),
                         child: const Text(
                           'Cancel',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.textSecondary,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -343,8 +343,8 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                       child: ElevatedButton(
                         onPressed: _handleSave,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppTheme.primaryColor,
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -383,7 +383,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
         Text(
           label,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -393,30 +393,30 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
           controller: controller,
           autofocus: autofocus,
           maxLines: maxLines,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: AppTheme.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+            hintStyle: const TextStyle(
+              color: AppTheme.textTertiary,
             ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.1),
+            fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Colors.grey.shade200,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Colors.grey.shade200,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: Colors.white,
+                color: AppTheme.primaryColor,
                 width: 2,
               ),
             ),
@@ -441,11 +441,11 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected
-                ? color.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.1),
+                ? color.withValues(alpha: 0.15)
+                : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? color : Colors.white.withValues(alpha: 0.2),
+              color: isSelected ? color : Colors.grey.shade200,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -454,14 +454,14 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
             children: [
               Icon(
                 Icons.flag_rounded,
-                color: isSelected ? color : Colors.white.withValues(alpha: 0.7),
+                color: isSelected ? color : AppTheme.textTertiary,
                 size: 16,
               ),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? color : Colors.white.withValues(alpha: 0.7),
+                  color: isSelected ? color : AppTheme.textSecondary,
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),

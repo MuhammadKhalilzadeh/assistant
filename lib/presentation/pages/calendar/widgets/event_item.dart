@@ -47,7 +47,7 @@ class EventItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: eventColor.withValues(alpha: 0.2),
+          color: eventColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusSmall),
           border: Border(
             left: BorderSide(color: eventColor, width: 3),
@@ -59,7 +59,7 @@ class EventItem extends StatelessWidget {
               child: Text(
                 event.title,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -70,8 +70,8 @@ class EventItem extends StatelessWidget {
             if (!event.isAllDay)
               Text(
                 _formatTime(event.startTime),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
                   fontSize: 11,
                 ),
               ),
@@ -89,12 +89,12 @@ class EventItem extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
-          color: AppTheme.errorColor.withValues(alpha: 0.3),
+          color: AppTheme.errorColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
         ),
         child: const Icon(
           Icons.delete_outline,
-          color: Colors.white,
+          color: AppTheme.errorColor,
         ),
       ),
       onDismissed: (_) => onDelete?.call(),
@@ -103,9 +103,9 @@ class EventItem extends StatelessWidget {
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: AppTheme.cardColor,
             borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: Row(
             children: [
@@ -132,15 +132,15 @@ class EventItem extends StatelessWidget {
                             Text(
                               _formatTime(event.startTime),
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: AppTheme.textPrimary,
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
                               _formatTime(event.endTime),
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.6),
+                              style: const TextStyle(
+                                color: AppTheme.textSecondary,
                                 fontSize: 12,
                               ),
                             ),
@@ -151,15 +151,15 @@ class EventItem extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: eventColor.withValues(alpha: 0.3),
+                            color: eventColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(AppTheme.borderRadiusSmall),
                           ),
-                          child: const Text(
+                          child: Text(
                             'All Day',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: eventColor,
                               fontSize: 11,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -172,7 +172,7 @@ class EventItem extends StatelessWidget {
                             Text(
                               event.title,
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: AppTheme.textPrimary,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -186,14 +186,14 @@ class EventItem extends StatelessWidget {
                                   Icon(
                                     Icons.location_on,
                                     size: 14,
-                                    color: Colors.white.withValues(alpha: 0.6),
+                                    color: AppTheme.primaryColor.withValues(alpha: 0.7),
                                   ),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
                                       event.location!,
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.6),
+                                      style: const TextStyle(
+                                        color: AppTheme.textSecondary,
                                         fontSize: 12,
                                       ),
                                       maxLines: 1,
@@ -207,8 +207,8 @@ class EventItem extends StatelessWidget {
                               const SizedBox(height: 4),
                               Text(
                                 event.description!,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.5),
+                                style: const TextStyle(
+                                  color: AppTheme.textTertiary,
                                   fontSize: 12,
                                 ),
                                 maxLines: 1,

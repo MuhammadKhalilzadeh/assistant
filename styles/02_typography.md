@@ -42,7 +42,7 @@ All typography is defined in the `textTheme` within `lib/presentation/constants/
 Text(
   'Tasks',
   style: TextStyle(
-    color: Colors.white,
+    color: AppTheme.textPrimary,  // Dark text on light background
     fontSize: 24,
     fontWeight: FontWeight.bold,
   ),
@@ -54,7 +54,7 @@ Text(
 Text(
   'Today\'s Progress',
   style: TextStyle(
-    color: Colors.white,
+    color: AppTheme.textPrimary,
     fontSize: 18,
     fontWeight: FontWeight.bold,
   ),
@@ -63,13 +63,13 @@ Text(
 
 ### Card Titles
 ```dart
-// On gradient backgrounds - responsive
+// On white cards - responsive
 final titleFontSize = (maxWidth * 0.055).clamp(16.0, 22.0);
 
 Text(
   'Todos',
   style: TextStyle(
-    color: Colors.white,
+    color: AppTheme.textPrimary,
     fontSize: titleFontSize,
     fontWeight: FontWeight.bold,
   ),
@@ -78,13 +78,13 @@ Text(
 
 ### Card Subtitles
 ```dart
-// On gradient backgrounds - responsive
+// On white cards - responsive
 final subtitleFontSize = (maxWidth * 0.038).clamp(12.0, 16.0);
 
 Text(
   '3 tasks remaining',
   style: TextStyle(
-    color: Colors.white,
+    color: AppTheme.textSecondary,
     fontSize: subtitleFontSize,
     fontWeight: FontWeight.w400,
   ),
@@ -102,12 +102,12 @@ Text(
 
 ### Labels
 ```dart
-// Text field labels on gradient
+// Text field labels on light background
 Text(
   'Email',
   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
     fontWeight: FontWeight.w500,
-    color: Colors.white,
+    color: AppTheme.textPrimary,
     fontSize: 16,
   ),
 )
@@ -146,7 +146,7 @@ style: TextStyle(color: AppTheme.textSecondary)
 style: TextStyle(color: AppTheme.textTertiary)
 ```
 
-### On Gradient/Dark Backgrounds
+### On Red Gradient Backgrounds (Headers only)
 ```dart
 // Primary text
 style: TextStyle(color: Colors.white)
@@ -160,6 +160,8 @@ style: TextStyle(color: Colors.white.withValues(alpha: 0.7))
 // Placeholder/disabled
 style: TextStyle(color: Colors.white.withValues(alpha: 0.5))
 ```
+
+**Note:** Red gradients are used sparingly (headers only). Most content is on white cards with dark text.
 
 ---
 
@@ -206,7 +208,7 @@ style: TextStyle(
 Text(
   todo.title,
   style: TextStyle(
-    color: Colors.white,
+    color: AppTheme.textPrimary,
     fontSize: 16,
     fontWeight: FontWeight.w500,
     decoration: todo.isCompleted ? TextDecoration.lineThrough : null,

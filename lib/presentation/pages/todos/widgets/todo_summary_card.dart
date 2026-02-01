@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class TodoSummaryCard extends StatelessWidget {
@@ -21,9 +22,9 @@ class TodoSummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         children: [
@@ -38,7 +39,7 @@ class TodoSummaryCard extends StatelessWidget {
                     const Text(
                       'Today\'s Progress',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -46,8 +47,8 @@ class TodoSummaryCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '$completed of $total tasks completed',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
                         fontSize: 14,
                       ),
                     ),
@@ -69,16 +70,16 @@ class TodoSummaryCard extends StatelessWidget {
                         child: CircularProgressIndicator(
                           value: value,
                           strokeWidth: 6,
-                          backgroundColor: Colors.white.withValues(alpha: 0.2),
+                          backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
                           valueColor:
-                              const AlwaysStoppedAnimation<Color>(Colors.white),
+                              const AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                           strokeCap: StrokeCap.round,
                         ),
                       ),
                       Text(
                         '${(value * 100).round()}%',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.primaryColor,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
@@ -97,7 +98,7 @@ class TodoSummaryCard extends StatelessWidget {
                 icon: Icons.today_rounded,
                 label: 'Today',
                 value: todayCount.toString(),
-                color: Colors.white,
+                color: AppTheme.primaryColor,
               ),
               _buildDivider(),
               _buildStatItem(
@@ -105,15 +106,15 @@ class TodoSummaryCard extends StatelessWidget {
                 label: 'Overdue',
                 value: overdueCount.toString(),
                 color: overdueCount > 0
-                    ? const Color(0xFFEF4444)
-                    : Colors.white,
+                    ? AppTheme.errorColor
+                    : AppTheme.textTertiary,
               ),
               _buildDivider(),
               _buildStatItem(
                 icon: Icons.check_circle_outline_rounded,
                 label: 'Done',
                 value: completed.toString(),
-                color: const Color(0xFF10B981),
+                color: AppTheme.successColor,
               ),
             ],
           ),
@@ -128,8 +129,8 @@ class TodoSummaryCard extends StatelessWidget {
               builder: (context, value, child) {
                 return LinearProgressIndicator(
                   value: value,
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                  backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                   minHeight: 8,
                 );
               },
@@ -166,8 +167,8 @@ class TodoSummaryCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
               fontSize: 12,
             ),
           ),
@@ -180,7 +181,7 @@ class TodoSummaryCard extends StatelessWidget {
     return Container(
       width: 1,
       height: 40,
-      color: Colors.white.withValues(alpha: 0.2),
+      color: Colors.grey.shade200,
     );
   }
 }

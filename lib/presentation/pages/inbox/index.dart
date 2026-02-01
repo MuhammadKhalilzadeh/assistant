@@ -22,34 +22,30 @@ class _InboxPageState extends State<InboxPage> {
     final services = _repository.messageServices;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
-          child: Column(
-            children: [
-              _buildAppBar(padding),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(padding),
-                    child: Column(
-                      children: [
-                        _buildSummaryCard(messages.length, unreadCount, services.length, padding),
-                        SizedBox(height: padding),
-                        ...services.map((service) => _buildServiceSection(
-                          service,
-                          messages.where((m) => m.service == service).toList(),
-                          padding,
-                        )),
-                      ],
-                    ),
+        child: Column(
+          children: [
+            _buildAppBar(padding),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
+                    children: [
+                      _buildSummaryCard(messages.length, unreadCount, services.length, padding),
+                      SizedBox(height: padding),
+                      ...services.map((service) => _buildServiceSection(
+                        service,
+                        messages.where((m) => m.service == service).toList(),
+                        padding,
+                      )),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -62,13 +58,13 @@ class _InboxPageState extends State<InboxPage> {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           ),
           const SizedBox(width: 8),
           const Text(
             'Inbox',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -81,11 +77,7 @@ class _InboxPageState extends State<InboxPage> {
   Widget _buildSummaryCard(int total, int unread, int services, double padding) {
     return Container(
       padding: EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -103,24 +95,24 @@ class _InboxPageState extends State<InboxPage> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: AppTheme.primaryColor.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: Colors.white, size: 24),
+          child: Icon(icon, color: AppTheme.primaryColor, size: 24),
         ),
         const SizedBox(height: 8),
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
             fontSize: 12,
           ),
         ),
@@ -149,12 +141,12 @@ class _InboxPageState extends State<InboxPage> {
       children: [
         Row(
           children: [
-            Icon(serviceIcon, color: Colors.white, size: 20),
+            Icon(serviceIcon, color: AppTheme.primaryColor, size: 20),
             const SizedBox(width: 8),
             Text(
               service,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -163,13 +155,13 @@ class _InboxPageState extends State<InboxPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 '${messages.where((m) => !m.isRead).length} unread',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                style: const TextStyle(
+                  color: AppTheme.primaryColor,
                   fontSize: 12,
                 ),
               ),
@@ -187,20 +179,21 @@ class _InboxPageState extends State<InboxPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: message.isRead ? 0.1 : 0.2),
+        color: message.isRead ? AppTheme.cardColor : AppTheme.primaryColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: message.isRead ? 0.1 : 0.3),
+        boxShadow: AppTheme.cardShadow,
+        border: message.isRead ? null : Border.all(
+          color: AppTheme.primaryColor.withValues(alpha: 0.2),
         ),
       ),
       child: ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: padding, vertical: 4),
         leading: CircleAvatar(
-          backgroundColor: Colors.white.withValues(alpha: 0.2),
+          backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
           child: Text(
             message.sender[0].toUpperCase(),
             style: const TextStyle(
-              color: Colors.white,
+              color: AppTheme.primaryColor,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -211,7 +204,7 @@ class _InboxPageState extends State<InboxPage> {
               child: Text(
                 message.sender,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 15,
                   fontWeight: message.isRead ? FontWeight.normal : FontWeight.bold,
                 ),
@@ -228,7 +221,7 @@ class _InboxPageState extends State<InboxPage> {
             Text(
               message.subject,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: AppTheme.textPrimary,
                 fontSize: 14,
                 fontWeight: message.isRead ? FontWeight.normal : FontWeight.w500,
               ),
@@ -237,8 +230,8 @@ class _InboxPageState extends State<InboxPage> {
             const SizedBox(height: 2),
             Text(
               message.preview,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
+              style: const TextStyle(
+                color: AppTheme.textTertiary,
                 fontSize: 12,
               ),
               maxLines: 1,
@@ -252,8 +245,8 @@ class _InboxPageState extends State<InboxPage> {
           children: [
             Text(
               _formatTime(message.receivedAt),
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
+              style: const TextStyle(
+                color: AppTheme.textTertiary,
                 fontSize: 11,
               ),
             ),
@@ -263,7 +256,7 @@ class _InboxPageState extends State<InboxPage> {
                 width: 8,
                 height: 8,
                 decoration: const BoxDecoration(
-                  color: Colors.white,
+                  color: AppTheme.primaryColor,
                   shape: BoxShape.circle,
                 ),
               ),

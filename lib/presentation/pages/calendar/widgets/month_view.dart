@@ -176,8 +176,8 @@ class _MonthViewState extends State<MonthView> {
                         child: Text(
                           day,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
+                          style: const TextStyle(
+                            color: AppTheme.textTertiary,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -225,9 +225,9 @@ class _MonthViewState extends State<MonthView> {
   Widget _buildSelectedDateEvents(List<CalendarEventModel> events) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +239,7 @@ class _MonthViewState extends State<MonthView> {
                 Text(
                   _formatSelectedDate(widget.selectedDate),
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -247,8 +247,8 @@ class _MonthViewState extends State<MonthView> {
                 const Spacer(),
                 Text(
                   '${events.length} event${events.length == 1 ? '' : 's'}',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
                     fontSize: 14,
                   ),
                 ),

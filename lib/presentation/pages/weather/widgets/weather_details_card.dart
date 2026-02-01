@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/weather_forecast_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class WeatherDetailsCard extends StatelessWidget {
@@ -12,10 +13,10 @@ class WeatherDetailsCard extends StatelessWidget {
   });
 
   Color _getUVColor(int uvIndex) {
-    if (uvIndex <= 2) return Colors.green;
-    if (uvIndex <= 5) return Colors.yellow;
+    if (uvIndex <= 2) return AppTheme.successColor;
+    if (uvIndex <= 5) return AppTheme.warningColor;
     if (uvIndex <= 7) return Colors.orange;
-    if (uvIndex <= 10) return Colors.red;
+    if (uvIndex <= 10) return AppTheme.errorColor;
     return Colors.purple;
   }
 
@@ -35,17 +36,17 @@ class WeatherDetailsCard extends StatelessWidget {
     Widget card = Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Weather Details',
             style: TextStyle(
-              color: Colors.white,
+              color: AppTheme.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -121,12 +122,12 @@ class WeatherDetailsCard extends StatelessWidget {
   Widget _buildDetailItem(IconData icon, String value, String label) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 24),
+        Icon(icon, color: AppTheme.primaryColor, size: 24),
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: AppTheme.textPrimary,
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
@@ -135,7 +136,7 @@ class WeatherDetailsCard extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: AppTheme.textSecondary,
             fontSize: 11,
           ),
           textAlign: TextAlign.center,
@@ -168,8 +169,8 @@ class WeatherDetailsCard extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           _getUVLabel(uvIndex),
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: AppTheme.textPrimary,
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
@@ -178,7 +179,7 @@ class WeatherDetailsCard extends StatelessWidget {
         Text(
           'UV Index',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: AppTheme.textSecondary,
             fontSize: 11,
           ),
         ),

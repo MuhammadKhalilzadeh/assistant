@@ -108,74 +108,70 @@ class _WeatherPageState extends State<WeatherPage>
     }
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.secondaryGradient,
-          ),
-          child: Column(
-            children: [
-              WeatherAppBar(
-                location: _weather!.location,
-                isSearching: _isSearching,
-                searchQuery: _searchQuery,
-                onBackPressed: () => Navigator.pop(context),
-                onSearchToggle: _toggleSearch,
-                onSearchChanged: _onSearchChanged,
-                onSearchSubmit: _onSearchSubmit,
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(padding),
-                    child: Column(
-                      children: [
-                        CurrentWeatherCard(
-                          weather: _weather!,
-                          animation: _itemAnimations[0],
-                        ),
+        child: Column(
+          children: [
+            WeatherAppBar(
+              location: _weather!.location,
+              isSearching: _isSearching,
+              searchQuery: _searchQuery,
+              onBackPressed: () => Navigator.pop(context),
+              onSearchToggle: _toggleSearch,
+              onSearchChanged: _onSearchChanged,
+              onSearchSubmit: _onSearchSubmit,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
+                    children: [
+                      CurrentWeatherCard(
+                        weather: _weather!,
+                        animation: _itemAnimations[0],
+                      ),
+                      SizedBox(height: padding),
+                      WeatherDetailsCard(
+                        weather: _weather!,
+                        animation: _itemAnimations[1],
+                      ),
+                      SizedBox(height: padding),
+                      HourlyForecastWidget(
+                        hourlyForecast: _weather!.hourlyForecast,
+                        animation: _itemAnimations[2],
+                      ),
+                      SizedBox(height: padding),
+                      SunTimesCard(
+                        sunrise: _weather!.sunrise,
+                        sunset: _weather!.sunset,
+                        animation: _itemAnimations[3],
+                      ),
+                      if (_weather!.alerts.isNotEmpty) ...[
                         SizedBox(height: padding),
-                        WeatherDetailsCard(
-                          weather: _weather!,
-                          animation: _itemAnimations[1],
+                        WeatherAlertsCard(
+                          alerts: _weather!.alerts,
+                          animation: _itemAnimations[4],
                         ),
-                        SizedBox(height: padding),
-                        HourlyForecastWidget(
-                          hourlyForecast: _weather!.hourlyForecast,
-                          animation: _itemAnimations[2],
-                        ),
-                        SizedBox(height: padding),
-                        SunTimesCard(
-                          sunrise: _weather!.sunrise,
-                          sunset: _weather!.sunset,
-                          animation: _itemAnimations[3],
-                        ),
-                        if (_weather!.alerts.isNotEmpty) ...[
-                          SizedBox(height: padding),
-                          WeatherAlertsCard(
-                            alerts: _weather!.alerts,
-                            animation: _itemAnimations[4],
-                          ),
-                        ],
-                        SizedBox(height: padding),
-                        DailyForecastWidget(
-                          dailyForecast: _weather!.dailyForecast,
-                          weather: _weather!,
-                          animation: _itemAnimations[5],
-                        ),
-                        SizedBox(height: padding),
-                        WeatherStatsCard(
-                          dailyForecast: _weather!.dailyForecast,
-                          animation: _itemAnimations[6],
-                        ),
-                        SizedBox(height: padding * 2),
                       ],
-                    ),
+                      SizedBox(height: padding),
+                      DailyForecastWidget(
+                        dailyForecast: _weather!.dailyForecast,
+                        weather: _weather!,
+                        animation: _itemAnimations[5],
+                      ),
+                      SizedBox(height: padding),
+                      WeatherStatsCard(
+                        dailyForecast: _weather!.dailyForecast,
+                        animation: _itemAnimations[6],
+                      ),
+                      SizedBox(height: padding * 2),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
