@@ -979,6 +979,10 @@ class MockRepository {
   // ==================== WATER LOGS ====================
   List<WaterLogModel> get waterLogs => List.unmodifiable(_waterLogs);
 
+  HydrationGoal _hydrationGoal = const HydrationGoal();
+
+  HydrationGoal get hydrationGoal => _hydrationGoal;
+
   int get todayWaterIntake {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
@@ -987,11 +991,124 @@ class MockRepository {
         .fold(0, (sum, l) => sum + l.amountMl);
   }
 
-  void addWaterLog(int amountMl) {
+  List<WaterLogModel> getWaterLogsForDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    return _waterLogs
+        .where((l) => l.loggedAt.isAfter(startOfDay) && l.loggedAt.isBefore(endOfDay))
+        .toList()
+      ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+  }
+
+  int getIntakeForDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    return _waterLogs
+        .where((l) => l.loggedAt.isAfter(startOfDay) && l.loggedAt.isBefore(endOfDay))
+        .fold(0, (sum, l) => sum + l.amountMl);
+  }
+
+  HydrationStats getWeeklyStats() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Calculate weekly average
+    int totalIntake = 0;
+    int daysWithData = 0;
+    int goalMetDays = 0;
+
+    for (int i = 0; i < 7; i++) {
+      final date = today.subtract(Duration(days: i));
+      final intake = getIntakeForDate(date);
+      if (intake > 0 || i == 0) {
+        totalIntake += intake;
+        daysWithData++;
+        if (intake >= _hydrationGoal.dailyGoalMl) {
+          goalMetDays++;
+        }
+      }
+    }
+
+    final weeklyAverage = daysWithData > 0 ? totalIntake / daysWithData : 0.0;
+    final completionRate = daysWithData > 0 ? goalMetDays / daysWithData : 0.0;
+
+    return HydrationStats(
+      weeklyAverageMl: weeklyAverage,
+      currentStreak: getCurrentStreak(),
+      bestStreak: getBestStreak(),
+      goalCompletionRate: completionRate,
+    );
+  }
+
+  Map<String, int> getLast7DaysIntake() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final Map<String, int> result = {};
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayName = dayNames[date.weekday - 1];
+      result[dayName] = getIntakeForDate(date);
+    }
+
+    return result;
+  }
+
+  int getCurrentStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int streak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final intake = getIntakeForDate(date);
+
+      if (intake >= _hydrationGoal.dailyGoalMl) {
+        streak++;
+      } else if (i > 0) {
+        // Allow today to be incomplete
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  int getBestStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int bestStreak = 0;
+    int currentStreak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final intake = getIntakeForDate(date);
+
+      if (intake >= _hydrationGoal.dailyGoalMl) {
+        currentStreak++;
+        if (currentStreak > bestStreak) {
+          bestStreak = currentStreak;
+        }
+      } else {
+        currentStreak = 0;
+      }
+    }
+
+    return bestStreak;
+  }
+
+  void updateDailyGoal(int goalMl) {
+    _hydrationGoal = _hydrationGoal.copyWith(dailyGoalMl: goalMl);
+  }
+
+  void addWaterLog(int amountMl, {BeverageType type = BeverageType.water, String? note}) {
     _waterLogs.add(WaterLogModel(
       id: _generateId(),
       amountMl: amountMl,
       loggedAt: DateTime.now(),
+      beverageType: type,
+      note: note,
     ));
   }
 
