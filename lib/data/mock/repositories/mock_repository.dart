@@ -1303,6 +1303,12 @@ class MockRepository {
   // ==================== SLEEP RECORDS ====================
   List<SleepRecordModel> get sleepRecords => List.unmodifiable(_sleepRecords);
 
+  SleepGoal _sleepGoal = const SleepGoal();
+
+  SleepGoal get sleepGoal => _sleepGoal;
+
+  int get sleepGoalMinutes => _sleepGoal.goalMinutes;
+
   SleepRecordModel? get lastNightSleep {
     if (_sleepRecords.isEmpty) return null;
     return _sleepRecords.reduce((a, b) => a.wakeTime.isAfter(b.wakeTime) ? a : b);
@@ -1314,6 +1320,159 @@ class MockRepository {
 
   void deleteSleepRecord(String id) {
     _sleepRecords.removeWhere((r) => r.id == id);
+  }
+
+  void updateSleepGoal(int minutes) {
+    _sleepGoal = _sleepGoal.copyWith(goalMinutes: minutes);
+  }
+
+  SleepRecordModel? getSleepForDate(DateTime date) {
+    final targetDate = DateTime(date.year, date.month, date.day);
+    return _sleepRecords.cast<SleepRecordModel?>().firstWhere(
+      (r) {
+        if (r == null) return false;
+        final wakeDate = DateTime(r.wakeTime.year, r.wakeTime.month, r.wakeTime.day);
+        return wakeDate == targetDate;
+      },
+      orElse: () => null,
+    );
+  }
+
+  List<SleepRecordModel> getLast7DaysSleep() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final List<SleepRecordModel> result = [];
+
+    for (int i = 0; i < 7; i++) {
+      final date = today.subtract(Duration(days: i));
+      final record = getSleepForDate(date);
+      if (record != null) {
+        result.add(record);
+      }
+    }
+
+    return result;
+  }
+
+  Map<String, double> getLast7DaysSleepHours() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final Map<String, double> result = {};
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayName = dayNames[date.weekday - 1];
+      final record = getSleepForDate(date);
+      result[dayName] = record?.durationHours ?? 0.0;
+    }
+
+    return result;
+  }
+
+  double getAverageSleepDuration() {
+    final records = getLast7DaysSleep();
+    if (records.isEmpty) return 0.0;
+    final totalHours = records.fold<double>(0.0, (sum, r) => sum + r.durationHours);
+    return totalHours / records.length;
+  }
+
+  Map<SleepQuality, int> getQualityDistribution() {
+    final records = getLast7DaysSleep();
+    final Map<SleepQuality, int> distribution = {
+      SleepQuality.poor: 0,
+      SleepQuality.fair: 0,
+      SleepQuality.good: 0,
+      SleepQuality.excellent: 0,
+    };
+
+    for (final record in records) {
+      distribution[record.quality] = (distribution[record.quality] ?? 0) + 1;
+    }
+
+    return distribution;
+  }
+
+  int getSleepStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int streak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final record = getSleepForDate(date);
+
+      if (record != null && record.duration.inMinutes >= _sleepGoal.goalMinutes) {
+        streak++;
+      } else if (i > 0) {
+        // Allow today to be incomplete
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  int getBestSleepStreak() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    int bestStreak = 0;
+    int currentStreak = 0;
+
+    for (int i = 0; i < 365; i++) {
+      final date = today.subtract(Duration(days: i));
+      final record = getSleepForDate(date);
+
+      if (record != null && record.duration.inMinutes >= _sleepGoal.goalMinutes) {
+        currentStreak++;
+        if (currentStreak > bestStreak) {
+          bestStreak = currentStreak;
+        }
+      } else {
+        currentStreak = 0;
+      }
+    }
+
+    return bestStreak;
+  }
+
+  double getWeeklySleepScore() {
+    final records = getLast7DaysSleep();
+    if (records.isEmpty) return 0.0;
+
+    int goalMetDays = 0;
+    for (final record in records) {
+      if (record.duration.inMinutes >= _sleepGoal.goalMinutes) {
+        goalMetDays++;
+      }
+    }
+
+    return (goalMetDays / 7) * 100;
+  }
+
+  SleepStats getWeeklySleepStats() {
+    final records = getLast7DaysSleep();
+    final avgDuration = getAverageSleepDuration();
+    final qualityDist = getQualityDistribution();
+
+    int daysWithData = records.length;
+    int goalMetDays = 0;
+
+    for (final record in records) {
+      if (record.duration.inMinutes >= _sleepGoal.goalMinutes) {
+        goalMetDays++;
+      }
+    }
+
+    final completionRate = daysWithData > 0 ? goalMetDays / daysWithData : 0.0;
+
+    return SleepStats(
+      weeklyAverageHours: avgDuration,
+      currentStreak: getSleepStreak(),
+      bestStreak: getBestSleepStreak(),
+      goalCompletionRate: completionRate,
+      qualityDistribution: qualityDist,
+    );
   }
 
   // ==================== STEP RECORDS ====================

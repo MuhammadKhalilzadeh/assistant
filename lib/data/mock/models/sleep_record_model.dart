@@ -35,3 +35,39 @@ class SleepRecordModel {
     );
   }
 }
+
+/// Sleep goal settings
+class SleepGoal {
+  final int goalMinutes; // Default 8 hours = 480 minutes
+
+  const SleepGoal({
+    this.goalMinutes = 480,
+  });
+
+  double get goalHours => goalMinutes / 60.0;
+
+  SleepGoal copyWith({
+    int? goalMinutes,
+  }) {
+    return SleepGoal(
+      goalMinutes: goalMinutes ?? this.goalMinutes,
+    );
+  }
+}
+
+/// Weekly sleep statistics
+class SleepStats {
+  final double weeklyAverageHours;
+  final int currentStreak;
+  final int bestStreak;
+  final double goalCompletionRate;
+  final Map<SleepQuality, int> qualityDistribution;
+
+  const SleepStats({
+    this.weeklyAverageHours = 0.0,
+    this.currentStreak = 0,
+    this.bestStreak = 0,
+    this.goalCompletionRate = 0.0,
+    this.qualityDistribution = const {},
+  });
+}
