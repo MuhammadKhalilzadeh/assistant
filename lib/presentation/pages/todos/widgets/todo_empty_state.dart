@@ -1,5 +1,5 @@
 import 'package:assistant/presentation/constants/app_theme.dart';
-import 'package:assistant/presentation/pages/todos/widgets/todo_filters.dart';
+import 'package:assistant/providers/todo_provider.dart';
 import 'package:flutter/material.dart';
 
 class TodoEmptyState extends StatelessWidget {

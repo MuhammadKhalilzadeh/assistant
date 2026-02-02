@@ -256,6 +256,11 @@ class _TodoItemState extends State<TodoItem>
                               // Tags row
                               Row(
                                 children: [
+                                  // Category tag
+                                  if (widget.todo.category != null) ...[
+                                    _buildCategoryTag(),
+                                    const SizedBox(width: 8),
+                                  ],
                                   // Priority tag
                                   _buildTag(
                                     icon: Icons.flag_rounded,
@@ -287,6 +292,36 @@ class _TodoItemState extends State<TodoItem>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryTag() {
+    final category = widget.todo.category!;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: category.colorValue.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            category.iconData,
+            size: 12,
+            color: category.colorValue,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            category.name,
+            style: TextStyle(
+              color: category.colorValue,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

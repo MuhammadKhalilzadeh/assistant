@@ -1,7 +1,27 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Force AGP version for buildscript classpath
+        classpath("com.android.tools.build:gradle:8.7.0")
+    }
+}
+
 allprojects {
     repositories {
         google()
         mavenCentral()
+    }
+
+    // Force all buildscript classpaths to use the same AGP version
+    buildscript {
+        configurations.all {
+            resolutionStrategy {
+                force("com.android.tools.build:gradle:8.7.0")
+            }
+        }
     }
 }
 

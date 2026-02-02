@@ -1,4 +1,5 @@
 import 'package:assistant/data/mock/models/todo_model.dart';
+import 'package:assistant/data/models/category_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -6,12 +7,14 @@ class AddTodoSheet extends StatefulWidget {
   final TodoModel? editingTodo;
   final Function(TodoModel) onSave;
   final VoidCallback? onDelete;
+  final List<CategoryModel> categories;
 
   const AddTodoSheet({
     super.key,
     this.editingTodo,
     required this.onSave,
     this.onDelete,
+    this.categories = const [],
   });
 
   static Future<void> show({
@@ -19,6 +22,7 @@ class AddTodoSheet extends StatefulWidget {
     TodoModel? editingTodo,
     required Function(TodoModel) onSave,
     VoidCallback? onDelete,
+    List<CategoryModel> categories = const [],
   }) {
     return showModalBottomSheet(
       context: context,
@@ -28,6 +32,7 @@ class AddTodoSheet extends StatefulWidget {
         editingTodo: editingTodo,
         onSave: onSave,
         onDelete: onDelete,
+        categories: categories,
       ),
     );
   }
@@ -42,6 +47,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
   int _priority = 2;
   DateTime? _dueDate;
   bool _showDescription = false;
+  String? _selectedCategoryId;
 
   bool get _isEditing => widget.editingTodo != null;
 
@@ -58,6 +64,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
     _dueDate = widget.editingTodo?.dueDate;
     _showDescription = widget.editingTodo?.description != null &&
         widget.editingTodo!.description!.isNotEmpty;
+    _selectedCategoryId = widget.editingTodo?.categoryId;
   }
 
   @override
@@ -77,6 +84,10 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
     }
 
     final description = _descriptionController.text.trim();
+    final selectedCategory = _selectedCategoryId != null
+        ? widget.categories.where((c) => c.id == _selectedCategoryId).firstOrNull
+        : null;
+
     final todo = TodoModel(
       id: widget.editingTodo?.id ?? '',
       title: title,
@@ -85,6 +96,8 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
       dueDate: _dueDate,
       createdAt: widget.editingTodo?.createdAt ?? DateTime.now(),
       isCompleted: widget.editingTodo?.isCompleted ?? false,
+      categoryId: _selectedCategoryId,
+      category: selectedCategory,
     );
 
     widget.onSave(todo);
@@ -224,6 +237,20 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                     maxLines: 3,
                   ),
                 const SizedBox(height: 24),
+                // Category selector
+                if (widget.categories.isNotEmpty) ...[
+                  const Text(
+                    'Category',
+                    style: TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildCategorySelector(),
+                  const SizedBox(height: 24),
+                ],
                 // Priority selector
                 const Text(
                   'Priority',
@@ -367,6 +394,104 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCategorySelector() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        // "None" option
+        GestureDetector(
+          onTap: () => setState(() => _selectedCategoryId = null),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: _selectedCategoryId == null
+                  ? AppTheme.textTertiary.withValues(alpha: 0.15)
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: _selectedCategoryId == null
+                    ? AppTheme.textTertiary
+                    : Colors.grey.shade200,
+                width: _selectedCategoryId == null ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.label_off_rounded,
+                  size: 16,
+                  color: _selectedCategoryId == null
+                      ? AppTheme.textSecondary
+                      : AppTheme.textTertiary,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'None',
+                  style: TextStyle(
+                    color: _selectedCategoryId == null
+                        ? AppTheme.textSecondary
+                        : AppTheme.textTertiary,
+                    fontSize: 13,
+                    fontWeight: _selectedCategoryId == null
+                        ? FontWeight.w600
+                        : FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Category options
+        ...widget.categories.map((category) {
+          final isSelected = _selectedCategoryId == category.id;
+          return GestureDetector(
+            onTap: () => setState(() => _selectedCategoryId = category.id),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? category.colorValue.withValues(alpha: 0.15)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? category.colorValue : Colors.grey.shade200,
+                  width: isSelected ? 2 : 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    category.iconData,
+                    size: 16,
+                    color: isSelected
+                        ? category.colorValue
+                        : AppTheme.textTertiary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    category.name,
+                    style: TextStyle(
+                      color: isSelected
+                          ? category.colorValue
+                          : AppTheme.textSecondary,
+                      fontSize: 13,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ],
     );
   }
 

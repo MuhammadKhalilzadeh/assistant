@@ -1,14 +1,6 @@
 import 'package:assistant/presentation/constants/app_theme.dart';
+import 'package:assistant/providers/todo_provider.dart';
 import 'package:flutter/material.dart';
-
-/// Filter options for the todo list
-enum TodoFilter {
-  all,
-  active,
-  completed,
-  today,
-  upcoming,
-}
 
 extension TodoFilterExtension on TodoFilter {
   String get label {

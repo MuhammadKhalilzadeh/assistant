@@ -1,5 +1,5 @@
 import 'package:assistant/data/mock/models/todo_model.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
+import 'package:assistant/data/errors/app_errors.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/todos/widgets/add_todo_sheet.dart';
 import 'package:assistant/presentation/pages/todos/widgets/todo_app_bar.dart';
@@ -7,19 +7,20 @@ import 'package:assistant/presentation/pages/todos/widgets/todo_empty_state.dart
 import 'package:assistant/presentation/pages/todos/widgets/todo_filters.dart';
 import 'package:assistant/presentation/pages/todos/widgets/todo_item.dart';
 import 'package:assistant/presentation/pages/todos/widgets/todo_summary_card.dart';
+import 'package:assistant/providers/todo_provider.dart';
+import 'package:assistant/providers/connectivity_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TodosPage extends StatefulWidget {
+class TodosPage extends ConsumerStatefulWidget {
   const TodosPage({super.key});
 
   @override
-  State<TodosPage> createState() => _TodosPageState();
+  ConsumerState<TodosPage> createState() => _TodosPageState();
 }
 
-class _TodosPageState extends State<TodosPage> with TickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-  String _searchQuery = '';
-  TodoFilter _currentFilter = TodoFilter.all;
+class _TodosPageState extends ConsumerState<TodosPage>
+    with TickerProviderStateMixin {
   bool _isSearching = false;
 
   late AnimationController _listAnimationController;
@@ -40,249 +41,160 @@ class _TodosPageState extends State<TodosPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  List<TodoModel> _filterTodos(List<TodoModel> todos) {
-    var filtered = [...todos];
-
-    // Apply search filter
-    if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
-      filtered = filtered.where((todo) {
-        return todo.title.toLowerCase().contains(query) ||
-            (todo.description?.toLowerCase().contains(query) ?? false);
-      }).toList();
+  String _getUserFriendlyErrorMessage(Object error) {
+    if (error is AppError) {
+      return error.userMessage;
     }
-
-    // Apply category filter
-    switch (_currentFilter) {
-      case TodoFilter.all:
-        break;
-      case TodoFilter.active:
-        filtered = filtered.where((t) => !t.isCompleted).toList();
-        break;
-      case TodoFilter.completed:
-        filtered = filtered.where((t) => t.isCompleted).toList();
-        break;
-      case TodoFilter.today:
-        filtered = filtered.where(_isDueToday).toList();
-        break;
-      case TodoFilter.upcoming:
-        filtered = filtered.where(_isUpcoming).toList();
-        break;
-    }
-
-    // Sort: incomplete first, then by priority, then by due date
-    filtered.sort((a, b) {
-      if (a.isCompleted != b.isCompleted) {
-        return a.isCompleted ? 1 : -1;
-      }
-      if (a.priority != b.priority) {
-        return a.priority.compareTo(b.priority);
-      }
-      if (a.dueDate != null && b.dueDate != null) {
-        return a.dueDate!.compareTo(b.dueDate!);
-      }
-      if (a.dueDate != null) return -1;
-      if (b.dueDate != null) return 1;
-      return 0;
-    });
-
-    return filtered;
-  }
-
-  bool _isDueToday(TodoModel todo) {
-    if (todo.dueDate == null) return false;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final dueDate = DateTime(
-      todo.dueDate!.year,
-      todo.dueDate!.month,
-      todo.dueDate!.day,
-    );
-    return dueDate == today;
-  }
-
-  bool _isUpcoming(TodoModel todo) {
-    if (todo.dueDate == null) return false;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final dueDate = DateTime(
-      todo.dueDate!.year,
-      todo.dueDate!.month,
-      todo.dueDate!.day,
-    );
-    return dueDate.isAfter(today);
-  }
-
-  bool _isOverdue(TodoModel todo) {
-    if (todo.dueDate == null || todo.isCompleted) return false;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final dueDate = DateTime(
-      todo.dueDate!.year,
-      todo.dueDate!.month,
-      todo.dueDate!.day,
-    );
-    return dueDate.isBefore(today);
-  }
-
-  Map<TodoFilter, int> _getFilterCounts(List<TodoModel> todos) {
-    return {
-      TodoFilter.all: todos.length,
-      TodoFilter.active: todos.where((t) => !t.isCompleted).length,
-      TodoFilter.completed: todos.where((t) => t.isCompleted).length,
-      TodoFilter.today: todos.where(_isDueToday).length,
-      TodoFilter.upcoming: todos.where(_isUpcoming).length,
-    };
+    return 'Something went wrong. Please try again.';
   }
 
   void _showAddSheet() {
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot add tasks while offline'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final categories = ref.read(categoriesProvider).valueOrNull ?? [];
     AddTodoSheet.show(
       context: context,
-      onSave: (todo) {
-        _repository.addTodo(todo);
-        setState(() {});
+      categories: categories,
+      onSave: (todo) async {
+        try {
+          await ref.read(todoListProvider.notifier).addTodo(todo);
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+            );
+          }
+        }
       },
     );
   }
 
   void _showEditSheet(TodoModel todo) {
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot edit tasks while offline'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final categories = ref.read(categoriesProvider).valueOrNull ?? [];
     AddTodoSheet.show(
       context: context,
+      categories: categories,
       editingTodo: todo,
-      onSave: (updatedTodo) {
-        _repository.updateTodo(updatedTodo);
-        setState(() {});
+      onSave: (updatedTodo) async {
+        try {
+          await ref.read(todoListProvider.notifier).updateTodo(updatedTodo);
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+            );
+          }
+        }
       },
-      onDelete: () {
-        _repository.deleteTodo(todo.id);
-        setState(() {});
+      onDelete: () async {
+        try {
+          await ref.read(todoListProvider.notifier).deleteTodo(todo.id);
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+            );
+          }
+        }
       },
     );
   }
 
-  void _deleteTodo(TodoModel todo) {
-    _repository.deleteTodo(todo.id);
-    setState(() {});
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Task deleted'),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () {
-            _repository.addTodo(todo);
-            setState(() {});
-          },
+  void _deleteTodo(TodoModel todo) async {
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot delete tasks while offline'),
+          backgroundColor: Colors.orange,
         ),
-      ),
-    );
-  }
+      );
+      return;
+    }
 
-  void _toggleComplete(TodoModel todo) {
-    _repository.toggleTodoComplete(todo.id);
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
-    final todos = _repository.todos;
-    final filteredTodos = _filterTodos(todos);
-    final filterCounts = _getFilterCounts(todos);
-    final completedCount = _repository.completedTodosCount;
-    final todayCount = todos.where(_isDueToday).length;
-    final overdueCount = todos.where(_isOverdue).length;
-
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      body: SafeArea(
-        child: Column(
-            children: [
-              // App bar
-              TodoAppBar(
-                isSearching: _isSearching,
-                searchQuery: _searchQuery,
-                onSearchToggle: () {
-                  setState(() {
-                    _isSearching = !_isSearching;
-                    if (!_isSearching) {
-                      _searchQuery = '';
-                    }
-                  });
-                },
-                onSearchChanged: (query) {
-                  setState(() {
-                    _searchQuery = query;
-                  });
-                },
-              ),
-              // Content
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Summary card
-                        TodoSummaryCard(
-                          total: todos.length,
-                          completed: completedCount,
-                          todayCount: todayCount,
-                          overdueCount: overdueCount,
-                        ),
-                        SizedBox(height: padding),
-                        // Filters
-                        TodoFilters(
-                          selected: _currentFilter,
-                          onChanged: (filter) {
-                            setState(() {
-                              _currentFilter = filter;
-                            });
-                          },
-                          counts: filterCounts,
-                        ),
-                        SizedBox(height: padding),
-                        // Section title
-                        if (filteredTodos.isNotEmpty) ...[
-                          Text(
-                            _getSectionTitle(),
-                            style: const TextStyle(
-                              color: AppTheme.textPrimary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-                        // Todos list or empty state
-                        if (filteredTodos.isEmpty)
-                          TodoEmptyState(currentFilter: _currentFilter)
-                        else
-                          _buildAnimatedList(filteredTodos),
-                        SizedBox(height: padding),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+    try {
+      await ref.read(todoListProvider.notifier).deleteTodo(todo.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Task deleted'),
+            action: SnackBarAction(
+              label: 'Undo',
+              onPressed: () async {
+                try {
+                  await ref.read(todoListProvider.notifier).restoreTodo(todo);
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+                    );
+                  }
+                }
+              },
+            ),
           ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+        );
+      }
+    }
+  }
+
+  void _toggleComplete(TodoModel todo) async {
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot update tasks while offline'),
+          backgroundColor: Colors.orange,
         ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddSheet,
-        backgroundColor: AppTheme.primaryColor,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-      ),
-    );
+      );
+      return;
+    }
+
+    try {
+      await ref.read(todoListProvider.notifier).toggleComplete(todo.id);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+        );
+      }
+    }
   }
 
   String _getSectionTitle() {
-    if (_searchQuery.isNotEmpty) {
+    final searchQuery = ref.read(searchQueryProvider);
+    final currentFilter = ref.read(todoFilterProvider);
+
+    if (searchQuery.isNotEmpty) {
       return 'Search Results';
     }
-    switch (_currentFilter) {
+    switch (currentFilter) {
       case TodoFilter.all:
         return 'All Tasks';
       case TodoFilter.active:
@@ -294,6 +206,208 @@ class _TodosPageState extends State<TodosPage> with TickerProviderStateMixin {
       case TodoFilter.upcoming:
         return 'Upcoming Tasks';
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
+
+    final currentFilter = ref.watch(todoFilterProvider);
+    final searchQuery = ref.watch(searchQueryProvider);
+    final filterCounts = ref.watch(filterCountsProvider);
+    final filteredTodosAsync = ref.watch(filteredTodosProvider);
+    final statsAsync = ref.watch(todoStatsProvider);
+    final isOffline = ref.watch(isOfflineProvider);
+
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Offline banner
+            if (isOffline) _buildOfflineBanner(),
+            // App bar
+            TodoAppBar(
+              isSearching: _isSearching,
+              searchQuery: searchQuery,
+              onSearchToggle: () {
+                setState(() {
+                  _isSearching = !_isSearching;
+                  if (!_isSearching) {
+                    ref.read(searchQueryProvider.notifier).state = '';
+                  }
+                });
+              },
+              onSearchChanged: (query) {
+                ref.read(searchQueryProvider.notifier).state = query;
+              },
+            ),
+            // Content
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await ref.read(todoListProvider.notifier).refresh();
+                  ref.invalidate(todoStatsProvider);
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: padding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Summary card
+                        statsAsync.when(
+                          data: (stats) => TodoSummaryCard(
+                            total: stats.total,
+                            completed: stats.completed,
+                            todayCount: stats.todayCount,
+                            overdueCount: stats.overdueCount,
+                          ),
+                          loading: () => const TodoSummaryCard(
+                            total: 0,
+                            completed: 0,
+                            todayCount: 0,
+                            overdueCount: 0,
+                          ),
+                          error: (e, s) => const TodoSummaryCard(
+                            total: 0,
+                            completed: 0,
+                            todayCount: 0,
+                            overdueCount: 0,
+                          ),
+                        ),
+                        SizedBox(height: padding),
+                        // Filters
+                        TodoFilters(
+                          selected: currentFilter,
+                          onChanged: (filter) {
+                            ref.read(todoFilterProvider.notifier).state =
+                                filter;
+                          },
+                          counts: filterCounts,
+                        ),
+                        SizedBox(height: padding),
+                        // Todos list or empty state
+                        filteredTodosAsync.when(
+                          data: (filteredTodos) {
+                            if (filteredTodos.isEmpty) {
+                              return TodoEmptyState(
+                                  currentFilter: currentFilter);
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Section title
+                                Text(
+                                  _getSectionTitle(),
+                                  style: const TextStyle(
+                                    color: AppTheme.textPrimary,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                // Animated list
+                                _buildAnimatedList(filteredTodos),
+                              ],
+                            );
+                          },
+                          loading: () => const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                          error: (error, _) => _buildErrorState(error),
+                        ),
+                        SizedBox(height: padding),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddSheet,
+        backgroundColor: isOffline ? Colors.grey : AppTheme.primaryColor,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildOfflineBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      color: Colors.orange.shade700,
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.cloud_off, color: Colors.white, size: 18),
+          SizedBox(width: 8),
+          Text(
+            'You are offline - viewing cached data',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(Object error) {
+    final isNetworkError = error is NetworkError;
+    final message = _getUserFriendlyErrorMessage(error);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          children: [
+            Icon(
+              isNetworkError ? Icons.cloud_off : Icons.error_outline,
+              size: 48,
+              color: isNetworkError ? Colors.orange : AppTheme.errorColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isNetworkError ? 'No Connection' : 'Failed to load tasks',
+              style: TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: TextStyle(
+                color: AppTheme.textTertiary,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                ref.invalidate(todoListProvider);
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildAnimatedList(List<TodoModel> todos) {

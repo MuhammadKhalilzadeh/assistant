@@ -18,6 +18,16 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+
+    // Force all plugins to use the project's AGP version
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "com.android.library" ||
+                requested.id.id == "com.android.application") {
+                useVersion("8.7.0")
+            }
+        }
+    }
 }
 
 plugins {
