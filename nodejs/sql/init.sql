@@ -45,3 +45,32 @@ WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Health');
 INSERT INTO categories (name, color, icon)
 SELECT 'Other', '#6B7280', 'more_horiz'
 WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Other');
+
+-- Habits table
+CREATE TABLE IF NOT EXISTS habits (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  icon VARCHAR(50) DEFAULT 'check_circle',
+  category VARCHAR(20) DEFAULT 'other' CHECK (category IN ('health', 'fitness', 'mindfulness', 'learning', 'productivity', 'social', 'other')),
+  frequency VARCHAR(20) DEFAULT 'daily' CHECK (frequency IN ('daily', 'weekdays', 'weekends', 'specificDays')),
+  target_days INTEGER[] DEFAULT ARRAY[0,1,2,3,4,5,6],
+  streak INTEGER DEFAULT 0,
+  best_streak INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Habit completions table (tracks which days each habit was completed)
+CREATE TABLE IF NOT EXISTS habit_completions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  habit_id UUID NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
+  completed_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(habit_id, completed_date)
+);
+
+-- Indexes for habits
+CREATE INDEX IF NOT EXISTS idx_habits_category ON habits(category);
+CREATE INDEX IF NOT EXISTS idx_habits_created_at ON habits(created_at);
+CREATE INDEX IF NOT EXISTS idx_habit_completions_habit_id ON habit_completions(habit_id);
+CREATE INDEX IF NOT EXISTS idx_habit_completions_date ON habit_completions(completed_date);

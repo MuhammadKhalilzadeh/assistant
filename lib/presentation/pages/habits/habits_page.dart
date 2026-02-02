@@ -1,5 +1,7 @@
+import 'dart:async';
+
 import 'package:assistant/data/mock/models/habit_model.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
+import 'package:assistant/data/errors/app_errors.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/habits/widgets/add_habit_sheet.dart';
 import 'package:assistant/presentation/pages/habits/widgets/habit_app_bar.dart';
@@ -9,24 +11,22 @@ import 'package:assistant/presentation/pages/habits/widgets/habit_empty_state.da
 import 'package:assistant/presentation/pages/habits/widgets/habit_filters.dart';
 import 'package:assistant/presentation/pages/habits/widgets/habit_item.dart';
 import 'package:assistant/presentation/pages/habits/widgets/habit_summary_card.dart';
+import 'package:assistant/providers/habit_provider.dart';
+import 'package:assistant/providers/connectivity_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HabitsPage extends StatefulWidget {
+class HabitsPage extends ConsumerStatefulWidget {
   const HabitsPage({super.key});
 
   @override
-  State<HabitsPage> createState() => _HabitsPageState();
+  ConsumerState<HabitsPage> createState() => _HabitsPageState();
 }
 
-class _HabitsPageState extends State<HabitsPage>
+class _HabitsPageState extends ConsumerState<HabitsPage>
     with SingleTickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-
   // State variables
-  String _searchQuery = '';
   bool _isSearching = false;
-  HabitFilter _currentFilter = HabitFilter.all;
-  HabitCategory? _selectedCategory;
 
   // Animation controller for list animations
   late AnimationController _listAnimationController;
@@ -47,204 +47,286 @@ class _HabitsPageState extends State<HabitsPage>
     super.dispose();
   }
 
-  List<HabitModel> get _filteredHabits {
-    var habits = _repository.habits.toList();
-
-    // Apply search filter
-    if (_searchQuery.isNotEmpty) {
-      habits = habits.where((h) =>
-        h.name.toLowerCase().contains(_searchQuery.toLowerCase())
-      ).toList();
+  String _getUserFriendlyErrorMessage(Object error) {
+    if (error is AppError) {
+      return error.userMessage;
     }
-
-    // Apply category filter
-    if (_selectedCategory != null) {
-      habits = habits.where((h) => h.category == _selectedCategory).toList();
-    }
-
-    // Apply main filter
-    switch (_currentFilter) {
-      case HabitFilter.all:
-        break;
-      case HabitFilter.completed:
-        habits = habits.where((h) => h.isCompletedToday).toList();
-        break;
-      case HabitFilter.inProgress:
-        habits = habits.where((h) => !h.isCompletedToday && h.isTodayTargetDay).toList();
-        break;
-      case HabitFilter.streaks:
-        habits = habits.where((h) => h.streak > 0).toList();
-        break;
-    }
-
-    return habits;
-  }
-
-  Map<HabitFilter, int> get _filterCounts {
-    final allHabits = _repository.habits;
-    return {
-      HabitFilter.all: allHabits.length,
-      HabitFilter.completed: allHabits.where((h) => h.isCompletedToday).length,
-      HabitFilter.inProgress: allHabits.where((h) => !h.isCompletedToday && h.isTodayTargetDay).length,
-      HabitFilter.streaks: allHabits.where((h) => h.streak > 0).length,
-    };
+    return 'Something went wrong. Please try again.';
   }
 
   void _onSearchToggle() {
     setState(() {
       _isSearching = !_isSearching;
       if (!_isSearching) {
-        _searchQuery = '';
+        ref.read(habitSearchQueryProvider.notifier).state = '';
       }
     });
   }
 
   void _onSearchChanged(String query) {
-    setState(() {
-      _searchQuery = query;
-    });
+    ref.read(habitSearchQueryProvider.notifier).state = query;
   }
 
   void _onFilterChanged(HabitFilter filter) {
-    setState(() {
-      _currentFilter = filter;
-    });
+    ref.read(habitFilterProvider.notifier).state = filter;
   }
 
   void _onCategoryChanged(HabitCategory? category) {
-    setState(() {
-      _selectedCategory = category;
-    });
+    ref.read(habitCategoryFilterProvider.notifier).state = category;
   }
 
   void _showAddHabitSheet({HabitModel? habit}) {
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot add or edit habits while offline'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     AddHabitSheet.show(
       context: context,
       editingHabit: habit,
-      onSave: (newHabit) {
-        setState(() {
+      onSave: (newHabit) async {
+        try {
           if (habit != null) {
-            _repository.updateHabit(newHabit);
+            await ref.read(habitListProvider.notifier).updateHabit(newHabit);
           } else {
-            _repository.addHabit(newHabit);
+            await ref.read(habitListProvider.notifier).addHabit(newHabit);
           }
-        });
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+            );
+          }
+        }
       },
       onDelete: habit != null
-          ? () {
-              setState(() {
-                _repository.deleteHabit(habit.id);
-              });
+          ? () async {
+              try {
+                await ref.read(habitListProvider.notifier).deleteHabit(habit.id);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+                  );
+                }
+              }
             }
           : null,
     );
   }
 
   void _showHabitDetail(HabitModel habit) {
+    final statsAsync = ref.read(habitStatsProvider);
+    final weeklyRate = statsAsync.valueOrNull?.weeklyCompletionRate ?? 0.0;
+
     HabitDetailSheet.show(
       context: context,
       habit: habit,
-      weeklyRate: _repository.getWeeklyCompletionRate(),
+      weeklyRate: weeklyRate,
       onEdit: () {
         _showAddHabitSheet(habit: habit);
       },
-      onDelete: () {
-        setState(() {
-          _repository.deleteHabit(habit.id);
-        });
+      onDelete: () async {
+        await _deleteHabit(habit);
       },
-      onToggleToday: () {
-        setState(() {
-          _repository.toggleHabitComplete(habit.id);
-        });
+      onToggleToday: () async {
+        await _toggleHabitComplete(habit);
       },
     );
   }
 
-  void _toggleHabitComplete(String id) {
-    setState(() {
-      _repository.toggleHabitComplete(id);
-    });
-  }
-
-  void _deleteHabit(String id) {
-    setState(() {
-      _repository.deleteHabit(id);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Habit deleted'),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () {
-            // Note: In a real app, we'd restore from a backup
-          },
+  Future<void> _toggleHabitComplete(HabitModel habit) async {
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot update habits while offline'),
+          backgroundColor: Colors.orange,
         ),
-      ),
-    );
+      );
+      return;
+    }
+
+    try {
+      await ref.read(habitListProvider.notifier).toggleComplete(habit.id);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteHabit(HabitModel habit) async {
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot delete habits while offline'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      await ref.read(habitListProvider.notifier).deleteHabit(habit.id);
+      if (mounted) {
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(
+          SnackBar(
+            content: const Text('Habit deleted'),
+            duration: const Duration(seconds: 3),
+            action: SnackBarAction(
+              label: 'Undo',
+              onPressed: () async {
+                try {
+                  await ref.read(habitListProvider.notifier).restoreHabit(habit);
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+                    );
+                  }
+                }
+              },
+            ),
+          ),
+        );
+        // Manually dismiss the snackbar after 3 seconds
+        Timer(const Duration(seconds: 3), () {
+          if (mounted) {
+            messenger.hideCurrentSnackBar();
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_getUserFriendlyErrorMessage(e))),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
-    final habits = _filteredHabits;
+
+    final currentFilter = ref.watch(habitFilterProvider);
+    final searchQuery = ref.watch(habitSearchQueryProvider);
+    final categoryFilter = ref.watch(habitCategoryFilterProvider);
+    final filterCounts = ref.watch(habitFilterCountsProvider);
+    final filteredHabitsAsync = ref.watch(filteredHabitsProvider);
+    final statsAsync = ref.watch(habitStatsProvider);
+    final habitsAsync = ref.watch(habitListProvider);
+    final isOffline = ref.watch(isOfflineProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: Column(
-            children: [
-              // App bar
-              HabitAppBar(
-                isSearching: _isSearching,
-                searchQuery: _searchQuery,
-                currentStreak: _repository.maxStreak,
-                onSearchToggle: _onSearchToggle,
-                onSearchChanged: _onSearchChanged,
-              ),
-              // Content
-              Expanded(
+          children: [
+            // Offline banner
+            if (isOffline) _buildOfflineBanner(),
+            // App bar
+            HabitAppBar(
+              isSearching: _isSearching,
+              searchQuery: searchQuery,
+              currentStreak: statsAsync.valueOrNull?.maxStreak ?? 0,
+              onSearchToggle: _onSearchToggle,
+              onSearchChanged: _onSearchChanged,
+            ),
+            // Content
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await ref.read(habitListProvider.notifier).refresh();
+                  ref.invalidate(habitStatsProvider);
+                },
                 child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   child: Padding(
                     padding: EdgeInsets.all(padding),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Summary card
-                        HabitSummaryCard(
-                          completedToday: _repository.completedHabitsToday,
-                          totalToday: _repository.totalHabitsForToday,
-                          currentStreak: _repository.maxStreak,
-                          bestStreak: _repository.maxBestStreak,
-                          weeklyRate: _repository.getWeeklyCompletionRate(),
+                        statsAsync.when(
+                          data: (stats) => HabitSummaryCard(
+                            completedToday: stats.completedToday,
+                            totalToday: stats.totalForToday,
+                            currentStreak: stats.maxStreak,
+                            bestStreak: stats.maxBestStreak,
+                            weeklyRate: stats.weeklyCompletionRate,
+                          ),
+                          loading: () => const HabitSummaryCard(
+                            completedToday: 0,
+                            totalToday: 0,
+                            currentStreak: 0,
+                            bestStreak: 0,
+                            weeklyRate: 0.0,
+                          ),
+                          error: (e, s) => const HabitSummaryCard(
+                            completedToday: 0,
+                            totalToday: 0,
+                            currentStreak: 0,
+                            bestStreak: 0,
+                            weeklyRate: 0.0,
+                          ),
                         ),
                         SizedBox(height: padding),
                         // Filters
                         HabitFilters(
-                          selected: _currentFilter,
+                          selected: currentFilter,
                           onChanged: _onFilterChanged,
-                          counts: _filterCounts,
+                          counts: filterCounts,
                         ),
                         SizedBox(height: padding * 0.5),
                         // Category selector
                         HabitCategorySelector(
-                          selected: _selectedCategory,
+                          selected: categoryFilter,
                           onChanged: _onCategoryChanged,
                         ),
                         SizedBox(height: padding),
-                        // Habits list header
-                        _buildListHeader(habits.length),
-                        SizedBox(height: padding * 0.5),
-                        // Habits list or empty state
-                        if (habits.isEmpty)
-                          HabitEmptyState(
-                            currentFilter: _currentFilter,
-                            hasAnyHabits: _repository.habits.isNotEmpty,
-                            searchQuery: _searchQuery.isNotEmpty ? _searchQuery : null,
-                          )
-                        else
-                          _buildHabitsList(habits),
+                        // Habits list or empty/error state
+                        filteredHabitsAsync.when(
+                          data: (habits) {
+                            if (habits.isEmpty) {
+                              return HabitEmptyState(
+                                currentFilter: currentFilter,
+                                hasAnyHabits: habitsAsync.valueOrNull?.isNotEmpty ?? false,
+                                searchQuery: searchQuery.isNotEmpty ? searchQuery : null,
+                              );
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Habits list header
+                                _buildListHeader(habits.length, currentFilter, categoryFilter),
+                                SizedBox(height: padding * 0.5),
+                                // Habits list
+                                _buildHabitsList(habits),
+                              ],
+                            );
+                          },
+                          loading: () => const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                          error: (error, _) => _buildErrorState(error),
+                        ),
                         // Bottom padding for FAB
                         const SizedBox(height: 80),
                       ],
@@ -252,21 +334,91 @@ class _HabitsPageState extends State<HabitsPage>
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddHabitSheet(),
-        backgroundColor: AppTheme.primaryColor,
+        backgroundColor: isOffline ? Colors.grey : AppTheme.primaryColor,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  Widget _buildListHeader(int count) {
+  Widget _buildOfflineBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      color: Colors.orange.shade700,
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.cloud_off, color: Colors.white, size: 18),
+          SizedBox(width: 8),
+          Text(
+            'You are offline - viewing cached data',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(Object error) {
+    final isNetworkError = error is NetworkError;
+    final message = _getUserFriendlyErrorMessage(error);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          children: [
+            Icon(
+              isNetworkError ? Icons.cloud_off : Icons.error_outline,
+              size: 48,
+              color: isNetworkError ? Colors.orange : AppTheme.errorColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isNetworkError ? 'No Connection' : 'Failed to load habits',
+              style: TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: TextStyle(
+                color: AppTheme.textTertiary,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                ref.invalidate(habitListProvider);
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListHeader(int count, HabitFilter currentFilter, HabitCategory? selectedCategory) {
     String title;
-    switch (_currentFilter) {
+    switch (currentFilter) {
       case HabitFilter.all:
         title = 'All Habits';
         break;
@@ -281,8 +433,8 @@ class _HabitsPageState extends State<HabitsPage>
         break;
     }
 
-    if (_selectedCategory != null) {
-      title = '${_selectedCategory!.label} $title';
+    if (selectedCategory != null) {
+      title = '${selectedCategory.label} $title';
     }
 
     return Row(
@@ -337,8 +489,8 @@ class _HabitsPageState extends State<HabitsPage>
                 child: HabitItem(
                   habit: habit,
                   index: index,
-                  onToggle: () => _toggleHabitComplete(habit.id),
-                  onDelete: () => _deleteHabit(habit.id),
+                  onToggle: () => _toggleHabitComplete(habit),
+                  onDelete: () => _deleteHabit(habit),
                   onEdit: () => _showAddHabitSheet(habit: habit),
                   onTap: () => _showHabitDetail(habit),
                 ),

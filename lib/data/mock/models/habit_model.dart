@@ -210,4 +210,77 @@ class HabitModel {
       createdAt: createdAt ?? this.createdAt,
     );
   }
+
+  factory HabitModel.fromJson(Map<String, dynamic> json) {
+    return HabitModel(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String?,
+      icon: json['icon'] as String? ?? 'check_circle',
+      streak: json['streak'] as int? ?? 0,
+      bestStreak: json['bestStreak'] as int? ?? 0,
+      completedDates: (json['completedDates'] as List<dynamic>?)
+              ?.map((e) => DateTime.parse(e as String))
+              .toList() ??
+          [],
+      isCompletedToday: json['isCompletedToday'] as bool? ?? false,
+      category: HabitCategory.values.firstWhere(
+        (c) => c.name == json['category'],
+        orElse: () => HabitCategory.other,
+      ),
+      frequency: HabitFrequency.values.firstWhere(
+        (f) => f.name == json['frequency'],
+        orElse: () => HabitFrequency.daily,
+      ),
+      targetDays: (json['targetDays'] as List<dynamic>?)
+              ?.map((e) => e as int)
+              .toList() ??
+          [0, 1, 2, 3, 4, 5, 6],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'icon': icon,
+      'streak': streak,
+      'bestStreak': bestStreak,
+      'completedDates':
+          completedDates.map((d) => d.toIso8601String()).toList(),
+      'isCompletedToday': isCompletedToday,
+      'category': category.name,
+      'frequency': frequency.name,
+      'targetDays': targetDays,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  /// JSON for creating a new habit (without server-managed fields)
+  Map<String, dynamic> toCreateJson() {
+    return {
+      'name': name,
+      'description': description,
+      'icon': icon,
+      'category': category.name,
+      'frequency': frequency.name,
+      'targetDays': targetDays,
+    };
+  }
+
+  /// JSON for updating an existing habit
+  Map<String, dynamic> toUpdateJson() {
+    return {
+      'name': name,
+      'description': description,
+      'icon': icon,
+      'category': category.name,
+      'frequency': frequency.name,
+      'targetDays': targetDays,
+    };
+  }
 }

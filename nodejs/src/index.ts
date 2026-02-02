@@ -7,6 +7,7 @@ dotenv.config();
 
 import todoRoutes from './routes/todo.routes';
 import categoryRoutes from './routes/category.routes';
+import habitRoutes from './routes/habit.routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authMiddleware } from './middleware/auth.middleware';
 import { securityHeaders, rateLimiter } from './middleware/security.middleware';
@@ -34,6 +35,7 @@ app.use(authMiddleware);
 // Routes
 app.use('/api/todos', todoRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/habits', habitRoutes);
 
 // Enhanced health check with database status
 app.get('/api/health', async (_req, res) => {
@@ -80,6 +82,13 @@ async function startServer(): Promise<void> {
       logger.info('  PATCH  /api/todos/:id/toggle');
       logger.info('  GET    /api/todos/stats');
       logger.info('  GET    /api/categories');
+      logger.info('  GET    /api/habits');
+      logger.info('  POST   /api/habits');
+      logger.info('  GET    /api/habits/stats');
+      logger.info('  GET    /api/habits/:id');
+      logger.info('  PUT    /api/habits/:id');
+      logger.info('  DELETE /api/habits/:id');
+      logger.info('  PATCH  /api/habits/:id/toggle');
     });
   } catch (err) {
     logger.fatal({ err }, 'Failed to start server');
