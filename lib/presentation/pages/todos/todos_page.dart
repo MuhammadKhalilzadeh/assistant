@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:assistant/data/mock/models/todo_model.dart';
 import 'package:assistant/data/errors/app_errors.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
@@ -135,10 +137,12 @@ class _TodosPageState extends ConsumerState<TodosPage>
     try {
       await ref.read(todoListProvider.notifier).deleteTodo(todo.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(
           SnackBar(
             content: const Text('Task deleted'),
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 3),
             action: SnackBarAction(
               label: 'Undo',
               onPressed: () async {
@@ -155,6 +159,12 @@ class _TodosPageState extends ConsumerState<TodosPage>
             ),
           ),
         );
+        // Manually dismiss the snackbar after 3 seconds since duration is ignored when action is present
+        Timer(const Duration(seconds: 3), () {
+          if (mounted) {
+            messenger.hideCurrentSnackBar();
+          }
+        });
       }
     } catch (e) {
       if (mounted) {
