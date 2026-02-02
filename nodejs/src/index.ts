@@ -11,7 +11,7 @@ import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authMiddleware } from './middleware/auth.middleware';
 import { securityHeaders, rateLimiter } from './middleware/security.middleware';
 import { requestLogger } from './middleware/request-logger.middleware';
-import { checkDatabaseHealth, closeDatabasePool } from './config/database';
+import { checkDatabaseHealth, closeDatabasePool, initializeDatabase } from './config/database';
 import { logger } from './config/logger';
 
 const app = express();
@@ -61,20 +61,33 @@ app.use(errorHandler);
 // Server instance for graceful shutdown
 let server: Server;
 
-// Start server
-server = app.listen(PORT, () => {
-  logger.info({ port: PORT }, 'Server started');
-  logger.info('API endpoints:');
-  logger.info('  GET    /api/health');
-  logger.info('  GET    /api/todos');
-  logger.info('  POST   /api/todos');
-  logger.info('  GET    /api/todos/:id');
-  logger.info('  PUT    /api/todos/:id');
-  logger.info('  DELETE /api/todos/:id');
-  logger.info('  PATCH  /api/todos/:id/toggle');
-  logger.info('  GET    /api/todos/stats');
-  logger.info('  GET    /api/categories');
-});
+// Initialize database and start server
+async function startServer(): Promise<void> {
+  try {
+    // Initialize database schema
+    await initializeDatabase();
+
+    // Start HTTP server
+    server = app.listen(PORT, () => {
+      logger.info({ port: PORT }, 'Server started');
+      logger.info('API endpoints:');
+      logger.info('  GET    /api/health');
+      logger.info('  GET    /api/todos');
+      logger.info('  POST   /api/todos');
+      logger.info('  GET    /api/todos/:id');
+      logger.info('  PUT    /api/todos/:id');
+      logger.info('  DELETE /api/todos/:id');
+      logger.info('  PATCH  /api/todos/:id/toggle');
+      logger.info('  GET    /api/todos/stats');
+      logger.info('  GET    /api/categories');
+    });
+  } catch (err) {
+    logger.fatal({ err }, 'Failed to start server');
+    process.exit(1);
+  }
+}
+
+startServer();
 
 // Graceful shutdown handling
 const shutdown = async (signal: string) => {

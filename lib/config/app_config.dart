@@ -20,14 +20,26 @@ class AppConfig {
     this.cacheTtl = const Duration(minutes: 15),
   });
 
+  // Set this to your computer's local IP for physical device testing
+  // Find it with: ipconfig (Windows) or ifconfig (macOS/Linux)
+  // Leave empty to use default (10.0.2.2 for Android emulator, localhost for others)
+  static const String _devServerIp = '192.168.1.102';
+
   /// Development configuration
   factory AppConfig._dev() {
     // Configure based on platform:
+    // - Physical Android device: use _devServerIp (your computer's local IP)
     // - Android emulator: 10.0.2.2
     // - iOS simulator / Web / Desktop: localhost
-    final baseUrl = Platform.isAndroid
-        ? 'http://10.0.2.2:3000/api'
-        : 'http://localhost:3000/api';
+    final String host;
+    if (_devServerIp.isNotEmpty) {
+      host = _devServerIp;
+    } else if (Platform.isAndroid) {
+      host = '10.0.2.2';
+    } else {
+      host = 'localhost';
+    }
+    final baseUrl = 'http://$host:3000/api';
 
     return AppConfig._(
       apiBaseUrl: baseUrl,

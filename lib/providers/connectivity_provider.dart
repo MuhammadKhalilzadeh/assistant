@@ -2,9 +2,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// Provider for connectivity state.
-/// In connectivity_plus 6.x, onConnectivityChanged returns a list of results.
-final connectivityProvider = StreamProvider<List<ConnectivityResult>>((ref) {
-  return Connectivity().onConnectivityChanged;
+/// Emits initial connectivity state immediately, then listens for changes.
+/// This fixes the issue where onConnectivityChanged only fires on changes,
+/// leaving the provider in AsyncLoading state indefinitely on app startup.
+final connectivityProvider = StreamProvider<List<ConnectivityResult>>((ref) async* {
+  final connectivity = Connectivity();
+
+  // Emit current connectivity state immediately
+  final initial = await connectivity.checkConnectivity();
+  yield initial;
+
+  // Then listen for changes
+  await for (final result in connectivity.onConnectivityChanged) {
+    yield result;
+  }
 });
 
 /// Provider that returns true if the device is currently offline

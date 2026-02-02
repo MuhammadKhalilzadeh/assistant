@@ -1,5 +1,7 @@
 import { Pool, PoolClient } from 'pg';
 import dotenv from 'dotenv';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { logger } from './logger';
 
 dotenv.config();
@@ -50,6 +52,67 @@ export async function closeDatabasePool(): Promise<void> {
   logger.info('Closing database pool...');
   await pool.end();
   logger.info('Database pool closed');
+}
+
+// Create database if it doesn't exist
+async function ensureDatabaseExists(): Promise<void> {
+  // Parse the connection URL to get database name
+  const dbUrl = process.env.DATABASE_URL || '';
+  const dbName = dbUrl.split('/').pop()?.split('?')[0] || 'assistant';
+
+  // Create a connection to the default 'postgres' database
+  const adminUrl = dbUrl.replace(`/${dbName}`, '/postgres');
+  const adminPool = new Pool({
+    connectionString: adminUrl,
+    max: 1,
+  });
+
+  try {
+    const result = await adminPool.query(
+      `SELECT 1 FROM pg_database WHERE datname = $1`,
+      [dbName]
+    );
+
+    if (result.rows.length === 0) {
+      logger.info(`Database '${dbName}' does not exist, creating...`);
+      await adminPool.query(`CREATE DATABASE ${dbName}`);
+      logger.info(`Database '${dbName}' created successfully`);
+    } else {
+      logger.debug(`Database '${dbName}' already exists`);
+    }
+  } finally {
+    await adminPool.end();
+  }
+}
+
+// Initialize database schema from init.sql
+export async function initializeDatabase(): Promise<void> {
+  let client: PoolClient | null = null;
+
+  try {
+    // First ensure the database exists
+    await ensureDatabaseExists();
+
+    logger.info('Initializing database schema...');
+
+    // Read the init.sql file
+    const sqlPath = join(__dirname, '../../sql/init.sql');
+    const initSql = readFileSync(sqlPath, 'utf-8');
+
+    // Execute the SQL
+    client = await pool.connect();
+    await client.query(initSql);
+
+    logger.info('Database schema initialized successfully');
+  } catch (err) {
+    const error = err instanceof Error ? err.message : 'Unknown error';
+    logger.error({ err }, 'Failed to initialize database schema');
+    throw new Error(`Database initialization failed: ${error}`);
+  } finally {
+    if (client) {
+      client.release();
+    }
+  }
 }
 
 export default pool;

@@ -138,6 +138,7 @@ class _TodosPageState extends ConsumerState<TodosPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Task deleted'),
+            duration: const Duration(seconds: 4),
             action: SnackBarAction(
               label: 'Undo',
               onPressed: () async {
@@ -293,8 +294,16 @@ class _TodosPageState extends ConsumerState<TodosPage>
                         filteredTodosAsync.when(
                           data: (filteredTodos) {
                             if (filteredTodos.isEmpty) {
-                              return TodoEmptyState(
-                                  currentFilter: currentFilter);
+                              // Calculate available height for proper centering
+                              final availableHeight =
+                                  MediaQuery.of(context).size.height * 0.45;
+                              return SizedBox(
+                                height: availableHeight,
+                                child: Center(
+                                  child: TodoEmptyState(
+                                      currentFilter: currentFilter),
+                                ),
+                              );
                             }
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

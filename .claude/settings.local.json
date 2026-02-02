@@ -27,7 +27,9 @@
       "Bash(npm install)",
       "Bash(npm run build:*)",
       "Bash(flutter pub:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)"
     ]
   }
 }
