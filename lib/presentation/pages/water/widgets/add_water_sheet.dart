@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/models/water_log_model.dart';
+import 'package:assistant/data/models/water_log_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'beverage_type_selector.dart';
 

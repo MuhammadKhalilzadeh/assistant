@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/water_log_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
+
+/// Stats data class for HydrationStatsCard
+class HydrationStatsData {
+  final double weeklyAverageMl;
+  final int currentStreak;
+  final int bestStreak;
+  final double goalCompletionRate;
+
+  const HydrationStatsData({
+    required this.weeklyAverageMl,
+    required this.currentStreak,
+    required this.bestStreak,
+    required this.goalCompletionRate,
+  });
+}
 
 /// 2x2 grid displaying weekly hydration statistics with animations
 class HydrationStatsCard extends StatelessWidget {
-  final HydrationStats stats;
+  final dynamic stats;
   final double padding;
   final Animation<double>? animation;
 

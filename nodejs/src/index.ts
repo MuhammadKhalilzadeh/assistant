@@ -8,6 +8,7 @@ dotenv.config();
 import todoRoutes from './routes/todo.routes';
 import categoryRoutes from './routes/category.routes';
 import habitRoutes from './routes/habit.routes';
+import waterRoutes from './routes/water.routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authMiddleware } from './middleware/auth.middleware';
 import { securityHeaders, rateLimiter } from './middleware/security.middleware';
@@ -36,6 +37,7 @@ app.use(authMiddleware);
 app.use('/api/todos', todoRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/habits', habitRoutes);
+app.use('/api/water', waterRoutes);
 
 // Enhanced health check with database status
 app.get('/api/health', async (_req, res) => {
@@ -89,6 +91,15 @@ async function startServer(): Promise<void> {
       logger.info('  PUT    /api/habits/:id');
       logger.info('  DELETE /api/habits/:id');
       logger.info('  PATCH  /api/habits/:id/toggle');
+      logger.info('  GET    /api/water');
+      logger.info('  POST   /api/water');
+      logger.info('  GET    /api/water/stats');
+      logger.info('  GET    /api/water/history');
+      logger.info('  GET    /api/water/goal');
+      logger.info('  PUT    /api/water/goal');
+      logger.info('  GET    /api/water/:id');
+      logger.info('  PUT    /api/water/:id');
+      logger.info('  DELETE /api/water/:id');
     });
   } catch (err) {
     logger.fatal({ err }, 'Failed to start server');
