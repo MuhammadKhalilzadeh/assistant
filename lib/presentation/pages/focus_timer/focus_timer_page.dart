@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/models/focus_session_model.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:assistant/data/models/focus_session_model.dart';
+import 'package:assistant/providers/focus_timer_provider.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'widgets/timer_app_bar.dart';
 import 'widgets/timer_display.dart';
@@ -80,17 +81,15 @@ class TimerSettings {
   }
 }
 
-class FocusTimerPage extends StatefulWidget {
+class FocusTimerPage extends ConsumerStatefulWidget {
   const FocusTimerPage({super.key});
 
   @override
-  State<FocusTimerPage> createState() => _FocusTimerPageState();
+  ConsumerState<FocusTimerPage> createState() => _FocusTimerPageState();
 }
 
-class _FocusTimerPageState extends State<FocusTimerPage>
+class _FocusTimerPageState extends ConsumerState<FocusTimerPage>
     with TickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-
   // Timer state
   Timer? _timer;
   TimerMode _timerMode = TimerMode.focus;
@@ -99,13 +98,12 @@ class _FocusTimerPageState extends State<FocusTimerPage>
   int _totalSeconds = 25 * 60;
 
   // Session state
-  String? _currentSessionId;
   String _currentTask = '';
-  int _sessionsCompleted = 0;
-  int _focusStreak = 0;
+  DateTime? _sessionStartTime;
 
   // Settings
   TimerSettings _settings = const TimerSettings();
+  bool _settingsLoaded = false;
 
   // Suggested mode after completion
   TimerMode? _suggestedMode;
@@ -117,8 +115,6 @@ class _FocusTimerPageState extends State<FocusTimerPage>
   @override
   void initState() {
     super.initState();
-    _initializeSessionCount();
-    _calculateStreak();
 
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1500),
@@ -129,55 +125,37 @@ class _FocusTimerPageState extends State<FocusTimerPage>
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
+
+    // Load settings from goal provider on first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSettingsFromGoal();
+    });
   }
 
-  void _initializeSessionCount() {
-    _sessionsCompleted = _repository.todayCompletedSessions;
-  }
-
-  void _calculateStreak() {
-    // Calculate streak based on consecutive days with completed sessions
-    final sessions = _repository.focusSessions;
-    if (sessions.isEmpty) {
-      _focusStreak = 0;
-      return;
-    }
-
-    final completedSessions = sessions.where((s) => s.isCompleted).toList();
-    if (completedSessions.isEmpty) {
-      _focusStreak = 0;
-      return;
-    }
-
-    completedSessions.sort((a, b) => b.startTime.compareTo(a.startTime));
-
-    int streak = 0;
-    DateTime? lastDate;
-
-    for (final session in completedSessions) {
-      final sessionDate = DateTime(
-        session.startTime.year,
-        session.startTime.month,
-        session.startTime.day,
-      );
-
-      if (lastDate == null) {
-        streak = 1;
-        lastDate = sessionDate;
-      } else {
-        final diff = lastDate.difference(sessionDate).inDays;
-        if (diff == 0) {
-          continue; // Same day
-        } else if (diff == 1) {
-          streak++;
-          lastDate = sessionDate;
-        } else {
-          break;
-        }
+  void _loadSettingsFromGoal() {
+    final goalAsync = ref.read(focusTimerGoalProvider);
+    goalAsync.whenData((goal) {
+      if (!_settingsLoaded) {
+        setState(() {
+          _settings = TimerSettings(
+            focusDuration: goal.focusDuration,
+            shortBreakDuration: goal.shortBreakDuration,
+            longBreakDuration: goal.longBreakDuration,
+            sessionsBeforeLongBreak: goal.sessionsBeforeLongBreak,
+            autoStartBreaks: goal.autoStartBreaks,
+            autoStartFocus: goal.autoStartFocus,
+            soundEnabled: goal.soundEnabled,
+            vibrationEnabled: goal.vibrationEnabled,
+            dailyGoalSessions: goal.dailyGoalSessions,
+          );
+          _settingsLoaded = true;
+          if (_timerState == TimerState.idle) {
+            _totalSeconds = _getDurationForMode(_timerMode) * 60;
+            _remainingSeconds = _totalSeconds;
+          }
+        });
       }
-    }
-
-    _focusStreak = streak;
+    });
   }
 
   @override
@@ -235,13 +213,7 @@ class _FocusTimerPageState extends State<FocusTimerPage>
 
   void _startTimer() {
     if (_timerMode == TimerMode.focus) {
-      _currentSessionId = DateTime.now().millisecondsSinceEpoch.toString();
-      _repository.addFocusSession(FocusSessionModel(
-        id: _currentSessionId!,
-        startTime: DateTime.now(),
-        durationMinutes: _totalSeconds ~/ 60,
-        task: _currentTask.isNotEmpty ? _currentTask : null,
-      ));
+      _sessionStartTime = DateTime.now();
     }
 
     setState(() {
@@ -297,7 +269,7 @@ class _FocusTimerPageState extends State<FocusTimerPage>
     setState(() {
       _timerState = TimerState.idle;
       _remainingSeconds = _totalSeconds;
-      _currentSessionId = null;
+      _sessionStartTime = null;
       _suggestedMode = null;
     });
   }
@@ -312,10 +284,27 @@ class _FocusTimerPageState extends State<FocusTimerPage>
     _pulseController.reset();
     _completionController.forward(from: 0);
 
-    if (_timerMode == TimerMode.focus && _currentSessionId != null) {
-      _repository.completeFocusSession(_currentSessionId!);
-      _sessionsCompleted++;
-      _calculateStreak();
+    // Get current sessions count from stats before persisting
+    final stats = ref.read(focusTimerStatsProvider).valueOrNull ?? FocusTimerStats.empty();
+    final sessionsCompleted = stats.todaySessions;
+
+    if (_timerMode == TimerMode.focus && _sessionStartTime != null) {
+      // Map TimerMode to FocusSessionType
+      final sessionType = FocusSessionType.focus;
+      final now = DateTime.now();
+
+      final session = FocusSessionModel(
+        id: '', // Backend will generate
+        type: sessionType,
+        startTime: _sessionStartTime!,
+        endTime: now,
+        durationMinutes: _totalSeconds ~/ 60,
+        isCompleted: true,
+        task: _currentTask.isNotEmpty ? _currentTask : null,
+      );
+
+      // Persist to backend
+      ref.read(focusTimerSessionsProvider.notifier).addSession(session);
     }
 
     // Haptic feedback
@@ -323,10 +312,10 @@ class _FocusTimerPageState extends State<FocusTimerPage>
       HapticFeedback.mediumImpact();
     }
 
-    // Determine suggested mode
+    // Determine suggested mode (use current sessionsCompleted + 1 for the just-completed session)
     TimerMode nextMode;
     if (_timerMode == TimerMode.focus) {
-      if (_sessionsCompleted % _settings.sessionsBeforeLongBreak == 0) {
+      if ((sessionsCompleted + 1) % _settings.sessionsBeforeLongBreak == 0) {
         nextMode = TimerMode.longBreak;
       } else {
         nextMode = TimerMode.shortBreak;
@@ -337,7 +326,7 @@ class _FocusTimerPageState extends State<FocusTimerPage>
 
     setState(() {
       _timerState = TimerState.completed;
-      _currentSessionId = null;
+      _sessionStartTime = null;
       _suggestedMode = nextMode;
     });
 
@@ -399,20 +388,53 @@ class _FocusTimerPageState extends State<FocusTimerPage>
             _remainingSeconds = _totalSeconds;
           }
         });
+
+        // Persist settings to backend
+        final goalAsync = ref.read(focusTimerGoalProvider);
+        goalAsync.whenData((currentGoal) {
+          final updatedGoal = currentGoal.copyWith(
+            dailyGoalSessions: newSettings.dailyGoalSessions,
+            focusDuration: newSettings.focusDuration,
+            shortBreakDuration: newSettings.shortBreakDuration,
+            longBreakDuration: newSettings.longBreakDuration,
+            sessionsBeforeLongBreak: newSettings.sessionsBeforeLongBreak,
+            autoStartBreaks: newSettings.autoStartBreaks,
+            autoStartFocus: newSettings.autoStartFocus,
+            soundEnabled: newSettings.soundEnabled,
+            vibrationEnabled: newSettings.vibrationEnabled,
+          );
+          ref.read(focusTimerGoalProvider.notifier).updateGoal(updatedGoal);
+        });
       },
     );
   }
 
   void _deleteSession(String id) {
-    // Note: Repository doesn't have delete for focus sessions yet
-    // This would be implemented when that API is added
-    setState(() {});
+    ref.read(focusTimerSessionsProvider.notifier).deleteSession(id);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
+
+    // Watch providers for real data
+    final stats = ref.watch(focusTimerStatsProvider).valueOrNull ?? FocusTimerStats.empty();
+    final sessions = ref.watch(focusTimerSessionsProvider).valueOrNull ?? [];
+
+    // Load settings from goal when it becomes available
+    final goalAsync = ref.watch(focusTimerGoalProvider);
+    goalAsync.whenData((goal) {
+      if (!_settingsLoaded) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _loadSettingsFromGoal();
+        });
+      }
+    });
+
+    final sessionsCompleted = stats.todaySessions;
+    final currentStreak = stats.currentStreak;
+    final bestStreak = stats.bestStreak;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -421,7 +443,7 @@ class _FocusTimerPageState extends State<FocusTimerPage>
           children: [
             TimerAppBar(
               onSettingsTap: _openSettings,
-              streak: _focusStreak,
+              streak: currentStreak,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -434,8 +456,8 @@ class _FocusTimerPageState extends State<FocusTimerPage>
 
                       // Streak display
                       StreakDisplay(
-                        currentStreak: _focusStreak,
-                        bestStreak: _focusStreak + 3, // Mock best streak
+                        currentStreak: currentStreak,
+                        bestStreak: bestStreak,
                       ),
 
                       const SizedBox(height: 16),
@@ -496,7 +518,7 @@ class _FocusTimerPageState extends State<FocusTimerPage>
 
                       // Daily progress
                       DailyProgress(
-                        completedSessions: _sessionsCompleted,
+                        completedSessions: sessionsCompleted,
                         goalSessions: _settings.dailyGoalSessions,
                         timerMode: _timerMode,
                       ),
@@ -505,7 +527,7 @@ class _FocusTimerPageState extends State<FocusTimerPage>
 
                       // Stats card
                       StatsCard(
-                        sessionsToday: _sessionsCompleted,
+                        sessionsToday: sessionsCompleted,
                         timerMode: _timerMode,
                       ),
 
@@ -513,7 +535,7 @@ class _FocusTimerPageState extends State<FocusTimerPage>
 
                       // Session history
                       SessionHistory(
-                        sessions: _repository.focusSessions,
+                        sessions: sessions,
                         onSessionDelete: _deleteSession,
                       ),
 

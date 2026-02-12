@@ -16,6 +16,7 @@ import sleepRoutes from './routes/sleep.routes';
 import meditationRoutes from './routes/meditation.routes';
 import workoutRoutes from './routes/workout.routes';
 import caloriesRoutes from './routes/calories.routes';
+import focusTimerRoutes from './routes/focus-timer.routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authMiddleware } from './middleware/auth.middleware';
 import { securityHeaders, rateLimiter } from './middleware/security.middleware';
@@ -52,6 +53,7 @@ app.use('/api/sleep', sleepRoutes);
 app.use('/api/meditation', meditationRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/calories', caloriesRoutes);
+app.use('/api/focus-timer', focusTimerRoutes);
 
 // Enhanced health check with database status
 app.get('/api/health', async (_req, res) => {
@@ -157,6 +159,12 @@ async function startServer(): Promise<void> {
       logger.info('  GET    /api/calories/history');
       logger.info('  GET    /api/calories/goal');
       logger.info('  PUT    /api/calories/goal');
+      logger.info('  GET    /api/focus-timer');
+      logger.info('  POST   /api/focus-timer');
+      logger.info('  GET    /api/focus-timer/stats');
+      logger.info('  GET    /api/focus-timer/history');
+      logger.info('  GET    /api/focus-timer/goal');
+      logger.info('  PUT    /api/focus-timer/goal');
     });
   } catch (err) {
     logger.fatal({ err }, 'Failed to start server');

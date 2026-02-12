@@ -53,6 +53,8 @@ import 'package:assistant/providers/todo_provider.dart';
 import 'package:assistant/providers/water_provider.dart';
 import 'package:assistant/providers/calendar_provider.dart';
 import 'package:assistant/providers/workout_provider.dart';
+import 'package:assistant/providers/focus_timer_provider.dart';
+import 'package:assistant/data/models/focus_session_model.dart';
 import 'package:assistant/data/models/calendar_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -127,12 +129,12 @@ class _HomeTab extends ConsumerWidget {
     final workoutStats = ref.watch(workoutStatsProvider).valueOrNull ?? WorkoutStats.empty();
     final workoutGoal = ref.watch(workoutGoalProvider).valueOrNull;
     final calendarStats = ref.watch(calendarStatsProvider).valueOrNull ?? CalendarStats.empty();
+    final focusTimerStats = ref.watch(focusTimerStatsProvider).valueOrNull ?? FocusTimerStats.empty();
 
-    // Mock data for 4 UI-only features (no backend yet)
+    // Mock data for 3 UI-only features (no backend yet)
     final repository = MockRepository();
     final unreadMessages = repository.unreadMessagesCount;
     final messageServices = repository.messageServices.length;
-    final focusSessionsToday = repository.todayCompletedSessions;
     final weather = repository.weather;
     final todayScreenTime = repository.todayScreenTime;
     final yesterdayScreenTime = repository.yesterdayScreenTime;
@@ -177,7 +179,7 @@ class _HomeTab extends ConsumerWidget {
               CustomFocusTimerCard(
                 isRunning: false,
                 remainingMinutes: 25,
-                sessionsCompleted: focusSessionsToday,
+                sessionsCompleted: focusTimerStats.todaySessions,
                 onTap: () => navigateTo(const FocusTimerPage()),
                 onStartStopPressed: () => navigateTo(const FocusTimerPage()),
               ),

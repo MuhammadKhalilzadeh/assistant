@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/focus_session_model.dart';
+import 'package:assistant/data/models/focus_session_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'session_item.dart';
 import 'focus_empty_state.dart';

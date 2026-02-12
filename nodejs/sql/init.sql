@@ -303,3 +303,39 @@ CREATE INDEX IF NOT EXISTS idx_calorie_entries_meal_type ON calorie_entries(meal
 
 INSERT INTO nutrition_goals (daily_calorie_goal, protein_goal_grams, carbs_goal_grams, fat_goal_grams)
 SELECT 2000, 50, 250, 65 WHERE NOT EXISTS (SELECT 1 FROM nutrition_goals);
+
+-- =============================================
+-- FOCUS TIMER
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS focus_timer_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type VARCHAR(20) NOT NULL CHECK (type IN ('focus', 'short_break', 'long_break')),
+  start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  end_time TIMESTAMP,
+  duration_minutes INTEGER NOT NULL DEFAULT 25 CHECK (duration_minutes >= 1 AND duration_minutes <= 480),
+  is_completed BOOLEAN DEFAULT FALSE,
+  task TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS focus_timer_goals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  daily_goal_sessions INTEGER NOT NULL DEFAULT 8 CHECK (daily_goal_sessions >= 1 AND daily_goal_sessions <= 50),
+  focus_duration INTEGER NOT NULL DEFAULT 25,
+  short_break_duration INTEGER NOT NULL DEFAULT 5,
+  long_break_duration INTEGER NOT NULL DEFAULT 15,
+  sessions_before_long_break INTEGER NOT NULL DEFAULT 4,
+  auto_start_breaks BOOLEAN DEFAULT FALSE,
+  auto_start_focus BOOLEAN DEFAULT FALSE,
+  sound_enabled BOOLEAN DEFAULT TRUE,
+  vibration_enabled BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_focus_timer_sessions_start_time ON focus_timer_sessions(start_time);
+CREATE INDEX IF NOT EXISTS idx_focus_timer_sessions_type ON focus_timer_sessions(type);
+
+INSERT INTO focus_timer_goals (daily_goal_sessions, focus_duration, short_break_duration, long_break_duration, sessions_before_long_break)
+SELECT 8, 25, 5, 15, 4 WHERE NOT EXISTS (SELECT 1 FROM focus_timer_goals);

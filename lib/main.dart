@@ -9,6 +9,7 @@ import 'package:assistant/data/cache/calories_cache.dart';
 import 'package:assistant/data/cache/habit_cache.dart';
 import 'package:assistant/data/cache/todo_cache.dart';
 import 'package:assistant/data/cache/water_cache.dart';
+import 'package:assistant/data/cache/focus_timer_cache.dart';
 import 'package:assistant/data/cache/calendar_cache.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/splash/index.dart';
@@ -38,6 +39,7 @@ void main() async {
     TodoCache().init(),
     WaterCache().init(),
     CalendarCache().init(),
+    FocusTimerCache().init(),
   ]);
 
   runApp(const ProviderScope(child: MyApp()));
