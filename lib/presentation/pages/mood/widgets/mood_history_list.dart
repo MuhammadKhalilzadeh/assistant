@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/models/mood_entry_model.dart';
+import 'package:assistant/data/models/mood_entry_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Mood history list with swipe-to-delete functionality

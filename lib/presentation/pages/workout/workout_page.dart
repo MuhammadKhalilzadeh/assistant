@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
-import 'package:assistant/data/mock/models/workout_session_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:assistant/data/models/workout_session_model.dart';
+import 'package:assistant/providers/workout_provider.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'widgets/workout_app_bar.dart';
 import 'widgets/workout_progress_card.dart';
@@ -13,22 +14,19 @@ import 'widgets/workout_tips_card.dart';
 import 'widgets/goal_celebration.dart';
 
 /// Main Workout page with timer-based tracking
-class WorkoutPage extends StatefulWidget {
+class WorkoutPage extends ConsumerStatefulWidget {
   const WorkoutPage({super.key});
 
   @override
-  State<WorkoutPage> createState() => _WorkoutPageState();
+  ConsumerState<WorkoutPage> createState() => _WorkoutPageState();
 }
 
-class _WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-
+class _WorkoutPageState extends ConsumerState<WorkoutPage> with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late AnimationController _progressAnimationController;
   late Animation<double> _listAnimation;
 
   bool _showCelebration = false;
-  bool _goalWasMetBefore = false;
 
   // Timer state
   bool _isTimerActive = false;
@@ -55,11 +53,6 @@ class _WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     )..repeat();
-
-    // Check initial goal state
-    final weeklyMinutes = _repository.getWeeklyWorkoutStats().weeklyMinutes;
-    final weeklyGoal = _repository.workoutGoal.weeklyMinutesGoal;
-    _goalWasMetBefore = weeklyMinutes >= weeklyGoal;
 
     _listAnimationController.forward();
   }
@@ -88,7 +81,7 @@ class _WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin
     HapticFeedback.mediumImpact();
   }
 
-  void _stopWorkout() {
+  Future<void> _stopWorkout() async {
     _timer?.cancel();
 
     if (_timerSeconds >= 60) {
@@ -96,44 +89,54 @@ class _WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin
       final durationMinutes = (_timerSeconds / 60).ceil();
       final caloriesBurned = _calculateCalories(durationMinutes);
 
-      final previousMinutes = _repository.getWeeklyWorkoutStats().weeklyMinutes;
-      final weeklyGoal = _repository.workoutGoal.weeklyMinutesGoal;
+      try {
+        await ref.read(workoutSessionsProvider.notifier).addSession(WorkoutSessionModel(
+          id: '',
+          type: _selectedWorkoutType,
+          startTime: _workoutStartTime ?? DateTime.now(),
+          endTime: DateTime.now(),
+          durationMinutes: durationMinutes,
+          caloriesBurned: caloriesBurned,
+        ));
 
-      _repository.addWorkoutSession(WorkoutSessionModel(
-        id: '',
-        type: _selectedWorkoutType,
-        startTime: _workoutStartTime ?? DateTime.now(),
-        endTime: DateTime.now(),
-        durationMinutes: durationMinutes,
-        caloriesBurned: caloriesBurned,
-      ));
-
-      final newMinutes = _repository.getWeeklyWorkoutStats().weeklyMinutes;
-
-      // Check if goal was just achieved
-      if (!_goalWasMetBefore && newMinutes >= weeklyGoal && previousMinutes < weeklyGoal) {
-        setState(() {
-          _showCelebration = true;
-          _goalWasMetBefore = true;
-        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.fitness_center, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text('Workout saved: $durationMinutes min'),
+                ],
+              ),
+              backgroundColor: AppTheme.successColor,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: const EdgeInsets.all(16),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text('Failed to save workout: $e'),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: const EdgeInsets.all(16),
+            ),
+          );
+        }
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.fitness_center, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
-              Text('Workout saved: $durationMinutes min'),
-            ],
-          ),
-          backgroundColor: AppTheme.successColor,
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
     }
 
     setState(() {
@@ -160,18 +163,36 @@ class _WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin
     return durationMinutes * caloriesPerMinute;
   }
 
-  void _deleteWorkout(String id) {
-    _repository.deleteWorkoutSession(id);
-
-    // Re-check goal status
-    final weeklyMinutes = _repository.getWeeklyWorkoutStats().weeklyMinutes;
-    final weeklyGoal = _repository.workoutGoal.weeklyMinutesGoal;
-    _goalWasMetBefore = weeklyMinutes >= weeklyGoal;
-
-    setState(() {});
+  Future<void> _deleteWorkout(String id) async {
+    try {
+      await ref.read(workoutSessionsProvider.notifier).deleteSession(id);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text('Failed to delete workout: $e'),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    }
   }
 
   void _showGoalSettings() {
+    final goalAsync = ref.read(workoutGoalProvider);
+    final currentGoal = goalAsync.valueOrNull;
+    if (currentGoal == null) return;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: AppTheme.cardColor,
@@ -179,14 +200,18 @@ class _WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => _GoalSettingsSheet(
-        currentGoal: _repository.workoutGoal.weeklyMinutesGoal,
-        onGoalChanged: (newGoal) {
-          _repository.updateWorkoutGoal(weeklyMinutesGoal: newGoal);
-          setState(() {
-            final weeklyMinutes = _repository.getWeeklyWorkoutStats().weeklyMinutes;
-            _goalWasMetBefore = weeklyMinutes >= newGoal;
-          });
-          Navigator.pop(context);
+        currentGoal: currentGoal.weeklyMinutesGoal,
+        onGoalChanged: (newGoal) async {
+          try {
+            await ref.read(workoutGoalProvider.notifier).updateGoal(
+              currentGoal.copyWith(weeklyMinutesGoal: newGoal),
+            );
+          } catch (e) {
+            // ignore
+          }
+          if (mounted) {
+            Navigator.pop(context);
+          }
         },
       ),
     );
@@ -202,11 +227,25 @@ class _WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
-    final stats = _repository.getWeeklyWorkoutStats();
-    final weeklyGoal = _repository.workoutGoal.weeklyMinutesGoal;
-    final progress = stats.weeklyMinutes / weeklyGoal;
-    final workouts = _repository.workoutSessions.toList()
+
+    final sessionsAsync = ref.watch(workoutSessionsProvider);
+    final statsAsync = ref.watch(workoutStatsProvider);
+    final goalAsync = ref.watch(workoutGoalProvider);
+
+    final workouts = (sessionsAsync.valueOrNull ?? []).toList()
       ..sort((a, b) => b.startTime.compareTo(a.startTime));
+    final stats = statsAsync.valueOrNull ?? WorkoutStats.empty();
+    final goal = goalAsync.valueOrNull;
+    final weeklyGoal = goal?.weeklyMinutesGoal ?? 150;
+    final progress = weeklyGoal > 0 ? stats.weeklyMinutes / weeklyGoal : 0.0;
+
+    final today = DateTime.now();
+    final todayWorkouts = workouts.where((w) =>
+      w.startTime.year == today.year && w.startTime.month == today.month && w.startTime.day == today.day
+    ).toList();
+    final todayMinutes = todayWorkouts.fold<int>(0, (sum, w) => sum + w.durationMinutes);
+    final todaySessions = todayWorkouts.length;
+    final todayCalories = todayWorkouts.fold<int>(0, (sum, w) => sum + w.caloriesBurned);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -231,9 +270,9 @@ class _WorkoutPageState extends State<WorkoutPage> with TickerProviderStateMixin
                             animation: _progressAnimationController,
                             builder: (context, child) {
                               return WorkoutProgressCard(
-                                todayMinutes: _repository.todayWorkoutMinutes,
-                                todaySessions: _repository.todayWorkoutSessions,
-                                todayCalories: _repository.todayWorkoutCalories,
+                                todayMinutes: todayMinutes,
+                                todaySessions: todaySessions,
+                                todayCalories: todayCalories,
                                 weeklyGoal: weeklyGoal,
                                 progress: progress,
                                 animationPhase: _progressAnimationController.value,

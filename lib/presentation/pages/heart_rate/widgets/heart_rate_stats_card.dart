@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/heart_rate_record_model.dart';
+import 'package:assistant/data/models/heart_rate_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// 2x2 grid displaying weekly heart rate statistics with animations

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/mood_entry_model.dart';
+import 'package:assistant/data/models/mood_entry_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// 2x2 grid displaying weekly mood statistics with animations
@@ -27,7 +27,7 @@ class MoodStatsCard extends StatelessWidget {
   String _getMostFrequentMood() {
     if (stats.moodDistribution.isEmpty) return 'N/A';
 
-    MoodLevel? mostFrequent;
+    String? mostFrequent;
     int maxCount = 0;
 
     stats.moodDistribution.forEach((mood, count) {
@@ -39,18 +39,9 @@ class MoodStatsCard extends StatelessWidget {
 
     if (mostFrequent == null) return 'N/A';
 
-    switch (mostFrequent!) {
-      case MoodLevel.great:
-        return 'Great';
-      case MoodLevel.good:
-        return 'Good';
-      case MoodLevel.okay:
-        return 'Okay';
-      case MoodLevel.bad:
-        return 'Bad';
-      case MoodLevel.awful:
-        return 'Awful';
-    }
+    // Capitalize the mood string
+    final mood = mostFrequent!;
+    return mood[0].toUpperCase() + mood.substring(1);
   }
 
   @override

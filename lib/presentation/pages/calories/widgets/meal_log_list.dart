@@ -1,4 +1,4 @@
-import 'package:assistant/data/mock/models/calorie_entry_model.dart';
+import 'package:assistant/data/models/calorie_entry_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

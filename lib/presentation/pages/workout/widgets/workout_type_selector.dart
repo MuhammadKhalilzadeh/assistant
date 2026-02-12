@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/workout_session_model.dart';
+import 'package:assistant/data/models/workout_session_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Workout type selector with chips for different exercise types

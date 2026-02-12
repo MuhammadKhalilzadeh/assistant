@@ -1,5 +1,6 @@
-import 'package:assistant/data/mock/models/calorie_entry_model.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:assistant/data/models/calorie_entry_model.dart';
+import 'package:assistant/providers/calories_provider.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -14,17 +15,15 @@ import 'widgets/nutrition_stats_card.dart';
 import 'widgets/nutrition_tips_card.dart';
 import 'widgets/quick_add_buttons.dart';
 
-class CaloriesPage extends StatefulWidget {
+class CaloriesPage extends ConsumerStatefulWidget {
   const CaloriesPage({super.key});
 
   @override
-  State<CaloriesPage> createState() => _CaloriesPageState();
+  ConsumerState<CaloriesPage> createState() => _CaloriesPageState();
 }
 
-class _CaloriesPageState extends State<CaloriesPage>
+class _CaloriesPageState extends ConsumerState<CaloriesPage>
     with TickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-
   late AnimationController _listAnimationController;
   late AnimationController _progressAnimationController;
   late Animation<double> _listAnimation;
@@ -73,11 +72,11 @@ class _CaloriesPageState extends State<CaloriesPage>
   void _checkGoalAchievement() {
     if (_hasShownCelebration) return;
 
-    final currentCalories = _repository.todayCalories;
-    final goal = _repository.nutritionGoal.dailyCalorieGoal;
+    final stats = ref.read(nutritionStatsProvider).valueOrNull;
+    if (stats == null) return;
 
-    final isWithinGoal =
-        currentCalories >= goal * 0.8 && currentCalories <= goal;
+    final isWithinGoal = stats.todayCalories >= stats.dailyCalorieGoal * 0.8 &&
+        stats.todayCalories <= stats.dailyCalorieGoal;
 
     if (isWithinGoal && !_showCelebration) {
       Future.delayed(const Duration(milliseconds: 800), () {
@@ -91,7 +90,7 @@ class _CaloriesPageState extends State<CaloriesPage>
     }
   }
 
-  void _handleQuickAdd(QuickAddItem item) {
+  void _handleQuickAdd(QuickAddItem item) async {
     final entry = CalorieEntryModel(
       id: '',
       foodName: item.name,
@@ -104,24 +103,46 @@ class _CaloriesPageState extends State<CaloriesPage>
       foodCategory: item.category,
     );
 
-    _repository.addCalorieEntry(entry);
-    _refreshAfterChange();
+    try {
+      await ref.read(calorieEntriesProvider.notifier).addEntry(entry);
+      _refreshAfterChange();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add entry: $e')),
+        );
+      }
+    }
   }
 
-  void _handleMealAdded(CalorieEntryModel entry) {
-    _repository.addCalorieEntry(entry);
-    _refreshAfterChange();
+  void _handleMealAdded(CalorieEntryModel entry) async {
+    try {
+      await ref.read(calorieEntriesProvider.notifier).addEntry(entry);
+      _refreshAfterChange();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add meal: $e')),
+        );
+      }
+    }
   }
 
-  void _handleDeleteEntry(String id) {
-    _repository.deleteCalorieEntry(id);
-    setState(() {});
+  void _handleDeleteEntry(String id) async {
+    try {
+      await ref.read(calorieEntriesProvider.notifier).deleteEntry(id);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete entry: $e')),
+        );
+      }
+    }
   }
 
   void _refreshAfterChange() {
     _progressAnimationController.reset();
     _progressAnimationController.forward();
-    setState(() {});
     _checkGoalAchievement();
   }
 
@@ -141,14 +162,27 @@ class _CaloriesPageState extends State<CaloriesPage>
   }
 
   void _showSettingsDialog() {
+    final goalAsync = ref.read(nutritionGoalProvider);
+    final currentGoal = goalAsync.valueOrNull;
+    if (currentGoal == null) return;
+
     showDialog(
       context: context,
       builder: (context) => _GoalSettingsDialog(
-        currentGoal: _repository.nutritionGoal,
-        onSave: (goal, protein, carbs, fat) {
-          _repository.updateCalorieGoal(goal);
-          _repository.updateMacroGoals(protein, carbs, fat);
-          setState(() {});
+        currentGoal: currentGoal,
+        onSave: (goal, protein, carbs, fat) async {
+          try {
+            await ref.read(nutritionGoalProvider.notifier).updateGoal(
+                  currentGoal.copyWith(
+                    dailyCalorieGoal: goal,
+                    proteinGoalGrams: protein,
+                    carbsGoalGrams: carbs,
+                    fatGoalGrams: fat,
+                  ),
+                );
+          } catch (e) {
+            // ignore
+          }
         },
       ),
     );
@@ -159,12 +193,31 @@ class _CaloriesPageState extends State<CaloriesPage>
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
 
-    final currentCalories = _repository.todayCalories;
-    final nutritionGoal = _repository.nutritionGoal;
-    final entries = _repository.todayCalorieEntries;
-    final macros = _repository.getMacrosForDate(DateTime.now());
-    final stats = _repository.getWeeklyNutritionStats();
-    final last7Days = _repository.getLast7DaysCalories();
+    final entriesAsync = ref.watch(calorieEntriesProvider);
+    final statsAsync = ref.watch(nutritionStatsProvider);
+    final goalAsync = ref.watch(nutritionGoalProvider);
+    final historyAsync = ref.watch(nutritionHistoryProvider);
+
+    final entries = entriesAsync.valueOrNull ?? [];
+    final stats = statsAsync.valueOrNull ?? NutritionStats.empty();
+    final nutritionGoal = goalAsync.valueOrNull;
+    final currentCalories = stats.todayCalories;
+    final last7Days = historyAsync.valueOrNull ?? [];
+
+    // Convert last7Days for DailyHistoryWidget
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final last7DaysCalories = <String, int>{};
+    for (final day in last7Days) {
+      final dayName = dayNames[day.date.weekday - 1];
+      last7DaysCalories[dayName] = day.totalCalories;
+    }
+
+    // Compute macros from today's entries
+    final macros = <String, int>{
+      'protein': entries.fold<int>(0, (sum, e) => sum + (e.protein ?? 0)),
+      'carbs': entries.fold<int>(0, (sum, e) => sum + (e.carbs ?? 0)),
+      'fat': entries.fold<int>(0, (sum, e) => sum + (e.fat ?? 0)),
+    };
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -187,7 +240,7 @@ class _CaloriesPageState extends State<CaloriesPage>
                             // Progress Card
                             CaloriesProgressCard(
                               currentCalories: currentCalories,
-                              goalCalories: nutritionGoal.dailyCalorieGoal,
+                              goalCalories: nutritionGoal?.dailyCalorieGoal ?? 2000,
                               animation: _progressAnimation,
                             ),
                             SizedBox(height: padding),
@@ -201,9 +254,9 @@ class _CaloriesPageState extends State<CaloriesPage>
                               protein: macros['protein'] ?? 0,
                               carbs: macros['carbs'] ?? 0,
                               fat: macros['fat'] ?? 0,
-                              proteinGoal: nutritionGoal.proteinGoalGrams,
-                              carbsGoal: nutritionGoal.carbsGoalGrams,
-                              fatGoal: nutritionGoal.fatGoalGrams,
+                              proteinGoal: nutritionGoal?.proteinGoalGrams ?? 50,
+                              carbsGoal: nutritionGoal?.carbsGoalGrams ?? 250,
+                              fatGoal: nutritionGoal?.fatGoalGrams ?? 65,
                               animation: _progressAnimation,
                             ),
                             SizedBox(height: padding),
@@ -214,8 +267,8 @@ class _CaloriesPageState extends State<CaloriesPage>
 
                             // Daily History
                             DailyHistoryWidget(
-                              last7DaysCalories: last7Days,
-                              goalCalories: nutritionGoal.dailyCalorieGoal,
+                              last7DaysCalories: last7DaysCalories,
+                              goalCalories: nutritionGoal?.dailyCalorieGoal ?? 2000,
                               animation: _listAnimation,
                             ),
                             SizedBox(height: padding),

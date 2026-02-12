@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
-import 'package:assistant/data/mock/models/sleep_record_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:assistant/data/models/sleep_record_model.dart';
+import 'package:assistant/providers/sleep_provider.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'widgets/sleep_app_bar.dart';
 import 'widgets/sleep_progress_card.dart';
@@ -15,22 +16,19 @@ import 'widgets/sleep_goal_sheet.dart';
 import 'widgets/goal_celebration.dart';
 
 /// Main Sleep page with animated progress and comprehensive tracking
-class SleepPage extends StatefulWidget {
+class SleepPage extends ConsumerStatefulWidget {
   const SleepPage({super.key});
 
   @override
-  State<SleepPage> createState() => _SleepPageState();
+  ConsumerState<SleepPage> createState() => _SleepPageState();
 }
 
-class _SleepPageState extends State<SleepPage> with TickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-
+class _SleepPageState extends ConsumerState<SleepPage> with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late AnimationController _moonAnimationController;
   late Animation<double> _listAnimation;
 
   bool _showCelebration = false;
-  bool _goalWasMetBefore = false;
 
   @override
   void initState() {
@@ -53,11 +51,6 @@ class _SleepPageState extends State<SleepPage> with TickerProviderStateMixin {
       vsync: this,
     )..repeat();
 
-    // Check initial goal state
-    final lastNight = _repository.lastNightSleep;
-    final goalMinutes = _repository.sleepGoalMinutes;
-    _goalWasMetBefore = lastNight != null && lastNight.duration.inMinutes >= goalMinutes;
-
     // Start animations
     _listAnimationController.forward();
   }
@@ -69,65 +62,54 @@ class _SleepPageState extends State<SleepPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _addSleep(DateTime bedTime, DateTime wakeTime, SleepQuality quality) {
-    final goalMinutes = _repository.sleepGoalMinutes;
-    final previousLastNight = _repository.lastNightSleep;
-    final wasPreviouslyMet = previousLastNight != null &&
-        previousLastNight.duration.inMinutes >= goalMinutes;
-
-    _repository.addSleepRecord(SleepRecordModel(
-      id: '',
-      bedTime: bedTime,
-      wakeTime: wakeTime,
-      quality: quality,
-    ));
-
-    HapticFeedback.mediumImpact();
-
-    final newLastNight = _repository.lastNightSleep;
-    final isNowMet = newLastNight != null &&
-        newLastNight.duration.inMinutes >= goalMinutes;
-
-    // Check if goal was just achieved
-    if (!_goalWasMetBefore && isNowMet && !wasPreviouslyMet) {
-      setState(() {
-        _showCelebration = true;
-        _goalWasMetBefore = true;
-      });
-    } else {
-      setState(() {});
+  void _addSleep(DateTime bedTime, DateTime wakeTime, SleepQuality quality) async {
+    try {
+      await ref.read(sleepRecordsProvider.notifier).addRecord(SleepRecordModel(
+        id: '',
+        bedTime: bedTime,
+        wakeTime: wakeTime,
+        quality: quality,
+      ));
+      HapticFeedback.mediumImpact();
+      final hours = wakeTime.difference(bedTime).inHours;
+      final minutes = wakeTime.difference(bedTime).inMinutes % 60;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.bedtime, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text('Logged ${hours}h ${minutes}m of sleep'),
+              ],
+            ),
+            backgroundColor: AppTheme.successColor,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to log sleep: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
-
-    final hours = wakeTime.difference(bedTime).inHours;
-    final minutes = wakeTime.difference(bedTime).inMinutes % 60;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.bedtime, color: Colors.white, size: 20),
-            const SizedBox(width: 8),
-            Text('Logged ${hours}h ${minutes}m of sleep'),
-          ],
-        ),
-        backgroundColor: AppTheme.successColor,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
   }
 
-  void _deleteSleepRecord(String id) {
-    _repository.deleteSleepRecord(id);
-
-    // Re-check goal status
-    final lastNight = _repository.lastNightSleep;
-    final goalMinutes = _repository.sleepGoalMinutes;
-    _goalWasMetBefore = lastNight != null && lastNight.duration.inMinutes >= goalMinutes;
-
-    setState(() {});
+  void _deleteSleepRecord(String id) async {
+    try {
+      await ref.read(sleepRecordsProvider.notifier).deleteRecord(id);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete record: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 
   void _showAddSleepSheet() {
@@ -140,17 +122,19 @@ class _SleepPageState extends State<SleepPage> with TickerProviderStateMixin {
   }
 
   void _showGoalSettings() {
+    final goalAsync = ref.read(sleepGoalProvider);
+    final currentGoal = goalAsync.valueOrNull;
+    if (currentGoal == null) return;
+
     SleepGoalSheet.show(
       context,
-      currentGoalMinutes: _repository.sleepGoalMinutes,
-      onGoalChanged: (newGoal) {
-        _repository.updateSleepGoal(newGoal);
-        setState(() {
-          // Re-check goal status with new goal
-          final lastNight = _repository.lastNightSleep;
-          _goalWasMetBefore = lastNight != null &&
-              lastNight.duration.inMinutes >= newGoal;
-        });
+      currentGoalMinutes: currentGoal.goalMinutes,
+      onGoalChanged: (newGoal) async {
+        try {
+          await ref.read(sleepGoalProvider.notifier).updateGoal(
+            currentGoal.copyWith(goalMinutes: newGoal),
+          );
+        } catch (e) { /* ignore */ }
       },
     );
   }
@@ -202,15 +186,28 @@ class _SleepPageState extends State<SleepPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
-    final lastNight = _repository.lastNightSleep;
-    final goalMinutes = _repository.sleepGoalMinutes;
-    final progress = lastNight != null
-        ? (lastNight.duration.inMinutes / goalMinutes)
-        : 0.0;
-    final sleepRecords = _repository.sleepRecords.toList()
+
+    final recordsAsync = ref.watch(sleepRecordsProvider);
+    final statsAsync = ref.watch(sleepStatsProvider);
+    final goalAsync = ref.watch(sleepGoalProvider);
+    final historyAsync = ref.watch(sleepHistoryProvider);
+
+    final sleepRecords = (recordsAsync.valueOrNull ?? []).toList()
       ..sort((a, b) => b.wakeTime.compareTo(a.wakeTime));
-    final stats = _repository.getWeeklySleepStats();
-    final last7Days = _repository.getLast7DaysSleepHours();
+    final stats = statsAsync.valueOrNull ?? SleepStats.empty();
+    final goal = goalAsync.valueOrNull;
+    final goalMinutes = goal?.goalMinutes ?? 480;
+    final lastNight = sleepRecords.isNotEmpty ? sleepRecords.first : null;
+    final progress = lastNight != null ? (lastNight.duration.inMinutes / goalMinutes) : 0.0;
+    final last7Days = historyAsync.valueOrNull ?? [];
+
+    // Convert to Map for WeeklySleepChart
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final last7DaysHours = <String, double>{};
+    for (final day in last7Days) {
+      final dayName = dayNames[day.date.weekday - 1];
+      last7DaysHours[dayName] = day.durationHours;
+    }
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -274,7 +271,7 @@ class _SleepPageState extends State<SleepPage> with TickerProviderStateMixin {
 
                           // Weekly chart
                           WeeklySleepChart(
-                            last7DaysHours: last7Days,
+                            last7DaysHours: last7DaysHours,
                             goalMinutes: goalMinutes,
                             padding: padding,
                             animation: _listAnimation,

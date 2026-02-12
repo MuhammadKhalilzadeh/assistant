@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/meditation_session_model.dart';
+import 'package:assistant/data/models/meditation_session_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// 2x2 grid displaying weekly meditation statistics with animations

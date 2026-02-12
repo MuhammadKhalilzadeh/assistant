@@ -1,4 +1,14 @@
 import 'package:assistant/data/mock/repositories/mock_repository.dart';
+import 'package:assistant/data/models/calorie_entry_model.dart';
+import 'package:assistant/data/models/habit_stats.dart';
+import 'package:assistant/data/models/heart_rate_model.dart';
+import 'package:assistant/data/models/meditation_session_model.dart';
+import 'package:assistant/data/models/mood_entry_model.dart';
+import 'package:assistant/data/models/sleep_record_model.dart';
+import 'package:assistant/data/models/step_record_model.dart';
+import 'package:assistant/data/models/todo_stats.dart';
+import 'package:assistant/data/models/water_log_model.dart';
+import 'package:assistant/data/models/workout_session_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/calendar/index.dart';
 import 'package:assistant/presentation/pages/calories/index.dart';
@@ -32,7 +42,18 @@ import 'package:assistant/presentation/widgets/cards/custom_todos_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_water_intake_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_weather_card.dart';
 import 'package:assistant/presentation/widgets/cards/custom_workout_card.dart';
+import 'package:assistant/providers/calories_provider.dart';
+import 'package:assistant/providers/habit_provider.dart';
+import 'package:assistant/providers/heart_rate_provider.dart';
+import 'package:assistant/providers/meditation_provider.dart';
+import 'package:assistant/providers/mood_provider.dart';
+import 'package:assistant/providers/sleep_provider.dart';
+import 'package:assistant/providers/steps_provider.dart';
+import 'package:assistant/providers/todo_provider.dart';
+import 'package:assistant/providers/water_provider.dart';
+import 'package:assistant/providers/workout_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -83,44 +104,41 @@ class _DashboardState extends State<Dashboard> {
   }
 }
 
-class _HomeTab extends StatefulWidget {
+class _HomeTab extends ConsumerWidget {
   const _HomeTab();
 
   @override
-  State<_HomeTab> createState() => _HomeTabState();
-}
-
-class _HomeTabState extends State<_HomeTab> {
-  final MockRepository _repository = MockRepository();
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double paddingValue = (screenWidth * 0.04).clamp(16.0, 24.0);
 
-    // Get live data from repository
-    final todos = _repository.todos;
-    final todayWater = _repository.todayWaterIntake;
-    final todayCalories = _repository.todayCalories;
-    final todayWorkoutMinutes = _repository.todayWorkoutMinutes;
-    final todayWorkoutSessions = _repository.todayWorkoutSessions;
-    final latestHeartRate = _repository.latestHeartRate;
-    final restingHeartRate = _repository.restingHeartRate;
-    final todayMood = _repository.todayMood;
-    final moodStreak = _repository.moodStreak;
-    final todayScreenTime = _repository.todayScreenTime;
-    final yesterdayScreenTime = _repository.yesterdayScreenTime;
-    final todayMeditationMinutes = _repository.todayMeditationMinutes;
-    final meditationStreak = _repository.meditationStreak;
-    final habits = _repository.habits;
-    final completedHabitsToday = _repository.completedHabitsToday;
-    final maxHabitStreak = _repository.maxStreak;
-    final unreadMessages = _repository.unreadMessagesCount;
-    final messageServices = _repository.messageServices.length;
-    final todayEvents = _repository.todayEventsCount;
-    final nextEvent = _repository.nextEvent;
-    final focusSessionsToday = _repository.todayCompletedSessions;
-    final weather = _repository.weather;
+    // Watch real providers for 10 backend-connected features
+    final todoStats = ref.watch(todoStatsProvider).valueOrNull ?? TodoStats.empty();
+    final habitStats = ref.watch(habitStatsProvider).valueOrNull ?? HabitStats.empty();
+    final waterStats = ref.watch(waterStatsProvider).valueOrNull ?? WaterStats.empty();
+    final nutritionStats = ref.watch(nutritionStatsProvider).valueOrNull ?? NutritionStats.empty();
+    final heartRateStats = ref.watch(heartRateStatsProvider).valueOrNull ?? HeartRateStats.empty();
+    final stepsStats = ref.watch(stepsStatsProvider).valueOrNull ?? StepsStats.empty();
+    final sleepStats = ref.watch(sleepStatsProvider).valueOrNull ?? SleepStats.empty();
+    final moodStats = ref.watch(moodStatsProvider).valueOrNull ?? MoodStats.empty();
+    final meditationStats = ref.watch(meditationStatsProvider).valueOrNull ?? MeditationStats.empty();
+    final workoutStats = ref.watch(workoutStatsProvider).valueOrNull ?? WorkoutStats.empty();
+    final workoutGoal = ref.watch(workoutGoalProvider).valueOrNull;
+
+    // Mock data for 5 UI-only features (no backend yet)
+    final repository = MockRepository();
+    final unreadMessages = repository.unreadMessagesCount;
+    final messageServices = repository.messageServices.length;
+    final todayEvents = repository.todayEventsCount;
+    final nextEvent = repository.nextEvent;
+    final focusSessionsToday = repository.todayCompletedSessions;
+    final weather = repository.weather;
+    final todayScreenTime = repository.todayScreenTime;
+    final yesterdayScreenTime = repository.yesterdayScreenTime;
+
+    void navigateTo(Widget page) {
+      NavigationUtils.navigateWithFade(context, page);
+    }
 
     return SafeArea(
       child: Container(
@@ -133,40 +151,40 @@ class _HomeTabState extends State<_HomeTab> {
               children: [
               // Productivity Section
               CustomTodosCard(
-                totalTodos: todos.length,
-                completedTodos: _repository.completedTodosCount,
-                onTap: () => _navigateTo(const TodosPage()),
-                onAddPressed: () => _navigateTo(const TodosPage()),
+                totalTodos: todoStats.total,
+                completedTodos: todoStats.completed,
+                onTap: () => navigateTo(const TodosPage()),
+                onAddPressed: () => navigateTo(const TodosPage()),
               ),
               SizedBox(height: paddingValue),
               CustomGeneralInboxCard(
                 unreadCount: unreadMessages,
                 servicesCount: messageServices,
-                onTap: () => _navigateTo(const InboxPage()),
+                onTap: () => navigateTo(const InboxPage()),
               ),
               SizedBox(height: paddingValue),
               CustomCalendarEventsCard(
                 nextEventTitle: nextEvent?.title ?? 'No events',
                 nextEventTime: nextEvent != null ? _formatEventTime(nextEvent.startTime) : '',
                 eventsToday: todayEvents,
-                onTap: () => _navigateTo(const CalendarPage()),
-                onAddPressed: () => _navigateTo(const CalendarPage()),
+                onTap: () => navigateTo(const CalendarPage()),
+                onAddPressed: () => navigateTo(const CalendarPage()),
               ),
               SizedBox(height: paddingValue),
               CustomFocusTimerCard(
                 isRunning: false,
                 remainingMinutes: 25,
                 sessionsCompleted: focusSessionsToday,
-                onTap: () => _navigateTo(const FocusTimerPage()),
-                onStartStopPressed: () => _navigateTo(const FocusTimerPage()),
+                onTap: () => navigateTo(const FocusTimerPage()),
+                onStartStopPressed: () => navigateTo(const FocusTimerPage()),
               ),
               SizedBox(height: paddingValue),
               CustomHabitsTrackerCard(
-                completedHabits: completedHabitsToday,
-                totalHabits: habits.length,
-                streak: maxHabitStreak,
-                onTap: () => _navigateTo(const HabitsPage()),
-                onAddPressed: () => _navigateTo(const HabitsPage()),
+                completedHabits: habitStats.completedToday,
+                totalHabits: habitStats.totalHabits,
+                streak: habitStats.maxBestStreak,
+                onTap: () => navigateTo(const HabitsPage()),
+                onAddPressed: () => navigateTo(const HabitsPage()),
               ),
               SizedBox(height: paddingValue),
 
@@ -177,65 +195,69 @@ class _HomeTabState extends State<_HomeTab> {
                 high: weather?.high ?? 28,
                 low: weather?.low ?? 18,
                 location: weather?.location ?? 'New York',
-                onTap: () => _navigateTo(const WeatherPage()),
+                onTap: () => navigateTo(const WeatherPage()),
               ),
               SizedBox(height: paddingValue),
               CustomWaterIntakeCard(
-                currentIntake: todayWater,
-                goalIntake: 3000,
-                onTap: () => _navigateTo(const WaterPage()),
-                onAddPressed: () => _navigateTo(const WaterPage()),
+                currentIntake: waterStats.todayIntakeMl,
+                goalIntake: waterStats.dailyGoalMl,
+                onTap: () => navigateTo(const WaterPage()),
+                onAddPressed: () => navigateTo(const WaterPage()),
               ),
               SizedBox(height: paddingValue),
               CustomCalorieIntakeCard(
-                currentCalories: todayCalories,
-                goalCalories: 2000,
-                onTap: () => _navigateTo(const CaloriesPage()),
-                onAddPressed: () => _navigateTo(const CaloriesPage()),
+                currentCalories: nutritionStats.todayCalories,
+                goalCalories: nutritionStats.dailyCalorieGoal,
+                onTap: () => navigateTo(const CaloriesPage()),
+                onAddPressed: () => navigateTo(const CaloriesPage()),
               ),
               SizedBox(height: paddingValue),
               CustomSleepDurationTrackerCard(
-                onTap: () => _navigateTo(const SleepPage()),
+                duration: '${sleepStats.weeklyAverageHours.toStringAsFixed(1)}h avg',
+                timeRange: '${sleepStats.averageBedTime ?? '--:--'} - ${sleepStats.averageWakeTime ?? '--:--'}',
+                onTap: () => navigateTo(const SleepPage()),
               ),
               SizedBox(height: paddingValue),
               CustomStepsTrackerCard(
-                onTap: () => _navigateTo(const StepsPage()),
+                currentSteps: stepsStats.todaySteps,
+                goalSteps: stepsStats.dailyGoal,
+                onTap: () => navigateTo(const StepsPage()),
               ),
               SizedBox(height: paddingValue),
               CustomWorkoutCard(
-                activeMinutes: todayWorkoutMinutes,
-                goalMinutes: 60,
-                sessionsToday: todayWorkoutSessions,
-                onTap: () => _navigateTo(const WorkoutPage()),
-                onStartPressed: () => _navigateTo(const WorkoutPage()),
+                activeMinutes: workoutStats.weeklyMinutes,
+                goalMinutes: workoutGoal?.weeklyMinutesGoal ?? 150,
+                sessionsToday: workoutStats.weeklySessions,
+                onTap: () => navigateTo(const WorkoutPage()),
+                onStartPressed: () => navigateTo(const WorkoutPage()),
               ),
               SizedBox(height: paddingValue),
               CustomHeartRateCard(
-                currentBpm: latestHeartRate?.bpm ?? 72,
-                restingBpm: restingHeartRate,
-                onTap: () => _navigateTo(const HeartRatePage()),
+                currentBpm: heartRateStats.maxBpm,
+                restingBpm: heartRateStats.averageRestingBpm.round(),
+                onTap: () => navigateTo(const HeartRatePage()),
               ),
               SizedBox(height: paddingValue),
 
               // Wellness Section
               CustomMoodTrackerCard(
-                currentMood: _mapMoodLevel(todayMood?.mood),
-                streak: moodStreak,
-                onTap: () => _navigateTo(const MoodPage()),
-                onMoodSelected: (mood) => _navigateTo(const MoodPage()),
+                currentMood: _mapMoodScore(moodStats.weeklyAverageMood),
+                streak: moodStats.currentStreak,
+                onTap: () => navigateTo(const MoodPage()),
+                onMoodSelected: (mood) => navigateTo(const MoodPage()),
               ),
               SizedBox(height: paddingValue),
               CustomScreenTimeCard(
                 todayMinutes: todayScreenTime?.totalMinutes ?? 225,
                 yesterdayMinutes: yesterdayScreenTime?.totalMinutes ?? 260,
-                onTap: () => _navigateTo(const ScreenTimePage()),
+                onTap: () => navigateTo(const ScreenTimePage()),
               ),
               SizedBox(height: paddingValue),
               CustomMeditationCard(
-                minutesToday: todayMeditationMinutes,
-                streak: meditationStreak,
-                onTap: () => _navigateTo(const MeditationPage()),
-                onStartPressed: () => _navigateTo(const MeditationPage()),
+                minutesToday: meditationStats.todayMinutes,
+                streak: meditationStats.currentStreak,
+                onTap: () => navigateTo(const MeditationPage()),
+                onStartPressed: () => navigateTo(const MeditationPage()),
               ),
               ],
             ),
@@ -243,10 +265,6 @@ class _HomeTabState extends State<_HomeTab> {
         ),
       ),
     );
-  }
-
-  void _navigateTo(Widget page) {
-    NavigationUtils.navigateWithFade(context, page);
   }
 
   String _formatEventTime(DateTime time) {
@@ -275,22 +293,13 @@ class _HomeTabState extends State<_HomeTab> {
     }
   }
 
-  MoodType? _mapMoodLevel(dynamic mood) {
-    if (mood == null) return null;
-    switch (mood.toString()) {
-      case 'MoodLevel.great':
-        return MoodType.great;
-      case 'MoodLevel.good':
-        return MoodType.good;
-      case 'MoodLevel.okay':
-        return MoodType.okay;
-      case 'MoodLevel.bad':
-        return MoodType.bad;
-      case 'MoodLevel.awful':
-        return MoodType.awful;
-      default:
-        return null;
-    }
+  MoodType? _mapMoodScore(double score) {
+    if (score <= 0) return null;
+    if (score >= 4.5) return MoodType.great;
+    if (score >= 3.5) return MoodType.good;
+    if (score >= 2.5) return MoodType.okay;
+    if (score >= 1.5) return MoodType.bad;
+    return MoodType.awful;
   }
 }
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
-import 'package:assistant/data/mock/models/mood_entry_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:assistant/data/models/mood_entry_model.dart';
+import 'package:assistant/providers/mood_provider.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'widgets/mood_app_bar.dart';
 import 'widgets/mood_progress_card.dart';
@@ -12,16 +13,14 @@ import 'widgets/mood_tips_card.dart';
 import 'widgets/goal_celebration.dart';
 
 /// Main Mood page with mood tracking and mental wellness features
-class MoodPage extends StatefulWidget {
+class MoodPage extends ConsumerStatefulWidget {
   const MoodPage({super.key});
 
   @override
-  State<MoodPage> createState() => _MoodPageState();
+  ConsumerState<MoodPage> createState() => _MoodPageState();
 }
 
-class _MoodPageState extends State<MoodPage> with TickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-
+class _MoodPageState extends ConsumerState<MoodPage> with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late AnimationController _progressAnimationController;
   late Animation<double> _listAnimation;
@@ -49,11 +48,6 @@ class _MoodPageState extends State<MoodPage> with TickerProviderStateMixin {
       vsync: this,
     )..repeat();
 
-    // Check initial goal state (streak-based)
-    final streak = _repository.moodStreak;
-    const streakGoal = 7; // Celebrate 7-day streaks
-    _previousStreakMilestone = (streak ~/ streakGoal) * streakGoal;
-
     _listAnimationController.forward();
   }
 
@@ -64,53 +58,75 @@ class _MoodPageState extends State<MoodPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _addMoodEntry(MoodLevel mood, {List<String>? activities, String? notes}) {
+  void _addMoodEntry(MoodLevel mood, {List<String>? activities, String? notes}) async {
     const streakGoal = 7;
 
-    _repository.addMoodEntry(MoodEntryModel(
-      id: '',
-      mood: mood,
-      recordedAt: DateTime.now(),
-      activities: activities ?? [],
-      notes: notes,
-    ));
+    try {
+      await ref.read(moodEntriesProvider.notifier).addEntry(MoodEntryModel(
+        id: '',
+        mood: mood,
+        recordedAt: DateTime.now(),
+        activities: activities ?? [],
+        notes: notes,
+      ));
 
-    final newStreak = _repository.moodStreak;
-    final newMilestone = (newStreak ~/ streakGoal) * streakGoal;
+      // Check streak milestone after adding
+      final statsAsync = ref.read(moodStatsProvider);
+      final newStreak = statsAsync.valueOrNull?.currentStreak ?? 0;
+      final newMilestone = (newStreak ~/ streakGoal) * streakGoal;
 
-    // Check if a new streak milestone was just achieved
-    if (newMilestone > _previousStreakMilestone && newMilestone > 0) {
-      setState(() {
-        _showCelebration = true;
-        _previousStreakMilestone = newMilestone;
-      });
-    } else {
-      setState(() {});
+      if (newMilestone > _previousStreakMilestone && newMilestone > 0) {
+        setState(() {
+          _showCelebration = true;
+          _previousStreakMilestone = newMilestone;
+        });
+      }
+
+      HapticFeedback.mediumImpact();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Text('😊', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: 8),
+                const Text('Mood logged successfully'),
+              ],
+            ),
+            backgroundColor: AppTheme.successColor,
+            duration: const Duration(seconds: 1),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to log mood: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
-
-    HapticFeedback.mediumImpact();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Text('😊', style: TextStyle(fontSize: 20)),
-            const SizedBox(width: 8),
-            const Text('Mood logged successfully'),
-          ],
-        ),
-        backgroundColor: AppTheme.successColor,
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
   }
 
-  void _deleteMoodEntry(String id) {
-    _repository.deleteMoodEntry(id);
-    setState(() {});
+  void _deleteMoodEntry(String id) async {
+    try {
+      await ref.read(moodEntriesProvider.notifier).deleteEntry(id);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete mood: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showLogMoodSheet() {
@@ -342,6 +358,10 @@ class _MoodPageState extends State<MoodPage> with TickerProviderStateMixin {
   }
 
   void _showGoalSettings() {
+    final goalAsync = ref.read(moodGoalProvider);
+    final currentGoal = goalAsync.valueOrNull;
+    if (currentGoal == null) return;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: AppTheme.cardColor,
@@ -349,14 +369,17 @@ class _MoodPageState extends State<MoodPage> with TickerProviderStateMixin {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => _GoalSettingsSheet(
-        currentGoal: _repository.moodGoal,
-        onGoalChanged: (dailyEntriesGoal, targetMood) {
-          _repository.updateMoodGoal(
-            dailyEntriesGoal: dailyEntriesGoal,
-            targetMood: targetMood,
-          );
-          setState(() {});
-          Navigator.pop(context);
+        currentGoal: currentGoal,
+        onGoalChanged: (dailyEntriesGoal, targetMood) async {
+          try {
+            await ref.read(moodGoalProvider.notifier).updateGoal(
+              currentGoal.copyWith(
+                dailyEntriesGoal: dailyEntriesGoal,
+                targetMood: targetMood.name,
+              ),
+            );
+          } catch (e) { /* ignore */ }
+          if (mounted) Navigator.pop(context);
         },
       ),
     );
@@ -417,12 +440,16 @@ class _MoodPageState extends State<MoodPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
-    final todayMood = _repository.todayMood;
-    final stats = _repository.getWeeklyMoodStats();
-    final streak = _repository.moodStreak;
-    final progress = todayMood != null ? 1.0 : 0.0;
-    final moodEntries = _repository.moodEntries.toList()
+
+    final entriesAsync = ref.watch(moodEntriesProvider);
+    final statsAsync = ref.watch(moodStatsProvider);
+
+    final moodEntries = (entriesAsync.valueOrNull ?? []).toList()
       ..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+    final stats = statsAsync.valueOrNull ?? MoodStats.empty();
+    final todayMood = moodEntries.isNotEmpty ? moodEntries.first : null;
+    final streak = stats.currentStreak;
+    final progress = todayMood != null ? 1.0 : 0.0;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -532,7 +559,10 @@ class _GoalSettingsSheetState extends State<_GoalSettingsSheet> {
   void initState() {
     super.initState();
     _dailyEntries = widget.currentGoal.dailyEntriesGoal;
-    _targetMood = widget.currentGoal.targetMood;
+    _targetMood = MoodLevel.values.firstWhere(
+      (m) => m.name == widget.currentGoal.targetMood,
+      orElse: () => MoodLevel.good,
+    );
   }
 
   String _getMoodEmoji(MoodLevel mood) {

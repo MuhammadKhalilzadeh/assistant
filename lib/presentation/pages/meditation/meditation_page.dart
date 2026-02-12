@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
-import 'package:assistant/data/mock/models/meditation_session_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:assistant/data/models/meditation_session_model.dart';
+import 'package:assistant/providers/meditation_provider.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'widgets/meditation_app_bar.dart';
 import 'widgets/meditation_progress_card.dart';
@@ -14,22 +15,19 @@ import 'widgets/meditation_tips_card.dart';
 import 'widgets/goal_celebration.dart';
 
 /// Main Meditation page with timer-based session tracking
-class MeditationPage extends StatefulWidget {
+class MeditationPage extends ConsumerStatefulWidget {
   const MeditationPage({super.key});
 
   @override
-  State<MeditationPage> createState() => _MeditationPageState();
+  ConsumerState<MeditationPage> createState() => _MeditationPageState();
 }
 
-class _MeditationPageState extends State<MeditationPage> with TickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-
+class _MeditationPageState extends ConsumerState<MeditationPage> with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late AnimationController _breathingAnimationController;
   late Animation<double> _listAnimation;
 
   bool _showCelebration = false;
-  bool _goalWasMetBefore = false;
 
   // Timer state
   bool _isTimerActive = false;
@@ -58,11 +56,6 @@ class _MeditationPageState extends State<MeditationPage> with TickerProviderStat
       duration: const Duration(milliseconds: 4000),
       vsync: this,
     )..repeat();
-
-    // Check initial goal state
-    final todayMinutes = _repository.todayMeditationMinutes;
-    final dailyGoal = _repository.meditationGoal.dailyMinutesGoal;
-    _goalWasMetBefore = todayMinutes >= dailyGoal;
 
     _listAnimationController.forward();
   }
@@ -112,7 +105,7 @@ class _MeditationPageState extends State<MeditationPage> with TickerProviderStat
     HapticFeedback.lightImpact();
   }
 
-  void _stopSession() {
+  void _stopSession() async {
     _timer?.cancel();
 
     final elapsedSeconds = (_selectedDuration * 60) - _remainingSeconds;
@@ -120,26 +113,13 @@ class _MeditationPageState extends State<MeditationPage> with TickerProviderStat
       // Only save sessions >= 1 minute
       final durationMinutes = (elapsedSeconds / 60).ceil();
 
-      final previousMinutes = _repository.todayMeditationMinutes;
-      final dailyGoal = _repository.meditationGoal.dailyMinutesGoal;
-
-      _repository.addMeditationSession(MeditationSessionModel(
+      await ref.read(meditationSessionsProvider.notifier).addSession(MeditationSessionModel(
         id: '',
         type: _selectedSessionType,
         startTime: _sessionStartTime ?? DateTime.now(),
         durationMinutes: durationMinutes,
         isCompleted: true,
       ));
-
-      final newMinutes = _repository.todayMeditationMinutes;
-
-      // Check if goal was just achieved
-      if (!_goalWasMetBefore && newMinutes >= dailyGoal && previousMinutes < dailyGoal) {
-        setState(() {
-          _showCelebration = true;
-          _goalWasMetBefore = true;
-        });
-      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -169,29 +149,16 @@ class _MeditationPageState extends State<MeditationPage> with TickerProviderStat
     HapticFeedback.mediumImpact();
   }
 
-  void _completeSession() {
+  void _completeSession() async {
     _timer?.cancel();
 
-    final previousMinutes = _repository.todayMeditationMinutes;
-    final dailyGoal = _repository.meditationGoal.dailyMinutesGoal;
-
-    _repository.addMeditationSession(MeditationSessionModel(
+    await ref.read(meditationSessionsProvider.notifier).addSession(MeditationSessionModel(
       id: '',
       type: _selectedSessionType,
       startTime: _sessionStartTime ?? DateTime.now(),
       durationMinutes: _selectedDuration,
       isCompleted: true,
     ));
-
-    final newMinutes = _repository.todayMeditationMinutes;
-
-    // Check if goal was just achieved
-    if (!_goalWasMetBefore && newMinutes >= dailyGoal && previousMinutes < dailyGoal) {
-      setState(() {
-        _showCelebration = true;
-        _goalWasMetBefore = true;
-      });
-    }
 
     setState(() {
       _isTimerActive = false;
@@ -220,18 +187,27 @@ class _MeditationPageState extends State<MeditationPage> with TickerProviderStat
     HapticFeedback.heavyImpact();
   }
 
-  void _deleteSession(String id) {
-    _repository.deleteMeditationSession(id);
-
-    // Re-check goal status
-    final todayMinutes = _repository.todayMeditationMinutes;
-    final dailyGoal = _repository.meditationGoal.dailyMinutesGoal;
-    _goalWasMetBefore = todayMinutes >= dailyGoal;
-
-    setState(() {});
+  void _deleteSession(String id) async {
+    try {
+      await ref.read(meditationSessionsProvider.notifier).deleteSession(id);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete session: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+    }
   }
 
   void _showGoalSettings() {
+    final goalAsync = ref.read(meditationGoalProvider);
+    final currentGoal = goalAsync.valueOrNull;
+    if (currentGoal == null) return;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: AppTheme.cardColor,
@@ -239,13 +215,13 @@ class _MeditationPageState extends State<MeditationPage> with TickerProviderStat
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => _GoalSettingsSheet(
-        currentGoal: _repository.meditationGoal.dailyMinutesGoal,
-        onGoalChanged: (newGoal) {
-          _repository.updateMeditationGoal(dailyMinutesGoal: newGoal);
-          setState(() {
-            final todayMinutes = _repository.todayMeditationMinutes;
-            _goalWasMetBefore = todayMinutes >= newGoal;
-          });
+        currentGoal: currentGoal.dailyMinutesGoal,
+        onGoalChanged: (newGoal) async {
+          try {
+            await ref.read(meditationGoalProvider.notifier).updateGoal(
+              currentGoal.copyWith(dailyMinutesGoal: newGoal),
+            );
+          } catch (e) { /* ignore */ }
           Navigator.pop(context);
         },
       ),
@@ -262,13 +238,19 @@ class _MeditationPageState extends State<MeditationPage> with TickerProviderStat
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
-    final stats = _repository.getWeeklyMeditationStats();
-    final dailyGoal = _repository.meditationGoal.dailyMinutesGoal;
-    final todayMinutes = _repository.todayMeditationMinutes;
-    final todaySessions = _repository.todayMeditationSessions;
-    final progress = todayMinutes / dailyGoal;
-    final sessions = _repository.meditationSessions.toList()
+
+    final sessionsAsync = ref.watch(meditationSessionsProvider);
+    final statsAsync = ref.watch(meditationStatsProvider);
+    final goalAsync = ref.watch(meditationGoalProvider);
+
+    final sessions = (sessionsAsync.valueOrNull ?? []).toList()
       ..sort((a, b) => b.startTime.compareTo(a.startTime));
+    final stats = statsAsync.valueOrNull ?? MeditationStats.empty();
+    final goal = goalAsync.valueOrNull;
+    final dailyGoal = goal?.dailyMinutesGoal ?? 10;
+    final todayMinutes = stats.todayMinutes;
+    final todaySessions = sessions.length;
+    final progress = dailyGoal > 0 ? todayMinutes / dailyGoal : 0.0;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,

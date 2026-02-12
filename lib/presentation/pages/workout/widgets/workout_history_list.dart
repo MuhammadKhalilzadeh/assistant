@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/models/workout_session_model.dart';
+import 'package:assistant/data/models/workout_session_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Workout history list with swipe-to-delete functionality

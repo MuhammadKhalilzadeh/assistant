@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/sleep_record_model.dart';
+import 'package:assistant/data/models/sleep_record_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'sleep_quality_badge.dart';
 
@@ -235,7 +235,7 @@ class _StatItemState extends State<_StatItem>
 }
 
 class _QualityDistribution extends StatelessWidget {
-  final Map<SleepQuality, int> distribution;
+  final Map<String, int> distribution;
 
   const _QualityDistribution({required this.distribution});
 
@@ -263,7 +263,7 @@ class _QualityDistribution extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: SleepQuality.values.map((quality) {
-              final count = distribution[quality] ?? 0;
+              final count = distribution[quality.name] ?? 0;
               final percentage = total > 0 ? count / total : 0.0;
               final color = SleepQualityBadge.getQualityColor(quality);
 

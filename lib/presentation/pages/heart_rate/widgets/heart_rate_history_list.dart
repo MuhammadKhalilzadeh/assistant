@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/models/heart_rate_record_model.dart';
+import 'package:assistant/data/models/heart_rate_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Heart rate history list with swipe-to-delete functionality

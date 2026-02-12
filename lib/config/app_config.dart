@@ -23,7 +23,7 @@ class AppConfig {
   // Set this to your computer's local IP for physical device testing
   // Find it with: ipconfig (Windows) or ifconfig (macOS/Linux)
   // Leave empty to use default (10.0.2.2 for Android emulator, localhost for others)
-  static const String _devServerIp = '192.168.1.102';
+  static const String _devServerIp = '192.168.43.27';
 
   /// Development configuration
   factory AppConfig._dev() {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/step_record_model.dart';
+import 'package:assistant/data/models/step_record_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// 2x2 grid displaying weekly steps statistics with animations
@@ -15,7 +15,7 @@ class StepsStatsCard extends StatelessWidget {
     this.animation,
   });
 
-  String _formatNumber(double number) {
+  String _formatNumber(num number) {
     if (number >= 1000) {
       return '${(number / 1000).toStringAsFixed(1).replaceAll('.0', '')}k';
     }

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/workout_session_model.dart';
+import 'package:assistant/data/models/workout_session_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Main progress card displaying workout timer and active session

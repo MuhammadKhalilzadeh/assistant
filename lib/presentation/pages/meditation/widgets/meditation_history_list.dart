@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/models/meditation_session_model.dart';
+import 'package:assistant/data/models/meditation_session_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Meditation history list with swipe-to-delete functionality

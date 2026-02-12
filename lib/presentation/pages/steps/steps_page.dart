@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:assistant/data/models/step_record_model.dart';
+import 'package:assistant/providers/steps_provider.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'widgets/steps_app_bar.dart';
 import 'widgets/steps_progress_card.dart';
@@ -14,22 +16,19 @@ import 'widgets/steps_goal_sheet.dart';
 import 'widgets/goal_celebration.dart';
 
 /// Main Steps page with animated progress and comprehensive tracking
-class StepsPage extends StatefulWidget {
+class StepsPage extends ConsumerStatefulWidget {
   const StepsPage({super.key});
 
   @override
-  State<StepsPage> createState() => _StepsPageState();
+  ConsumerState<StepsPage> createState() => _StepsPageState();
 }
 
-class _StepsPageState extends State<StepsPage> with TickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-
+class _StepsPageState extends ConsumerState<StepsPage> with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late AnimationController _progressAnimationController;
   late Animation<double> _listAnimation;
 
   bool _showCelebration = false;
-  bool _goalWasMetBefore = false;
 
   @override
   void initState() {
@@ -52,11 +51,6 @@ class _StepsPageState extends State<StepsPage> with TickerProviderStateMixin {
       vsync: this,
     )..repeat();
 
-    // Check initial goal state
-    final todaySteps = _repository.todaySteps;
-    final dailyGoal = _repository.stepsGoal.dailyGoal;
-    _goalWasMetBefore = todaySteps != null && todaySteps.steps >= dailyGoal;
-
     // Start animations
     _listAnimationController.forward();
   }
@@ -68,52 +62,53 @@ class _StepsPageState extends State<StepsPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _addSteps(int steps) {
-    final previousSteps = _repository.todaySteps?.steps ?? 0;
-    final dailyGoal = _repository.stepsGoal.dailyGoal;
-
-    _repository.addSteps(steps);
-    HapticFeedback.mediumImpact();
-
-    final newSteps = _repository.todaySteps?.steps ?? 0;
-
-    // Check if goal was just achieved
-    if (!_goalWasMetBefore && newSteps >= dailyGoal && previousSteps < dailyGoal) {
-      setState(() {
-        _showCelebration = true;
-        _goalWasMetBefore = true;
-      });
-    } else {
-      setState(() {});
+  void _addSteps(int steps) async {
+    try {
+      await ref.read(stepRecordsProvider.notifier).addSteps(steps);
+      HapticFeedback.mediumImpact();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.directions_walk, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text('Added ${_formatNumber(steps)} steps'),
+              ],
+            ),
+            backgroundColor: AppTheme.successColor,
+            duration: const Duration(seconds: 1),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add steps: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.directions_walk, color: Colors.white, size: 20),
-            const SizedBox(width: 8),
-            Text('Added ${_formatNumber(steps)} steps'),
-          ],
-        ),
-        backgroundColor: AppTheme.successColor,
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
   }
 
-  void _deleteStepRecord(String id) {
-    _repository.deleteStepRecord(id);
-
-    // Re-check goal status
-    final todaySteps = _repository.todaySteps;
-    final dailyGoal = _repository.stepsGoal.dailyGoal;
-    _goalWasMetBefore = todaySteps != null && todaySteps.steps >= dailyGoal;
-
-    setState(() {});
+  void _deleteStepRecord(String id) async {
+    try {
+      await ref.read(stepRecordsProvider.notifier).deleteRecord(id);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete record: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showAddStepsSheet() {
@@ -126,16 +121,21 @@ class _StepsPageState extends State<StepsPage> with TickerProviderStateMixin {
   }
 
   void _showGoalSettings() {
+    final goalAsync = ref.read(stepsGoalProvider);
+    final currentGoal = goalAsync.valueOrNull;
+    if (currentGoal == null) return;
+
     StepsGoalSheet.show(
       context,
-      currentGoal: _repository.stepsGoal.dailyGoal,
-      onGoalChanged: (newGoal) {
-        _repository.updateStepsGoal(newGoal);
-        setState(() {
-          // Re-check goal status with new goal
-          final todaySteps = _repository.todaySteps;
-          _goalWasMetBefore = todaySteps != null && todaySteps.steps >= newGoal;
-        });
+      currentGoal: currentGoal.dailyGoal,
+      onGoalChanged: (newGoal) async {
+        try {
+          await ref.read(stepsGoalProvider.notifier).updateGoal(
+            currentGoal.copyWith(dailyGoal: newGoal),
+          );
+        } catch (e) {
+          // ignore
+        }
       },
     );
   }
@@ -157,15 +157,38 @@ class _StepsPageState extends State<StepsPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
-    final todaySteps = _repository.todaySteps;
-    final dailyGoal = _repository.stepsGoal.dailyGoal;
-    final progress = todaySteps != null
-        ? (todaySteps.steps / dailyGoal)
-        : 0.0;
-    final stepRecords = _repository.stepRecords.toList()
+
+    final recordsAsync = ref.watch(stepRecordsProvider);
+    final statsAsync = ref.watch(stepsStatsProvider);
+    final goalAsync = ref.watch(stepsGoalProvider);
+    final historyAsync = ref.watch(stepsHistoryProvider);
+
+    final stepRecords = (recordsAsync.valueOrNull ?? []).toList()
       ..sort((a, b) => b.date.compareTo(a.date));
-    final stats = _repository.getWeeklyStepsStats();
-    final last7Days = _repository.getLast7DaysStepsMap();
+    final stats = statsAsync.valueOrNull ?? StepsStats.empty();
+    final goal = goalAsync.valueOrNull;
+    final dailyGoal = goal?.dailyGoal ?? 10000;
+    final todaySteps = stats.todaySteps;
+    final progress = dailyGoal > 0 ? (todaySteps / dailyGoal) : 0.0;
+    final last7Days = historyAsync.valueOrNull ?? [];
+
+    // Convert last7Days to Map<String, int> for WeeklyStepsChart
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final last7DaysMap = <String, int>{};
+    for (final day in last7Days) {
+      final dayName = dayNames[day.date.weekday - 1];
+      last7DaysMap[dayName] = day.steps;
+    }
+
+    // Create a synthetic StepRecordModel for StepsProgressCard
+    final todayRecord = todaySteps > 0
+        ? StepRecordModel(
+            id: '',
+            date: DateTime.now(),
+            steps: todaySteps,
+            goal: dailyGoal,
+          )
+        : null;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -194,7 +217,7 @@ class _StepsPageState extends State<StepsPage> with TickerProviderStateMixin {
                             animation: _progressAnimationController,
                             builder: (context, child) {
                               return StepsProgressCard(
-                                todaySteps: todaySteps,
+                                todaySteps: todayRecord,
                                 dailyGoal: dailyGoal,
                                 progress: progress,
                                 animationPhase: _progressAnimationController.value,
@@ -229,7 +252,7 @@ class _StepsPageState extends State<StepsPage> with TickerProviderStateMixin {
 
                           // Weekly chart
                           WeeklyStepsChart(
-                            last7DaysSteps: last7Days,
+                            last7DaysSteps: last7DaysMap,
                             dailyGoal: dailyGoal,
                             padding: padding,
                             animation: _listAnimation,

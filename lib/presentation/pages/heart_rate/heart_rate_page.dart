@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:assistant/data/models/heart_rate_model.dart';
+import 'package:assistant/providers/heart_rate_provider.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'widgets/heart_rate_app_bar.dart';
 import 'widgets/heart_rate_progress_card.dart';
@@ -10,22 +12,19 @@ import 'widgets/heart_rate_tips_card.dart';
 import 'widgets/goal_celebration.dart';
 
 /// Main Heart Rate page with BPM tracking and zone display
-class HeartRatePage extends StatefulWidget {
+class HeartRatePage extends ConsumerStatefulWidget {
   const HeartRatePage({super.key});
 
   @override
-  State<HeartRatePage> createState() => _HeartRatePageState();
+  ConsumerState<HeartRatePage> createState() => _HeartRatePageState();
 }
 
-class _HeartRatePageState extends State<HeartRatePage> with TickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-
+class _HeartRatePageState extends ConsumerState<HeartRatePage> with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late AnimationController _pulseAnimationController;
   late Animation<double> _listAnimation;
 
   bool _showCelebration = false;
-  bool _goalWasMetBefore = false;
 
   // Quick BPM options for logging
   static const List<int> _quickBpmOptions = [60, 70, 80, 90, 100, 120];
@@ -49,10 +48,6 @@ class _HeartRatePageState extends State<HeartRatePage> with TickerProviderStateM
       vsync: this,
     )..repeat();
 
-    // Check initial goal state
-    final stats = _repository.getWeeklyHeartRateStats();
-    _goalWasMetBefore = stats.totalReadings >= 7; // Goal: at least 1 reading per day
-
     _listAnimationController.forward();
   }
 
@@ -63,54 +58,57 @@ class _HeartRatePageState extends State<HeartRatePage> with TickerProviderStateM
     super.dispose();
   }
 
-  void _addHeartRateReading(int bpm) {
-    final previousReadings = _repository.getWeeklyHeartRateStats().totalReadings;
+  void _addHeartRateReading(int bpm) async {
+    try {
+      await ref.read(heartRateRecordsProvider.notifier).addRecord(
+        HeartRateRecordModel(id: '', bpm: bpm, recordedAt: DateTime.now()),
+      );
+      HapticFeedback.mediumImpact();
 
-    _repository.addHeartRateRecord(bpm);
-
-    final newReadings = _repository.getWeeklyHeartRateStats().totalReadings;
-
-    // Check if goal was just achieved (7 readings in a week)
-    if (!_goalWasMetBefore && newReadings >= 7 && previousReadings < 7) {
-      setState(() {
-        _showCelebration = true;
-        _goalWasMetBefore = true;
-      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.favorite, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text('Heart rate logged: $bpm BPM'),
+              ],
+            ),
+            backgroundColor: AppTheme.errorColor,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to log heart rate: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
-
-    setState(() {});
-
-    HapticFeedback.mediumImpact();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.favorite, color: Colors.white, size: 20),
-            const SizedBox(width: 8),
-            Text('Heart rate logged: $bpm BPM'),
-          ],
-        ),
-        backgroundColor: AppTheme.errorColor,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
   }
 
-  void _deleteReading(String id) {
-    _repository.deleteHeartRateRecord(id);
-
-    // Re-check goal status
-    final readings = _repository.getWeeklyHeartRateStats().totalReadings;
-    _goalWasMetBefore = readings >= 7;
-
-    setState(() {});
+  void _deleteReading(String id) async {
+    try {
+      await ref.read(heartRateRecordsProvider.notifier).deleteRecord(id);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 
   void _showGoalSettings() {
+    final goalAsync = ref.read(heartRateGoalProvider);
+    final currentGoal = goalAsync.valueOrNull;
+    if (currentGoal == null) return;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: AppTheme.cardColor,
@@ -118,11 +116,16 @@ class _HeartRatePageState extends State<HeartRatePage> with TickerProviderStateM
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => _GoalSettingsSheet(
-        currentGoal: _repository.heartRateGoal.targetRestingBpm,
-        onGoalChanged: (newGoal) {
-          _repository.updateHeartRateGoal(targetRestingBpm: newGoal);
-          setState(() {});
-          Navigator.pop(context);
+        currentGoal: currentGoal.targetRestingBpm,
+        onGoalChanged: (newGoal) async {
+          try {
+            await ref.read(heartRateGoalProvider.notifier).updateGoal(
+              currentGoal.copyWith(targetRestingBpm: newGoal),
+            );
+          } catch (e) {
+            // ignore
+          }
+          if (mounted) Navigator.pop(context);
         },
       ),
     );
@@ -138,12 +141,19 @@ class _HeartRatePageState extends State<HeartRatePage> with TickerProviderStateM
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
-    final stats = _repository.getWeeklyHeartRateStats();
-    final latestReading = _repository.latestHeartRate;
-    final goal = _repository.heartRateGoal;
-    final progress = (stats.totalReadings / 7).clamp(0.0, 1.0);
-    final records = _repository.heartRateRecords.toList()
+
+    final recordsAsync = ref.watch(heartRateRecordsProvider);
+    final statsAsync = ref.watch(heartRateStatsProvider);
+    final goalAsync = ref.watch(heartRateGoalProvider);
+
+    final records = recordsAsync.valueOrNull ?? [];
+    final stats = statsAsync.valueOrNull ?? HeartRateStats.empty();
+    final goal = goalAsync.valueOrNull;
+
+    final sortedRecords = records.toList()
       ..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+    final latestReading = sortedRecords.isNotEmpty ? sortedRecords.first : null;
+    final progress = (stats.totalReadings / 7).clamp(0.0, 1.0);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -170,7 +180,7 @@ class _HeartRatePageState extends State<HeartRatePage> with TickerProviderStateM
                               return HeartRateProgressCard(
                                 currentBpm: latestReading?.bpm,
                                 currentZone: latestReading?.zone,
-                                targetRestingBpm: goal.targetRestingBpm,
+                                targetRestingBpm: goal?.targetRestingBpm ?? 65,
                                 animationPhase: _pulseAnimationController.value,
                                 padding: padding,
                                 quickBpmOptions: _quickBpmOptions,
@@ -194,7 +204,7 @@ class _HeartRatePageState extends State<HeartRatePage> with TickerProviderStateM
                           SizedBox(height: padding),
 
                           HeartRateHistoryList(
-                            records: records,
+                            records: sortedRecords,
                             onDelete: _deleteReading,
                             padding: padding,
                             animation: _listAnimation,

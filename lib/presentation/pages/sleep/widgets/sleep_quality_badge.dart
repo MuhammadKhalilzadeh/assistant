@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/sleep_record_model.dart';
+import 'package:assistant/data/models/sleep_record_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Reusable quality indicator component for sleep quality

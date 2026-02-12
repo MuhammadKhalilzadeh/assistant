@@ -1,4 +1,4 @@
-import 'package:assistant/data/mock/models/calorie_entry_model.dart';
+import 'package:assistant/data/models/calorie_entry_model.dart';
 import 'package:flutter/material.dart';
 
 class FoodCategoryData {

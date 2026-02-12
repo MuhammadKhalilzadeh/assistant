@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/models/sleep_record_model.dart';
+import 'package:assistant/data/models/sleep_record_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'sleep_quality_badge.dart';
 

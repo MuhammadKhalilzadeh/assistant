@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/mood_entry_model.dart';
+import 'package:assistant/data/models/mood_entry_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Mood selector with 5 mood levels and emojis

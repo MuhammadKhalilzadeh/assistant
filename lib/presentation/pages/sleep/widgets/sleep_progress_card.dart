@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/sleep_record_model.dart';
+import 'package:assistant/data/models/sleep_record_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'moon_phase_painter.dart';
 import 'sleep_quality_badge.dart';

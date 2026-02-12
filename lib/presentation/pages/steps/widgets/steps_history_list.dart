@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:assistant/data/mock/models/step_record_model.dart';
+import 'package:assistant/data/models/step_record_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Steps history list with swipe-to-delete functionality

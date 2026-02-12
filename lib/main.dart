@@ -1,4 +1,14 @@
 import 'package:assistant/config/app_config.dart';
+import 'package:assistant/data/cache/heart_rate_cache.dart';
+import 'package:assistant/data/cache/steps_cache.dart';
+import 'package:assistant/data/cache/mood_cache.dart';
+import 'package:assistant/data/cache/sleep_cache.dart';
+import 'package:assistant/data/cache/meditation_cache.dart';
+import 'package:assistant/data/cache/workout_cache.dart';
+import 'package:assistant/data/cache/calories_cache.dart';
+import 'package:assistant/data/cache/habit_cache.dart';
+import 'package:assistant/data/cache/todo_cache.dart';
+import 'package:assistant/data/cache/water_cache.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/splash/index.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +23,20 @@ void main() async {
 
   // Initialize app configuration
   AppConfig.initialize(Environment.dev);
+
+  // Initialize health feature caches
+  await Future.wait([
+    HeartRateCache().init(),
+    StepsCache().init(),
+    MoodCache().init(),
+    SleepCache().init(),
+    MeditationCache().init(),
+    WorkoutCache().init(),
+    CaloriesCache().init(),
+    HabitCache().init(),
+    TodoCache().init(),
+    WaterCache().init(),
+  ]);
 
   runApp(const ProviderScope(child: MyApp()));
 }
