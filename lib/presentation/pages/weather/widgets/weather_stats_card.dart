@@ -1,4 +1,4 @@
-import 'package:assistant/data/mock/models/weather_forecast_model.dart';
+import 'package:assistant/data/models/weather_forecast_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 

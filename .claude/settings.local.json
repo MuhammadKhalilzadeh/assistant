@@ -36,7 +36,8 @@
       "Bash(if not exist \"C:\\\\Workspace\\\\flutter-projects\\\\First\\\\assistant\\\\results\" mkdir \"C:\\\\Workspace\\\\flutter-projects\\\\First\\\\assistant\\\\results\")",
       "WebFetch(domain:pub.dev)",
       "Bash(del \"C:\\\\Workspace\\\\flutter-projects\\\\First\\\\assistant\\\\lib\\\\presentation\\\\pages\\\\calendar\\\\widgets\\\\event_category_chip.dart\")",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(ipconfig:*)"
     ]
   }
 }

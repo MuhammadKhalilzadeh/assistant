@@ -11,6 +11,7 @@ import 'package:assistant/data/cache/todo_cache.dart';
 import 'package:assistant/data/cache/water_cache.dart';
 import 'package:assistant/data/cache/focus_timer_cache.dart';
 import 'package:assistant/data/cache/calendar_cache.dart';
+import 'package:assistant/data/cache/weather_cache.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/splash/index.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +41,7 @@ void main() async {
     WaterCache().init(),
     CalendarCache().init(),
     FocusTimerCache().init(),
+    WeatherCache().init(),
   ]);
 
   runApp(const ProviderScope(child: MyApp()));

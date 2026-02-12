@@ -1,10 +1,12 @@
-import 'package:assistant/data/mock/models/weather_forecast_model.dart';
+import 'package:assistant/data/models/weather_forecast_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/weather/widgets/weather_condition_icon.dart';
 import 'package:assistant/presentation/pages/weather/widgets/weather_detail_sheet.dart';
+import 'package:assistant/providers/weather_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DailyForecastWidget extends StatefulWidget {
+class DailyForecastWidget extends ConsumerStatefulWidget {
   final List<DailyForecast> dailyForecast;
   final WeatherForecastModel weather;
   final Animation<double>? animation;
@@ -17,10 +19,10 @@ class DailyForecastWidget extends StatefulWidget {
   });
 
   @override
-  State<DailyForecastWidget> createState() => _DailyForecastWidgetState();
+  ConsumerState<DailyForecastWidget> createState() => _DailyForecastWidgetState();
 }
 
-class _DailyForecastWidgetState extends State<DailyForecastWidget>
+class _DailyForecastWidgetState extends ConsumerState<DailyForecastWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _staggerController;
   late List<Animation<double>> _itemAnimations;
@@ -119,7 +121,11 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget>
     final tempRange = maxHigh - minLow;
 
     return GestureDetector(
-      onTap: () => WeatherDetailSheet.show(context, daily, widget.weather),
+      onTap: () {
+        final hourlyAsync = ref.read(weatherHourlyProvider(daily.date));
+        final hourlyData = hourlyAsync.valueOrNull ?? [];
+        WeatherDetailSheet.show(context, daily, widget.weather, hourlyForecast: hourlyData);
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: EdgeInsets.all(padding),

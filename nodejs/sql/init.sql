@@ -339,3 +339,20 @@ CREATE INDEX IF NOT EXISTS idx_focus_timer_sessions_type ON focus_timer_sessions
 
 INSERT INTO focus_timer_goals (daily_goal_sessions, focus_duration, short_break_duration, long_break_duration, sessions_before_long_break)
 SELECT 8, 25, 5, 15, 4 WHERE NOT EXISTS (SELECT 1 FROM focus_timer_goals);
+
+-- =============================================
+-- WEATHER SETTINGS
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS weather_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  latitude DECIMAL(8,5) NOT NULL DEFAULT 40.71280,
+  longitude DECIMAL(9,5) NOT NULL DEFAULT -74.00600,
+  city_name VARCHAR(200) NOT NULL DEFAULT 'New York',
+  temperature_unit VARCHAR(10) NOT NULL DEFAULT 'celsius' CHECK (temperature_unit IN ('celsius', 'fahrenheit')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO weather_settings (latitude, longitude, city_name, temperature_unit)
+SELECT 40.71280, -74.00600, 'New York', 'celsius' WHERE NOT EXISTS (SELECT 1 FROM weather_settings);

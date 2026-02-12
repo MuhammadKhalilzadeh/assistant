@@ -17,6 +17,7 @@ import meditationRoutes from './routes/meditation.routes';
 import workoutRoutes from './routes/workout.routes';
 import caloriesRoutes from './routes/calories.routes';
 import focusTimerRoutes from './routes/focus-timer.routes';
+import weatherRoutes from './routes/weather.routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authMiddleware } from './middleware/auth.middleware';
 import { securityHeaders, rateLimiter } from './middleware/security.middleware';
@@ -54,6 +55,7 @@ app.use('/api/meditation', meditationRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/calories', caloriesRoutes);
 app.use('/api/focus-timer', focusTimerRoutes);
+app.use('/api/weather', weatherRoutes);
 
 // Enhanced health check with database status
 app.get('/api/health', async (_req, res) => {
@@ -165,6 +167,11 @@ async function startServer(): Promise<void> {
       logger.info('  GET    /api/focus-timer/history');
       logger.info('  GET    /api/focus-timer/goal');
       logger.info('  PUT    /api/focus-timer/goal');
+      logger.info('  GET    /api/weather');
+      logger.info('  GET    /api/weather/hourly');
+      logger.info('  GET    /api/weather/search');
+      logger.info('  GET    /api/weather/settings');
+      logger.info('  PUT    /api/weather/settings');
     });
   } catch (err) {
     logger.fatal({ err }, 'Failed to start server');

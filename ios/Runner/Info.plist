@@ -47,6 +47,8 @@
 	<true/>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Jarvis needs calendar access to display your events from all calendar accounts</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Jarvis needs your location to show weather for your current area</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

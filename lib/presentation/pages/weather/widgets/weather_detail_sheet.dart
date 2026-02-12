@@ -1,5 +1,4 @@
-import 'package:assistant/data/mock/models/weather_forecast_model.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
+import 'package:assistant/data/models/weather_forecast_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/weather/widgets/sun_times_card.dart';
 import 'package:assistant/presentation/pages/weather/widgets/weather_condition_icon.dart';
@@ -8,23 +7,30 @@ import 'package:flutter/material.dart';
 class WeatherDetailSheet extends StatelessWidget {
   final DailyForecast daily;
   final WeatherForecastModel weather;
+  final List<HourlyForecast> hourlyForecast;
 
   const WeatherDetailSheet({
     super.key,
     required this.daily,
     required this.weather,
+    this.hourlyForecast = const [],
   });
 
   static void show(
     BuildContext context,
     DailyForecast daily,
-    WeatherForecastModel weather,
-  ) {
+    WeatherForecastModel weather, {
+    List<HourlyForecast> hourlyForecast = const [],
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => WeatherDetailSheet(daily: daily, weather: weather),
+      builder: (context) => WeatherDetailSheet(
+        daily: daily,
+        weather: weather,
+        hourlyForecast: hourlyForecast,
+      ),
     );
   }
 
@@ -100,8 +106,6 @@ class WeatherDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
-    final repository = MockRepository();
-    final hourlyForDate = repository.getHourlyForDate(daily.date);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
@@ -142,7 +146,7 @@ class WeatherDetailSheet extends StatelessWidget {
                       sunset: daily.sunset,
                     ),
                     SizedBox(height: padding),
-                    _buildHourlyBreakdown(hourlyForDate, padding),
+                    _buildHourlyBreakdown(hourlyForecast, padding),
                     SizedBox(height: padding * 2),
                   ],
                 ),

@@ -54,8 +54,10 @@ import 'package:assistant/providers/water_provider.dart';
 import 'package:assistant/providers/calendar_provider.dart';
 import 'package:assistant/providers/workout_provider.dart';
 import 'package:assistant/providers/focus_timer_provider.dart';
+import 'package:assistant/providers/weather_provider.dart';
 import 'package:assistant/data/models/focus_session_model.dart';
 import 'package:assistant/data/models/calendar_event.dart';
+import 'package:assistant/data/models/weather_forecast_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -131,11 +133,13 @@ class _HomeTab extends ConsumerWidget {
     final calendarStats = ref.watch(calendarStatsProvider).valueOrNull ?? CalendarStats.empty();
     final focusTimerStats = ref.watch(focusTimerStatsProvider).valueOrNull ?? FocusTimerStats.empty();
 
-    // Mock data for 3 UI-only features (no backend yet)
+    // Real weather data from provider
+    final weather = ref.watch(weatherProvider).valueOrNull;
+
+    // Mock data for 2 UI-only features (no backend yet)
     final repository = MockRepository();
     final unreadMessages = repository.unreadMessagesCount;
     final messageServices = repository.messageServices.length;
-    final weather = repository.weather;
     final todayScreenTime = repository.todayScreenTime;
     final yesterdayScreenTime = repository.yesterdayScreenTime;
 
@@ -278,23 +282,21 @@ class _HomeTab extends ConsumerWidget {
     return '$hour:${time.minute.toString().padLeft(2, '0')} $period';
   }
 
-  WeatherCondition _mapWeatherCondition(dynamic condition) {
+  WeatherCondition _mapWeatherCondition(WeatherConditionType? condition) {
     if (condition == null) return WeatherCondition.sunny;
-    switch (condition.toString()) {
-      case 'WeatherConditionType.sunny':
+    switch (condition) {
+      case WeatherConditionType.sunny:
         return WeatherCondition.sunny;
-      case 'WeatherConditionType.cloudy':
+      case WeatherConditionType.cloudy:
         return WeatherCondition.cloudy;
-      case 'WeatherConditionType.rainy':
+      case WeatherConditionType.rainy:
         return WeatherCondition.rainy;
-      case 'WeatherConditionType.stormy':
+      case WeatherConditionType.stormy:
         return WeatherCondition.stormy;
-      case 'WeatherConditionType.snowy':
+      case WeatherConditionType.snowy:
         return WeatherCondition.snowy;
-      case 'WeatherConditionType.partlyCloudy':
+      case WeatherConditionType.partlyCloudy:
         return WeatherCondition.partlyCloudy;
-      default:
-        return WeatherCondition.sunny;
     }
   }
 
