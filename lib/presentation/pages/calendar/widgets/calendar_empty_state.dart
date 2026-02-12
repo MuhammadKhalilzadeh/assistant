@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
-/// Empty state widget for when there are no events
+/// Full-page empty state — 64px icon in circle + title + subtitle + optional button
 class CalendarEmptyState extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -80,7 +80,7 @@ class CalendarEmptyState extends StatelessWidget {
   }
 }
 
-/// Empty state for specific date
+/// Compact inline empty state — 32px icon + 2 lines text, mainAxisSize.min
 class DateEmptyState extends StatelessWidget {
   final DateTime date;
   final VoidCallback? onAddEvent;
@@ -90,6 +90,42 @@ class DateEmptyState extends StatelessWidget {
     required this.date,
     this.onAddEvent,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.event_available,
+              size: 32,
+              color: AppTheme.textTertiary.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No events on ${_formatDate(date)}',
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Your schedule is free',
+              style: TextStyle(
+                color: AppTheme.textTertiary,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   String _formatDate(DateTime date) {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -105,37 +141,5 @@ class DateEmptyState extends StatelessWidget {
     }
 
     return '${days[date.weekday % 7]}, ${months[date.month - 1]} ${date.day}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CalendarEmptyState(
-      title: 'No events on ${_formatDate(date)}',
-      subtitle: 'Your schedule is free',
-      icon: Icons.event_available,
-      onAddEvent: onAddEvent,
-    );
-  }
-}
-
-/// Empty state for week view
-class WeekEmptyState extends StatelessWidget {
-  final DateTime weekStart;
-  final VoidCallback? onAddEvent;
-
-  const WeekEmptyState({
-    super.key,
-    required this.weekStart,
-    this.onAddEvent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CalendarEmptyState(
-      title: 'No events this week',
-      subtitle: 'Enjoy your free time',
-      icon: Icons.calendar_today,
-      onAddEvent: onAddEvent,
-    );
   }
 }

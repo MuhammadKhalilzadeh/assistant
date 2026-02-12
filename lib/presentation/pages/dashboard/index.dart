@@ -51,7 +51,9 @@ import 'package:assistant/providers/sleep_provider.dart';
 import 'package:assistant/providers/steps_provider.dart';
 import 'package:assistant/providers/todo_provider.dart';
 import 'package:assistant/providers/water_provider.dart';
+import 'package:assistant/providers/calendar_provider.dart';
 import 'package:assistant/providers/workout_provider.dart';
+import 'package:assistant/data/models/calendar_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -124,13 +126,12 @@ class _HomeTab extends ConsumerWidget {
     final meditationStats = ref.watch(meditationStatsProvider).valueOrNull ?? MeditationStats.empty();
     final workoutStats = ref.watch(workoutStatsProvider).valueOrNull ?? WorkoutStats.empty();
     final workoutGoal = ref.watch(workoutGoalProvider).valueOrNull;
+    final calendarStats = ref.watch(calendarStatsProvider).valueOrNull ?? CalendarStats.empty();
 
-    // Mock data for 5 UI-only features (no backend yet)
+    // Mock data for 4 UI-only features (no backend yet)
     final repository = MockRepository();
     final unreadMessages = repository.unreadMessagesCount;
     final messageServices = repository.messageServices.length;
-    final todayEvents = repository.todayEventsCount;
-    final nextEvent = repository.nextEvent;
     final focusSessionsToday = repository.todayCompletedSessions;
     final weather = repository.weather;
     final todayScreenTime = repository.todayScreenTime;
@@ -164,9 +165,11 @@ class _HomeTab extends ConsumerWidget {
               ),
               SizedBox(height: paddingValue),
               CustomCalendarEventsCard(
-                nextEventTitle: nextEvent?.title ?? 'No events',
-                nextEventTime: nextEvent != null ? _formatEventTime(nextEvent.startTime) : '',
-                eventsToday: todayEvents,
+                nextEventTitle: calendarStats.nextEventTitle ?? 'No events',
+                nextEventTime: calendarStats.nextEventTime != null
+                    ? _formatEventTime(calendarStats.nextEventTime!)
+                    : '',
+                eventsToday: calendarStats.todayEventsCount,
                 onTap: () => navigateTo(const CalendarPage()),
                 onAddPressed: () => navigateTo(const CalendarPage()),
               ),

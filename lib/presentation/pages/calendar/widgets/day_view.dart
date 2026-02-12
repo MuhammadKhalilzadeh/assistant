@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/calendar_event_model.dart';
+import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'event_item.dart';
 import 'calendar_empty_state.dart';
 
-/// Day detail/timeline view
+/// Day detail/timeline view with compact header and constrained all-day events
 class DayView extends StatefulWidget {
   final DateTime selectedDate;
-  final List<CalendarEventModel> events;
+  final List<CalendarEvent> events;
   final ValueChanged<DateTime> onDateSelected;
-  final ValueChanged<CalendarEventModel>? onEventTap;
-  final ValueChanged<CalendarEventModel>? onEventDelete;
+  final ValueChanged<CalendarEvent>? onEventTap;
+  final ValueChanged<CalendarEvent>? onEventDelete;
   final Function(DateTime, TimeOfDay)? onTimeSlotTap;
   final VoidCallback? onAddEvent;
 
@@ -32,10 +32,12 @@ class DayView extends StatefulWidget {
 class _DayViewState extends State<DayView> {
   late PageController _pageController;
   late ScrollController _scrollController;
-  static const int _initialPage = 3650; // ~10 years in each direction
+  static const int _initialPage = 3650;
   static const double _hourHeight = 60.0;
   static const int _startHour = 6;
   static const int _endHour = 23;
+
+  bool _allDayExpanded = false;
 
   @override
   void initState() {
@@ -85,13 +87,10 @@ class _DayViewState extends State<DayView> {
     return today.add(Duration(days: dayDiff));
   }
 
-  List<CalendarEventModel> _getEventsForDate(DateTime date) {
+  List<CalendarEvent> _getEventsForDate(DateTime date) {
     return widget.events.where((event) {
       final eventDate = DateTime(
-        event.startTime.year,
-        event.startTime.month,
-        event.startTime.day,
-      );
+        event.startTime.year, event.startTime.month, event.startTime.day);
       final targetDate = DateTime(date.year, date.month, date.day);
       return eventDate == targetDate;
     }).toList()
@@ -102,12 +101,12 @@ class _DayViewState extends State<DayView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Date navigation header
-        _buildDateHeader(),
-        const SizedBox(height: 16),
-        // All-day events
+        // Compact date header (~56px)
+        _buildCompactDateHeader(),
+        const SizedBox(height: 8),
+        // All-day events (constrained)
         _buildAllDayEvents(),
-        // Timeline with swipe
+        // Day timeline or empty state
         Expanded(
           child: PageView.builder(
             controller: _pageController,
@@ -124,75 +123,83 @@ class _DayViewState extends State<DayView> {
     );
   }
 
-  Widget _buildDateHeader() {
+  Widget _buildCompactDateHeader() {
     final isToday = _isToday(widget.selectedDate);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppTheme.cardColor,
-        borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-        boxShadow: AppTheme.cardShadow,
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () {
-              _pageController.previousPage(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOut,
-              );
-            },
-            icon: const Icon(Icons.chevron_left, color: AppTheme.textPrimary),
-            visualDensity: VisualDensity.compact,
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Text(
-                  _formatDate(widget.selectedDate),
-                  style: const TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.cardColor,
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Row(
+          children: [
+            IconButton(
+              onPressed: () {
+                _pageController.previousPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+              },
+              icon: const Icon(Icons.chevron_left, color: AppTheme.textPrimary, size: 22),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            ),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _formatDate(widget.selectedDate),
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                if (!isToday)
-                  GestureDetector(
-                    onTap: () {
-                      _pageController.animateToPage(
-                        _initialPage,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        'Go to today',
-                        style: TextStyle(
-                          color: AppTheme.primaryColor,
-                          fontSize: 12,
-                          decoration: TextDecoration.underline,
+                  if (!isToday)
+                    GestureDetector(
+                      onTap: () {
+                        _pageController.animateToPage(
+                          _initialPage,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.only(top: 2),
+                        child: Text(
+                          'Go to today',
+                          style: TextStyle(
+                            color: AppTheme.primaryColor,
+                            fontSize: 12,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            onPressed: () {
-              _pageController.nextPage(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOut,
-              );
-            },
-            icon: const Icon(Icons.chevron_right, color: AppTheme.textPrimary),
-            visualDensity: VisualDensity.compact,
-          ),
-        ],
+            IconButton(
+              onPressed: () {
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+              },
+              icon: const Icon(Icons.chevron_right, color: AppTheme.textPrimary, size: 22),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -204,32 +211,56 @@ class _DayViewState extends State<DayView> {
 
     if (allDayEvents.isEmpty) return const SizedBox.shrink();
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.cardColor,
-        borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-        boxShadow: AppTheme.cardShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'All Day',
-            style: TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+    // Show max 2 events by default, expandable
+    final maxVisible = _allDayExpanded ? allDayEvents.length : 2;
+    final visibleEvents = allDayEvents.take(maxVisible).toList();
+    final hasMore = allDayEvents.length > 2 && !_allDayExpanded;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppTheme.cardColor,
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'All Day',
+              style: TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          ...allDayEvents.map((event) => EventItem(
-                event: event,
-                isCompact: true,
-                onTap: () => widget.onEventTap?.call(event),
-              )),
-        ],
+            const SizedBox(height: 6),
+            ...visibleEvents.map((event) => EventItem(
+                  event: event,
+                  isCompact: true,
+                  onTap: () => widget.onEventTap?.call(event),
+                )),
+            if (hasMore)
+              GestureDetector(
+                onTap: () => setState(() => _allDayExpanded = true),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    '+${allDayEvents.length - 2} more',
+                    style: const TextStyle(
+                      color: AppTheme.primaryColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -237,6 +268,7 @@ class _DayViewState extends State<DayView> {
   Widget _buildDayTimeline(DateTime date) {
     final events = _getEventsForDate(date).where((e) => !e.isAllDay).toList();
     final isToday = _isToday(date);
+    final totalHeight = (_endHour - _startHour + 1) * _hourHeight;
 
     if (events.isEmpty) {
       return DateEmptyState(
@@ -247,20 +279,24 @@ class _DayViewState extends State<DayView> {
 
     return SingleChildScrollView(
       controller: _scrollController,
-      child: Stack(
-        children: [
-          // Hour slots
-          Column(
-            children: List.generate(_endHour - _startHour + 1, (index) {
-              final hour = _startHour + index;
-              return _buildHourSlot(hour, date);
-            }),
-          ),
-          // Events overlay
-          _buildEventsOverlay(events),
-          // Current time indicator
-          if (isToday) _buildCurrentTimeIndicator(),
-        ],
+      child: SizedBox(
+        height: totalHeight,
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            // Hour slots
+            Column(
+              children: List.generate(_endHour - _startHour + 1, (index) {
+                final hour = _startHour + index;
+                return _buildHourSlot(hour, date);
+              }),
+            ),
+            // Event blocks (clamped positions)
+            _buildEventsOverlay(events, totalHeight),
+            // Current time indicator
+            if (isToday) _buildCurrentTimeIndicator(),
+          ],
+        ),
       ),
     );
   }
@@ -294,14 +330,8 @@ class _DayViewState extends State<DayView> {
               child: Container(
                 decoration: BoxDecoration(
                   border: Border(
-                    top: BorderSide(
-                      color: Colors.grey.shade200,
-                      width: 1,
-                    ),
-                    left: BorderSide(
-                      color: Colors.grey.shade200,
-                      width: 1,
-                    ),
+                    top: BorderSide(color: Colors.grey.shade200, width: 1),
+                    left: BorderSide(color: Colors.grey.shade200, width: 1),
                   ),
                 ),
               ),
@@ -312,55 +342,51 @@ class _DayViewState extends State<DayView> {
     );
   }
 
-  Widget _buildEventsOverlay(List<CalendarEventModel> events) {
+  Widget _buildEventsOverlay(List<CalendarEvent> events, double totalHeight) {
     return Positioned(
       left: 70,
       right: 8,
       top: 0,
       bottom: 0,
       child: Stack(
-        children: events.map((event) => _buildEventBlock(event)).toList(),
+        clipBehavior: Clip.hardEdge,
+        children: events.map((event) => _buildEventBlock(event, totalHeight)).toList(),
       ),
     );
   }
 
-  Widget _buildEventBlock(CalendarEventModel event) {
+  Widget _buildEventBlock(CalendarEvent event, double totalHeight) {
     final startMinutes =
         (event.startTime.hour - _startHour) * 60 + event.startTime.minute;
     final endMinutes =
         (event.endTime.hour - _startHour) * 60 + event.endTime.minute;
     final durationMinutes = endMinutes - startMinutes;
 
-    final top = (startMinutes / 60) * _hourHeight;
-    final height = (durationMinutes / 60) * _hourHeight;
+    final top = ((startMinutes / 60) * _hourHeight).clamp(0.0, totalHeight);
+    final remaining = totalHeight - top;
+    final height = ((durationMinutes / 60) * _hourHeight).clamp(24.0, remaining);
 
-    Color eventColor;
-    try {
-      eventColor = Color(int.parse(event.color.replaceFirst('#', '0xFF')));
-    } catch (_) {
-      eventColor = AppTheme.primaryColor;
-    }
+    final eventColor = event.calendarColor != null
+        ? Color(event.calendarColor!)
+        : AppTheme.primaryColor;
 
     return Positioned(
       top: top,
       left: 0,
       right: 0,
-      height: height.clamp(50.0, double.infinity),
+      height: height,
       child: GestureDetector(
         onTap: () => widget.onEventTap?.call(event),
         child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 2),
-          padding: const EdgeInsets.all(12),
+          margin: const EdgeInsets.symmetric(vertical: 1),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: eventColor,
+            color: AppTheme.cardColor,
             borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-            boxShadow: [
-              BoxShadow(
-                color: eventColor.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            border: Border(
+              left: BorderSide(color: eventColor, width: 4),
+            ),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,36 +394,38 @@ class _DayViewState extends State<DayView> {
               Text(
                 event.title,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
-              Text(
-                '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 12,
+              if (height > 40) ...[
+                const SizedBox(height: 2),
+                Text(
+                  '${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}',
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 12,
+                  ),
                 ),
-              ),
-              if (event.location != null && height > 80) ...[
-                const SizedBox(height: 4),
+              ],
+              if (event.location != null && height > 70) ...[
+                const SizedBox(height: 2),
                 Row(
                   children: [
                     Icon(
                       Icons.location_on,
                       size: 14,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: AppTheme.textTertiary,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         event.location!,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                        style: const TextStyle(
+                          color: AppTheme.textTertiary,
                           fontSize: 12,
                         ),
                         maxLines: 1,
@@ -463,13 +491,9 @@ class _DayViewState extends State<DayView> {
   }
 
   String _formatDate(DateTime date) {
-    const days = [
-      'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
-    ];
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
 
     if (_isToday(date)) {
       return 'Today, ${months[date.month - 1]} ${date.day}';

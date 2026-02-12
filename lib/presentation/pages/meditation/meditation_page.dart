@@ -121,6 +121,7 @@ class _MeditationPageState extends ConsumerState<MeditationPage> with TickerProv
         isCompleted: true,
       ));
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -160,6 +161,7 @@ class _MeditationPageState extends ConsumerState<MeditationPage> with TickerProv
       isCompleted: true,
     ));
 
+    if (!mounted) return;
     setState(() {
       _isTimerActive = false;
       _isPaused = false;
@@ -191,6 +193,7 @@ class _MeditationPageState extends ConsumerState<MeditationPage> with TickerProv
     try {
       await ref.read(meditationSessionsProvider.notifier).deleteSession(id);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to delete session: $e'),
@@ -222,7 +225,7 @@ class _MeditationPageState extends ConsumerState<MeditationPage> with TickerProv
               currentGoal.copyWith(dailyMinutesGoal: newGoal),
             );
           } catch (e) { /* ignore */ }
-          Navigator.pop(context);
+          if (context.mounted) Navigator.pop(context);
         },
       ),
     );

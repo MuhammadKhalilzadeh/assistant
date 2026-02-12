@@ -9,6 +9,7 @@ import 'package:assistant/data/cache/calories_cache.dart';
 import 'package:assistant/data/cache/habit_cache.dart';
 import 'package:assistant/data/cache/todo_cache.dart';
 import 'package:assistant/data/cache/water_cache.dart';
+import 'package:assistant/data/cache/calendar_cache.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/splash/index.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,7 @@ void main() async {
     HabitCache().init(),
     TodoCache().init(),
     WaterCache().init(),
+    CalendarCache().init(),
   ]);
 
   runApp(const ProviderScope(child: MyApp()));

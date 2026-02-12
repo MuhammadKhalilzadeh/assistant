@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
-/// Compact month picker shown in bottom sheet or dropdown
+/// Compact month picker shown in a constrained bottom sheet
 class MiniCalendar extends StatefulWidget {
   final DateTime selectedDate;
   final DateTime focusedMonth;
@@ -24,6 +24,7 @@ class MiniCalendar extends StatefulWidget {
     return showModalBottomSheet<DateTime>(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) => _MiniCalendarSheet(
         selectedDate: selectedDate,
         focusedMonth: focusedMonth,
@@ -76,35 +77,14 @@ class _MiniCalendarState extends State<MiniCalendar> {
     final lastDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1, 0);
     final daysInMonth = lastDayOfMonth.day;
     final startWeekday = firstDayOfMonth.weekday;
-
-    // Adjust for Sunday start (weekday is 1-7 with Monday=1)
     final leadingEmptyDays = startWeekday == 7 ? 0 : startWeekday;
 
-    final days = <Widget>[];
+    final dayCells = <Widget>[];
 
-    // Day names header
-    const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-    for (var name in dayNames) {
-      days.add(
-        Center(
-          child: Text(
-            name,
-            style: const TextStyle(
-              color: AppTheme.textTertiary,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      );
-    }
-
-    // Leading empty cells
     for (var i = 0; i < leadingEmptyDays; i++) {
-      days.add(const SizedBox.shrink());
+      dayCells.add(const SizedBox.shrink());
     }
 
-    // Day cells
     final today = DateTime.now();
     for (var day = 1; day <= daysInMonth; day++) {
       final date = DateTime(_focusedMonth.year, _focusedMonth.month, day);
@@ -115,7 +95,7 @@ class _MiniCalendarState extends State<MiniCalendar> {
           today.month == date.month &&
           today.day == date.day;
 
-      days.add(
+      dayCells.add(
         GestureDetector(
           onTap: () => widget.onDateSelected(date),
           child: Container(
@@ -153,6 +133,7 @@ class _MiniCalendarState extends State<MiniCalendar> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Month navigation
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -175,12 +156,29 @@ class _MiniCalendarState extends State<MiniCalendar> {
           ],
         ),
         const SizedBox(height: 8),
+        // Static day names row
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            children: [
+              _DayNameLabel('S'),
+              _DayNameLabel('M'),
+              _DayNameLabel('T'),
+              _DayNameLabel('W'),
+              _DayNameLabel('T'),
+              _DayNameLabel('F'),
+              _DayNameLabel('S'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 4),
+        // Grid of day cells
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 7,
           childAspectRatio: 1.2,
-          children: days,
+          children: dayCells,
         ),
       ],
     );
@@ -195,6 +193,28 @@ class _MiniCalendarState extends State<MiniCalendar> {
   }
 }
 
+class _DayNameLabel extends StatelessWidget {
+  final String label;
+  const _DayNameLabel(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Center(
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: AppTheme.textTertiary,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bottom sheet wrapper for MiniCalendar with polished UI
 class _MiniCalendarSheet extends StatefulWidget {
   final DateTime selectedDate;
   final DateTime focusedMonth;
@@ -221,25 +241,32 @@ class _MiniCalendarSheetState extends State<_MiniCalendarSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
     return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: AppTheme.elevatedShadow,
       ),
-      padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(2),
+          // Handle bar
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+          // Title
           const Text(
             'Select Date',
             style: TextStyle(
@@ -248,56 +275,74 @@ class _MiniCalendarSheetState extends State<_MiniCalendarSheet> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 24),
-          MiniCalendar(
-            selectedDate: _selectedDate,
-            focusedMonth: _focusedMonth,
-            onDateSelected: (date) {
-              setState(() => _selectedDate = date);
-            },
-            onMonthChanged: (month) {
-              setState(() => _focusedMonth = month);
-            },
+          const SizedBox(height: 16),
+          // Calendar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: MiniCalendar(
+              selectedDate: _selectedDate,
+              focusedMonth: _focusedMonth,
+              onDateSelected: (date) {
+                setState(() => _selectedDate = date);
+              },
+              onMonthChanged: (month) {
+                setState(() => _focusedMonth = month);
+              },
+            ),
           ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 16,
+          const SizedBox(height: 20),
+          // Action buttons
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.textSecondary,
+                      side: BorderSide(color: Colors.grey.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context, _selectedDate),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context, _selectedDate),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'Select',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      'Select',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom),
+          SizedBox(height: bottomPadding > 0 ? bottomPadding : 16),
         ],
       ),
     );

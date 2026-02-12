@@ -35,17 +35,13 @@ enum CalendarViewType {
   }
 }
 
-/// Custom app bar with view toggle
+/// Compact app bar — just back + title + today button
 class CalendarAppBar extends StatelessWidget {
-  final CalendarViewType currentView;
-  final ValueChanged<CalendarViewType> onViewChanged;
   final VoidCallback onTodayPressed;
   final VoidCallback? onBackPressed;
 
   const CalendarAppBar({
     super.key,
-    required this.currentView,
-    required this.onViewChanged,
     required this.onTodayPressed,
     this.onBackPressed,
   });
@@ -53,196 +49,143 @@ class CalendarAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(8, 12, 16, 0),
+      child: Row(
         children: [
-          // Top row: Back button, title, and today button
-          Row(
-            children: [
-              IconButton(
-                onPressed: onBackPressed ?? () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
-              ),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'Calendar',
-                  style: TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              _TodayButton(onPressed: onTodayPressed),
-            ],
+          IconButton(
+            onPressed: onBackPressed ?? () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+            visualDensity: VisualDensity.compact,
           ),
-          const SizedBox(height: 16),
-          // View toggle tabs
-          _ViewToggle(
-            currentView: currentView,
-            onViewChanged: onViewChanged,
+          const SizedBox(width: 4),
+          const Expanded(
+            child: Text(
+              'Calendar',
+              style: TextStyle(
+                color: AppTheme.textPrimary,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
+          _TodayButton(onPressed: onTodayPressed),
         ],
       ),
     );
   }
 }
 
-class _TodayButton extends StatefulWidget {
+class _TodayButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const _TodayButton({required this.onPressed});
 
   @override
-  State<_TodayButton> createState() => _TodayButtonState();
-}
-
-class _TodayButtonState extends State<_TodayButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.1), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 1.1, end: 1.0), weight: 1),
-    ]).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-
-    // Pulse animation
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        _controller.repeat(reverse: false);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _scaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        );
-      },
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryColor,
-            borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primaryColor.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.today,
-                size: 16,
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryColor,
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryColor.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.today,
+              size: 14,
+              color: Colors.white,
+            ),
+            SizedBox(width: 6),
+            Text(
+              'Today',
+              style: TextStyle(
                 color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
               ),
-              SizedBox(width: 8),
-              Text(
-                'Today',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _ViewToggle extends StatelessWidget {
+/// Segmented view toggle — used in CalendarPage body
+class CalendarViewToggle extends StatelessWidget {
   final CalendarViewType currentView;
   final ValueChanged<CalendarViewType> onViewChanged;
 
-  const _ViewToggle({
+  const CalendarViewToggle({
+    super.key,
     required this.currentView,
     required this.onViewChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-      ),
-      child: Row(
-        children: CalendarViewType.values.map((view) {
-          final isSelected = view == currentView;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => onViewChanged(view),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppTheme.cardColor
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppTheme.borderRadiusSmall),
-                  boxShadow: isSelected ? AppTheme.cardShadow : null,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      view.icon,
-                      size: 16,
-                      color: isSelected
-                          ? AppTheme.primaryColor
-                          : AppTheme.textSecondary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      view.label,
-                      style: TextStyle(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        ),
+        child: Row(
+          children: CalendarViewType.values.map((view) {
+            final isSelected = view == currentView;
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => onViewChanged(view),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.cardColor
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppTheme.borderRadiusSmall),
+                    boxShadow: isSelected ? AppTheme.cardShadow : null,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        view.icon,
+                        size: 14,
                         color: isSelected
                             ? AppTheme.primaryColor
                             : AppTheme.textSecondary,
-                        fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Text(
+                        view.label,
+                        style: TextStyle(
+                          color: isSelected
+                              ? AppTheme.primaryColor
+                              : AppTheme.textSecondary,
+                          fontSize: 12,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        }).toList(),
+            );
+          }).toList(),
+        ),
       ),
     );
   }

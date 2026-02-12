@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/calendar_event_model.dart';
+import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'event_item.dart';
 import 'calendar_empty_state.dart';
 
-/// Agenda list view grouped by date
+/// Agenda list view grouped by date with staggered animations
 class AgendaView extends StatefulWidget {
   final DateTime selectedDate;
-  final List<CalendarEventModel> events;
+  final List<CalendarEvent> events;
   final ValueChanged<DateTime> onDateSelected;
-  final ValueChanged<CalendarEventModel>? onEventTap;
-  final ValueChanged<CalendarEventModel>? onEventDelete;
+  final ValueChanged<CalendarEvent>? onEventTap;
+  final ValueChanged<CalendarEvent>? onEventDelete;
   final VoidCallback? onAddEvent;
 
   const AgendaView({
@@ -29,7 +29,6 @@ class AgendaView extends StatefulWidget {
 
 class _AgendaViewState extends State<AgendaView> {
   late ScrollController _scrollController;
-  final Map<DateTime, GlobalKey> _dateKeys = {};
 
   @override
   void initState() {
@@ -43,8 +42,8 @@ class _AgendaViewState extends State<AgendaView> {
     super.dispose();
   }
 
-  Map<DateTime, List<CalendarEventModel>> _groupEventsByDate() {
-    final grouped = <DateTime, List<CalendarEventModel>>{};
+  Map<DateTime, List<CalendarEvent>> _groupEventsByDate() {
+    final grouped = <DateTime, List<CalendarEvent>>{};
 
     for (final event in widget.events) {
       final date = DateTime(
@@ -59,7 +58,6 @@ class _AgendaViewState extends State<AgendaView> {
       grouped[date]!.add(event);
     }
 
-    // Sort events within each date
     for (final date in grouped.keys) {
       grouped[date]!.sort((a, b) => a.startTime.compareTo(b.startTime));
     }
@@ -67,7 +65,7 @@ class _AgendaViewState extends State<AgendaView> {
     return grouped;
   }
 
-  List<DateTime> _getSortedDates(Map<DateTime, List<CalendarEventModel>> grouped) {
+  List<DateTime> _getSortedDates(Map<DateTime, List<CalendarEvent>> grouped) {
     final dates = grouped.keys.toList();
     dates.sort((a, b) => a.compareTo(b));
     return dates;
@@ -87,16 +85,13 @@ class _AgendaViewState extends State<AgendaView> {
       );
     }
 
-    // Find dates to show (starting from selected date or today)
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final startDate = widget.selectedDate.isBefore(today) ? widget.selectedDate : today;
 
-    // Filter to show only dates >= startDate
     final visibleDates = dates.where((d) => !d.isBefore(startDate)).toList();
 
     if (visibleDates.isEmpty) {
-      // Show past events if no future events
       return _buildAgendaList(dates, grouped);
     }
 
@@ -105,7 +100,7 @@ class _AgendaViewState extends State<AgendaView> {
 
   Widget _buildAgendaList(
     List<DateTime> dates,
-    Map<DateTime, List<CalendarEventModel>> grouped,
+    Map<DateTime, List<CalendarEvent>> grouped,
   ) {
     return ListView.builder(
       controller: _scrollController,
@@ -114,31 +109,25 @@ class _AgendaViewState extends State<AgendaView> {
       itemBuilder: (context, index) {
         final date = dates[index];
         final events = grouped[date]!;
-
-        if (!_dateKeys.containsKey(date)) {
-          _dateKeys[date] = GlobalKey();
-        }
-
         return _buildDateSection(date, events, index);
       },
     );
   }
 
-  Widget _buildDateSection(DateTime date, List<CalendarEventModel> events, int index) {
+  Widget _buildDateSection(DateTime date, List<CalendarEvent> events, int sectionIndex) {
     final isToday = _isToday(date);
     final isSelected = _isSameDay(date, widget.selectedDate);
 
     return Column(
-      key: _dateKeys[date],
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Date header (sticky)
+        // Date header
         GestureDetector(
           onTap: () => widget.onDateSelected(date),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             margin: EdgeInsets.only(
-              top: index == 0 ? 0 : 16,
+              top: sectionIndex == 0 ? 0 : 16,
               bottom: 8,
             ),
             decoration: BoxDecoration(
@@ -208,7 +197,7 @@ class _AgendaViewState extends State<AgendaView> {
                     ],
                   ),
                 ),
-                Icon(
+                const Icon(
                   Icons.chevron_right,
                   color: AppTheme.textTertiary,
                 ),
@@ -216,7 +205,7 @@ class _AgendaViewState extends State<AgendaView> {
             ),
           ),
         ),
-        // Events for this date
+        // Events with staggered animation
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
@@ -272,9 +261,7 @@ class _AgendaViewState extends State<AgendaView> {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
-    if (_isToday(date)) {
-      return 'Today';
-    }
+    if (_isToday(date)) return 'Today';
 
     final now = DateTime.now();
     final tomorrow = now.add(const Duration(days: 1));
@@ -291,7 +278,6 @@ class _AgendaViewState extends State<AgendaView> {
       return 'Yesterday';
     }
 
-    // Show full date
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }

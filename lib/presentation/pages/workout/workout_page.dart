@@ -209,7 +209,7 @@ class _WorkoutPageState extends ConsumerState<WorkoutPage> with TickerProviderSt
           } catch (e) {
             // ignore
           }
-          if (mounted) {
+          if (context.mounted) {
             Navigator.pop(context);
           }
         },

@@ -57,7 +57,7 @@ class DayCell extends StatelessWidget {
               ),
               child: Text('${date.day}'),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             _buildEventDots(),
           ],
         ),
@@ -67,7 +67,7 @@ class DayCell extends StatelessWidget {
 
   Widget _buildEventDots() {
     if (eventColors.isEmpty) {
-      return const SizedBox(height: 6);
+      return const SizedBox(height: 4);
     }
 
     final displayColors = eventColors.take(3).toList();

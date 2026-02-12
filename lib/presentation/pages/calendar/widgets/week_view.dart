@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/calendar_event_model.dart';
+import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
+import 'calendar_empty_state.dart';
 
-/// Week timeline view with swipe navigation
+/// Week timeline view with swipe navigation — tracks page index in state
 class WeekView extends StatefulWidget {
   final DateTime selectedDate;
   final DateTime focusedWeek;
-  final List<CalendarEventModel> events;
+  final List<CalendarEvent> events;
   final ValueChanged<DateTime> onDateSelected;
   final ValueChanged<DateTime> onWeekChanged;
-  final ValueChanged<CalendarEventModel>? onEventTap;
+  final ValueChanged<CalendarEvent>? onEventTap;
   final Function(DateTime, TimeOfDay)? onTimeSlotTap;
 
   const WeekView({
@@ -30,10 +31,13 @@ class WeekView extends StatefulWidget {
 class _WeekViewState extends State<WeekView> {
   late PageController _pageController;
   late ScrollController _scrollController;
-  static const int _initialPage = 520; // ~10 years in each direction
+  static const int _initialPage = 520;
   static const double _hourHeight = 60.0;
   static const int _startHour = 6;
   static const int _endHour = 23;
+
+  // Track current page in state instead of reading .page during build
+  int _currentPage = _initialPage;
 
   @override
   void initState() {
@@ -41,7 +45,6 @@ class _WeekViewState extends State<WeekView> {
     _pageController = PageController(initialPage: _initialPage);
     _scrollController = ScrollController();
 
-    // Scroll to current time on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrentTime();
     });
@@ -82,40 +85,50 @@ class _WeekViewState extends State<WeekView> {
     return List.generate(7, (i) => weekStart.add(Duration(days: i)));
   }
 
-  List<CalendarEventModel> _getEventsForDate(DateTime date) {
+  List<CalendarEvent> _getEventsForDate(DateTime date) {
     return widget.events.where((event) {
       final eventDate = DateTime(
-        event.startTime.year,
-        event.startTime.month,
-        event.startTime.day,
-      );
+        event.startTime.year, event.startTime.month, event.startTime.day);
       final targetDate = DateTime(date.year, date.month, date.day);
       return eventDate == targetDate;
     }).toList();
   }
 
+  bool _hasAnyEventsThisWeek(DateTime weekStart) {
+    final days = _getWeekDays(weekStart);
+    return days.any((d) => _getEventsForDate(d).isNotEmpty);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final weekStart = _getWeekStartForPage(_currentPage);
+    final selectedDayEvents = _getEventsForDate(widget.selectedDate)
+        .where((e) => !e.isAllDay)
+        .toList();
+
     return Column(
       children: [
-        // Week day headers with swipe
+        // Week day headers (swipeable)
         SizedBox(
           height: 80,
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (page) {
+              setState(() => _currentPage = page);
               widget.onWeekChanged(_getWeekStartForPage(page));
             },
             itemBuilder: (context, page) {
-              final weekStart = _getWeekStartForPage(page);
-              return _buildWeekHeader(weekStart);
+              final ws = _getWeekStartForPage(page);
+              return _buildWeekHeader(ws);
             },
           ),
         ),
         const SizedBox(height: 8),
-        // Timeline
+        // Timeline or empty state
         Expanded(
-          child: _buildTimeline(),
+          child: !_hasAnyEventsThisWeek(weekStart) && selectedDayEvents.isEmpty
+              ? DateEmptyState(date: widget.selectedDate)
+              : _buildTimeline(),
         ),
       ],
     );
@@ -127,7 +140,7 @@ class _WeekViewState extends State<WeekView> {
 
     return Row(
       children: [
-        const SizedBox(width: 50), // Space for time column
+        const SizedBox(width: 50),
         ...days.map((date) {
           final isToday = date.year == today.year &&
               date.month == today.month &&
@@ -185,9 +198,7 @@ class _WeekViewState extends State<WeekView> {
                         width: 6,
                         height: 6,
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? Colors.white
-                              : AppTheme.primaryColor,
+                          color: isSelected ? Colors.white : AppTheme.primaryColor,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -202,22 +213,28 @@ class _WeekViewState extends State<WeekView> {
   }
 
   Widget _buildTimeline() {
+    final totalHeight = (_endHour - _startHour + 1) * _hourHeight;
+
     return SingleChildScrollView(
       controller: _scrollController,
-      child: Stack(
-        children: [
-          // Hour slots
-          Column(
-            children: List.generate(_endHour - _startHour + 1, (index) {
-              final hour = _startHour + index;
-              return _buildHourRow(hour);
-            }),
-          ),
-          // Events overlay
-          _buildEventsOverlay(),
-          // Current time indicator
-          _buildCurrentTimeIndicator(),
-        ],
+      child: SizedBox(
+        height: totalHeight,
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            // Hour rows
+            Column(
+              children: List.generate(_endHour - _startHour + 1, (index) {
+                final hour = _startHour + index;
+                return _buildHourRow(hour);
+              }),
+            ),
+            // Event blocks (clipped)
+            _buildEventsOverlay(),
+            // Current time indicator
+            _buildCurrentTimeIndicator(),
+          ],
+        ),
       ),
     );
   }
@@ -247,10 +264,7 @@ class _WeekViewState extends State<WeekView> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
-                  top: BorderSide(
-                    color: Colors.grey.shade200,
-                    width: 1,
-                  ),
+                  top: BorderSide(color: Colors.grey.shade200, width: 1),
                 ),
               ),
               child: Row(
@@ -258,9 +272,7 @@ class _WeekViewState extends State<WeekView> {
                   return Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        final weekStart = _getWeekStartForPage(
-                          _pageController.page?.round() ?? _initialPage,
-                        );
+                        final weekStart = _getWeekStartForPage(_currentPage);
                         final date = weekStart.add(Duration(days: dayIndex));
                         widget.onTimeSlotTap?.call(date, TimeOfDay(hour: hour, minute: 0));
                       },
@@ -286,66 +298,66 @@ class _WeekViewState extends State<WeekView> {
   }
 
   Widget _buildEventsOverlay() {
-    final weekStart = _getWeekStartForPage(
-      _pageController.page?.round() ?? _initialPage,
-    );
+    final weekStart = _getWeekStartForPage(_currentPage);
     final days = _getWeekDays(weekStart);
+    final totalHeight = (_endHour - _startHour + 1) * _hourHeight;
 
     return Positioned(
       left: 50,
       right: 0,
       top: 0,
       bottom: 0,
-      child: Row(
-        children: days.asMap().entries.map((entry) {
-          final dayIndex = entry.key;
-          final date = entry.value;
-          final dayEvents = _getEventsForDate(date)
-              .where((e) => !e.isAllDay)
-              .toList();
+      child: ClipRect(
+        child: Row(
+          children: days.map((date) {
+            final dayEvents = _getEventsForDate(date)
+                .where((e) => !e.isAllDay)
+                .toList();
 
-          return Expanded(
-            child: Stack(
-              children: dayEvents.map((event) {
-                return _buildEventBlock(event, dayIndex);
-              }).toList(),
-            ),
-          );
-        }).toList(),
+            return Expanded(
+              child: Stack(
+                clipBehavior: Clip.hardEdge,
+                children: dayEvents.map((event) {
+                  return _buildEventBlock(event, totalHeight);
+                }).toList(),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
 
-  Widget _buildEventBlock(CalendarEventModel event, int dayIndex) {
+  Widget _buildEventBlock(CalendarEvent event, double totalHeight) {
     final startMinutes = (event.startTime.hour - _startHour) * 60 + event.startTime.minute;
     final endMinutes = (event.endTime.hour - _startHour) * 60 + event.endTime.minute;
     final durationMinutes = endMinutes - startMinutes;
 
-    final top = (startMinutes / 60) * _hourHeight;
-    final height = (durationMinutes / 60) * _hourHeight;
+    final top = ((startMinutes / 60) * _hourHeight).clamp(0.0, totalHeight);
+    final height = ((durationMinutes / 60) * _hourHeight).clamp(20.0, totalHeight - top);
 
-    Color eventColor;
-    try {
-      eventColor = Color(int.parse(event.color.replaceFirst('#', '0xFF')));
-    } catch (_) {
-      eventColor = AppTheme.primaryColor;
-    }
+    final eventColor = event.calendarColor != null
+        ? Color(event.calendarColor!)
+        : AppTheme.primaryColor;
 
     return Positioned(
       top: top,
       left: 2,
       right: 2,
-      height: height.clamp(24.0, double.infinity),
+      height: height,
       child: GestureDetector(
         onTap: () => widget.onEventTap?.call(event),
         child: Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: eventColor,
+            color: AppTheme.cardColor,
             borderRadius: BorderRadius.circular(6),
+            border: Border(
+              left: BorderSide(color: eventColor, width: 3),
+            ),
             boxShadow: [
               BoxShadow(
-                color: eventColor.withValues(alpha: 0.3),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -357,7 +369,7 @@ class _WeekViewState extends State<WeekView> {
               Text(
                 event.title,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
@@ -367,8 +379,8 @@ class _WeekViewState extends State<WeekView> {
               if (height > 40 && event.location != null)
                 Text(
                   event.location!,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
                     fontSize: 10,
                   ),
                   maxLines: 1,
@@ -383,12 +395,9 @@ class _WeekViewState extends State<WeekView> {
 
   Widget _buildCurrentTimeIndicator() {
     final now = DateTime.now();
-    final weekStart = _getWeekStartForPage(
-      _pageController.page?.round() ?? _initialPage,
-    );
+    final weekStart = _getWeekStartForPage(_currentPage);
     final weekEnd = weekStart.add(const Duration(days: 7));
 
-    // Only show if current time is in this week and within hour range
     if (now.isBefore(weekStart) ||
         now.isAfter(weekEnd) ||
         now.hour < _startHour ||

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/calendar_event_model.dart';
+import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
-import 'event_category_chip.dart';
 
-/// Bottom sheet for adding/editing events
+/// Bottom sheet for adding/editing events — lightweight, no DraggableScrollableSheet
 class AddEventSheet extends StatefulWidget {
-  final CalendarEventModel? event;
+  final CalendarEvent? event;
   final DateTime? initialDate;
   final TimeOfDay? initialTime;
-  final Function(CalendarEventModel) onSave;
+  final List<DeviceCalendar> calendars;
+  final Function(CalendarEvent) onSave;
   final VoidCallback? onDelete;
 
   const AddEventSheet({
@@ -16,16 +16,18 @@ class AddEventSheet extends StatefulWidget {
     this.event,
     this.initialDate,
     this.initialTime,
+    this.calendars = const [],
     required this.onSave,
     this.onDelete,
   });
 
   static Future<void> show(
     BuildContext context, {
-    CalendarEventModel? event,
+    CalendarEvent? event,
     DateTime? initialDate,
     TimeOfDay? initialTime,
-    required Function(CalendarEventModel) onSave,
+    List<DeviceCalendar> calendars = const [],
+    required Function(CalendarEvent) onSave,
     VoidCallback? onDelete,
   }) {
     return showModalBottomSheet(
@@ -36,6 +38,7 @@ class AddEventSheet extends StatefulWidget {
         event: event,
         initialDate: initialDate,
         initialTime: initialTime,
+        calendars: calendars,
         onSave: onSave,
         onDelete: onDelete,
       ),
@@ -54,7 +57,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
   late DateTime _selectedDate;
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
-  late EventCategory _selectedCategory;
+  DeviceCalendar? _selectedCalendar;
   bool _isAllDay = false;
   bool _showDescription = false;
 
@@ -71,9 +74,14 @@ class _AddEventSheetState extends State<AddEventSheet> {
       _selectedDate = widget.event!.startTime;
       _startTime = TimeOfDay.fromDateTime(widget.event!.startTime);
       _endTime = TimeOfDay.fromDateTime(widget.event!.endTime);
-      _selectedCategory = EventCategory.fromHexColor(widget.event!.color);
       _isAllDay = widget.event!.isAllDay;
       _showDescription = widget.event!.description?.isNotEmpty == true;
+
+      if (widget.event!.calendarId != null && widget.calendars.isNotEmpty) {
+        _selectedCalendar = widget.calendars
+            .where((c) => c.id == widget.event!.calendarId)
+            .firstOrNull;
+      }
     } else {
       _titleController = TextEditingController();
       _locationController = TextEditingController();
@@ -84,8 +92,9 @@ class _AddEventSheetState extends State<AddEventSheet> {
         hour: (_startTime.hour + 1) % 24,
         minute: _startTime.minute,
       );
-      _selectedCategory = EventCategory.work;
     }
+
+    _selectedCalendar ??= widget.calendars.isNotEmpty ? widget.calendars.first : null;
   }
 
   @override
@@ -144,7 +153,6 @@ class _AddEventSheetState extends State<AddEventSheet> {
     if (time != null) {
       setState(() {
         _startTime = time;
-        // Ensure end time is after start time
         if (_endTime.hour < _startTime.hour ||
             (_endTime.hour == _startTime.hour && _endTime.minute <= _startTime.minute)) {
           _endTime = TimeOfDay(
@@ -183,9 +191,25 @@ class _AddEventSheetState extends State<AddEventSheet> {
   void _save() {
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter an event title'),
+        SnackBar(
+          content: const Text('Please enter an event title'),
           backgroundColor: AppTheme.errorColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+      return;
+    }
+
+    if (_selectedCalendar == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please select a calendar'),
+          backgroundColor: AppTheme.errorColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
         ),
       );
       return;
@@ -207,8 +231,11 @@ class _AddEventSheetState extends State<AddEventSheet> {
       _isAllDay ? 59 : _endTime.minute,
     );
 
-    final event = CalendarEventModel(
-      id: widget.event?.id ?? '',
+    final event = CalendarEvent(
+      eventId: widget.event?.eventId,
+      calendarId: _selectedCalendar!.id,
+      calendarName: _selectedCalendar!.name,
+      calendarColor: _selectedCalendar!.color,
       title: _titleController.text.trim(),
       description: _showDescription && _descriptionController.text.trim().isNotEmpty
           ? _descriptionController.text.trim()
@@ -218,7 +245,6 @@ class _AddEventSheetState extends State<AddEventSheet> {
       location: _locationController.text.trim().isNotEmpty
           ? _locationController.text.trim()
           : null,
-      color: _selectedCategory.hexColor,
       isAllDay: _isAllDay,
     );
 
@@ -230,6 +256,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Delete Event'),
         content: const Text('Are you sure you want to delete this event?'),
         actions: [
@@ -239,8 +266,8 @@ class _AddEventSheetState extends State<AddEventSheet> {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Close sheet
+              Navigator.pop(context);
+              Navigator.pop(context);
               widget.onDelete?.call();
             },
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorColor),
@@ -253,197 +280,309 @@ class _AddEventSheetState extends State<AddEventSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Fixed height: 75% of screen, adjusts for keyboard
+    final sheetHeight = screenHeight * 0.75;
 
     return Container(
-      decoration: BoxDecoration(
+      height: sheetHeight,
+      margin: EdgeInsets.only(bottom: bottomInset),
+      decoration: const BoxDecoration(
         color: AppTheme.cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: AppTheme.elevatedShadow,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: bottomPadding),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
+      child: Column(
+        children: [
+          // Handle bar
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 10),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          // Title row
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 12, 16, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _isEditMode ? 'Edit Event' : 'New Event',
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // Header
-              Row(
+                if (_isEditMode)
+                  IconButton(
+                    onPressed: _delete,
+                    icon: const Icon(Icons.delete_outline, color: AppTheme.errorColor, size: 22),
+                    visualDensity: VisualDensity.compact,
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Divider(height: 1, color: Colors.grey.shade200),
+          ),
+          // Scrollable content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      _isEditMode ? 'Edit Event' : 'New Event',
-                      style: const TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                  // Calendar selector chips
+                  if (widget.calendars.isNotEmpty) ...[
+                    const Text(
+                      'Calendar',
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
                       ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: widget.calendars.map((calendar) {
+                        final calColor = Color(calendar.color);
+                        final isSelected = _selectedCalendar?.id == calendar.id;
+
+                        return GestureDetector(
+                          onTap: () => setState(() => _selectedCalendar = calendar),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected ? calColor : calColor.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected ? calColor : calColor.withValues(alpha: 0.4),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? Colors.white : calColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  calendar.name,
+                                  style: TextStyle(
+                                    color: isSelected ? Colors.white : AppTheme.textPrimary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // Title input
+                  _buildInputField(
+                    controller: _titleController,
+                    label: 'Event Title',
+                    hint: 'What\'s the event?',
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Date & Time section
+                  const Text(
+                    'Date & Time',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  if (_isEditMode)
-                    IconButton(
-                      onPressed: _delete,
-                      icon: const Icon(Icons.delete_outline, color: AppTheme.errorColor),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 24),
+                  const SizedBox(height: 8),
 
-              // Title input
-              _buildInputField(
-                controller: _titleController,
-                label: 'Event Title',
-                hint: 'Enter event title',
-                autofocus: true,
-              ),
-              const SizedBox(height: 16),
+                  // Date picker row
+                  _buildTappableField(
+                    icon: Icons.calendar_today,
+                    label: _formatDate(_selectedDate),
+                    onTap: _selectDate,
+                  ),
+                  const SizedBox(height: 10),
 
-              // Category selector
-              const Text(
-                'Category',
-                style: TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 8),
-              CategorySelector(
-                selectedCategory: _selectedCategory,
-                onCategorySelected: (category) {
-                  setState(() => _selectedCategory = category);
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Date picker
-              _buildDateTimeRow(
-                icon: Icons.calendar_today,
-                label: _formatDate(_selectedDate),
-                onTap: _selectDate,
-              ),
-              const SizedBox(height: 12),
-
-              // All-day toggle
-              _buildToggleRow(
-                label: 'All-day event',
-                value: _isAllDay,
-                onChanged: (value) {
-                  setState(() => _isAllDay = value);
-                },
-              ),
-
-              // Time pickers (hidden if all-day)
-              if (!_isAllDay) ...[
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildDateTimeRow(
-                        icon: Icons.access_time,
-                        label: 'Start: ${_startTime.format(context)}',
-                        onTap: _selectStartTime,
+                  // All-day toggle
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'All-day event',
+                        style: TextStyle(
+                          color: AppTheme.textPrimary,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildDateTimeRow(
-                        icon: Icons.access_time,
-                        label: 'End: ${_endTime.format(context)}',
-                        onTap: _selectEndTime,
+                      SizedBox(
+                        height: 28,
+                        child: Switch(
+                          value: _isAllDay,
+                          onChanged: (value) => setState(() => _isAllDay = value),
+                          activeThumbColor: AppTheme.primaryColor,
+                          activeTrackColor: AppTheme.primaryColor.withValues(alpha: 0.3),
+                          inactiveThumbColor: Colors.grey.shade400,
+                          inactiveTrackColor: Colors.grey.shade200,
+                        ),
                       ),
+                    ],
+                  ),
+
+                  // Time pickers
+                  if (!_isAllDay) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTappableField(
+                            icon: Icons.access_time,
+                            label: _startTime.format(context),
+                            subtitle: 'Start',
+                            onTap: _selectStartTime,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Icon(Icons.arrow_forward, size: 16, color: AppTheme.textTertiary),
+                        ),
+                        Expanded(
+                          child: _buildTappableField(
+                            icon: Icons.access_time,
+                            label: _endTime.format(context),
+                            subtitle: 'End',
+                            onTap: _selectEndTime,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ],
-              const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-              // Location input
-              _buildInputField(
-                controller: _locationController,
-                label: 'Location',
-                hint: 'Enter location (optional)',
-                prefixIcon: Icons.location_on_outlined,
-              ),
-              const SizedBox(height: 16),
+                  // Location input
+                  _buildInputField(
+                    controller: _locationController,
+                    label: 'Location',
+                    hint: 'Add location (optional)',
+                    prefixIcon: Icons.location_on_outlined,
+                  ),
+                  const SizedBox(height: 16),
 
-              // Description toggle and input
-              _buildToggleRow(
-                label: 'Add description',
-                value: _showDescription,
-                onChanged: (value) {
-                  setState(() => _showDescription = value);
-                },
-              ),
-              if (_showDescription) ...[
-                const SizedBox(height: 12),
-                _buildInputField(
-                  controller: _descriptionController,
-                  label: 'Description',
-                  hint: 'Enter event description',
-                  maxLines: 3,
-                ),
-              ],
-              const SizedBox(height: 24),
-
-              // Action buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Cancel',
+                  // Description toggle and input
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Add description',
                         style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 16,
+                          color: AppTheme.textPrimary,
+                          fontSize: 14,
                         ),
                       ),
-                    ),
+                      SizedBox(
+                        height: 28,
+                        child: Switch(
+                          value: _showDescription,
+                          onChanged: (value) => setState(() => _showDescription = value),
+                          activeThumbColor: AppTheme.primaryColor,
+                          activeTrackColor: AppTheme.primaryColor.withValues(alpha: 0.3),
+                          inactiveThumbColor: Colors.grey.shade400,
+                          inactiveTrackColor: Colors.grey.shade200,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                      onPressed: _save,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        _isEditMode ? 'Save Changes' : 'Add Event',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  if (_showDescription) ...[
+                    const SizedBox(height: 10),
+                    _buildInputField(
+                      controller: _descriptionController,
+                      label: 'Description',
+                      hint: 'Add event details',
+                      maxLines: 3,
                     ),
-                  ),
+                  ],
+                  const SizedBox(height: 16),
                 ],
               ),
-              SizedBox(height: MediaQuery.of(context).padding.bottom),
-            ],
+            ),
           ),
-        ),
+          // Action buttons (pinned at bottom)
+          Container(
+            padding: EdgeInsets.fromLTRB(24, 12, 24, bottomPadding > 0 ? bottomPadding : 16),
+            decoration: BoxDecoration(
+              color: AppTheme.cardColor,
+              border: Border(top: BorderSide(color: Colors.grey.shade100)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.textSecondary,
+                      side: BorderSide(color: Colors.grey.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: _save,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      _isEditMode ? 'Save Changes' : 'Add Event',
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -454,7 +593,6 @@ class _AddEventSheetState extends State<AddEventSheet> {
     required String hint,
     IconData? prefixIcon,
     int maxLines = 1,
-    bool autofocus = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -462,25 +600,26 @@ class _AddEventSheetState extends State<AddEventSheet> {
         Text(
           label,
           style: const TextStyle(
-            color: AppTheme.textPrimary,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+            color: AppTheme.textSecondary,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         TextFormField(
           controller: controller,
-          autofocus: autofocus,
           maxLines: maxLines,
-          style: const TextStyle(color: AppTheme.textPrimary),
+          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: AppTheme.textTertiary),
+            hintStyle: TextStyle(color: AppTheme.textTertiary, fontSize: 14),
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: AppTheme.textSecondary)
+                ? Icon(prefixIcon, color: AppTheme.textSecondary, size: 20)
                 : null,
             filled: true,
             fillColor: Colors.grey.shade50,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.grey.shade200),
@@ -491,7 +630,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+              borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.5),
             ),
           ),
         ),
@@ -499,15 +638,16 @@ class _AddEventSheetState extends State<AddEventSheet> {
     );
   }
 
-  Widget _buildDateTimeRow({
+  Widget _buildTappableField({
     required IconData icon,
     required String label,
+    String? subtitle,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.grey.shade50,
           borderRadius: BorderRadius.circular(12),
@@ -515,45 +655,37 @@ class _AddEventSheetState extends State<AddEventSheet> {
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppTheme.primaryColor, size: 20),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: const TextStyle(
-                color: AppTheme.textPrimary,
-                fontSize: 14,
+            Icon(icon, color: AppTheme.primaryColor, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (subtitle != null)
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: AppTheme.textTertiary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
+            Icon(Icons.chevron_right, size: 16, color: AppTheme.textTertiary),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildToggleRow({
-    required String label,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: AppTheme.textSecondary,
-            fontSize: 14,
-          ),
-        ),
-        Switch(
-          value: value,
-          onChanged: onChanged,
-          activeThumbColor: AppTheme.primaryColor,
-          activeTrackColor: AppTheme.primaryColor.withValues(alpha: 0.3),
-          inactiveThumbColor: Colors.grey.shade400,
-          inactiveTrackColor: Colors.grey.shade200,
-        ),
-      ],
     );
   }
 

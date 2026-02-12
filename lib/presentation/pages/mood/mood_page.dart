@@ -379,7 +379,7 @@ class _MoodPageState extends ConsumerState<MoodPage> with TickerProviderStateMix
               ),
             );
           } catch (e) { /* ignore */ }
-          if (mounted) Navigator.pop(context);
+          if (context.mounted) Navigator.pop(context);
         },
       ),
     );

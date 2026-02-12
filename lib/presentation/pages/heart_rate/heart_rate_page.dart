@@ -125,7 +125,7 @@ class _HeartRatePageState extends ConsumerState<HeartRatePage> with TickerProvid
           } catch (e) {
             // ignore
           }
-          if (mounted) Navigator.pop(context);
+          if (context.mounted) Navigator.pop(context);
         },
       ),
     );

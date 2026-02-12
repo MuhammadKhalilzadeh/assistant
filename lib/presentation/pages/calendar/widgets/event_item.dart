@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/calendar_event_model.dart';
+import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
-/// Event card component with color-coded left border
+/// Event card component with calendar-color left border
+///
+/// Two variants:
+/// - Compact (`isCompact: true`): Single row — 3px left border + time + title. ~40px height.
+/// - Full (`isCompact: false`): White card with IntrinsicHeight color border + time/title/location. Dismissible.
 class EventItem extends StatelessWidget {
-  final CalendarEventModel event;
+  final CalendarEvent event;
   final bool isCompact;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
@@ -18,11 +22,10 @@ class EventItem extends StatelessWidget {
   });
 
   Color get eventColor {
-    try {
-      return Color(int.parse(event.color.replaceFirst('#', '0xFF')));
-    } catch (_) {
-      return AppTheme.primaryColor;
+    if (event.calendarColor != null) {
+      return Color(event.calendarColor!);
     }
+    return AppTheme.primaryColor;
   }
 
   String _formatTime(DateTime time) {
@@ -44,10 +47,10 @@ class EventItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: eventColor.withValues(alpha: 0.1),
+          color: eventColor.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusSmall),
           border: Border(
             left: BorderSide(color: eventColor, width: 3),
@@ -55,24 +58,36 @@ class EventItem extends StatelessWidget {
         ),
         child: Row(
           children: [
+            SizedBox(
+              width: 58,
+              child: Text(
+                event.isAllDay ? 'All day' : _formatTime(event.startTime),
+                style: TextStyle(
+                  color: event.isAllDay ? eventColor : AppTheme.textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
             Expanded(
               child: Text(
                 event.title,
                 style: const TextStyle(
                   color: AppTheme.textPrimary,
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (!event.isAllDay)
-              Text(
-                _formatTime(event.startTime),
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 11,
+            if (event.location != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Icon(
+                  Icons.location_on,
+                  size: 14,
+                  color: AppTheme.textTertiary,
                 ),
               ),
           ],
@@ -82,36 +97,20 @@ class EventItem extends StatelessWidget {
   }
 
   Widget _buildFullVariant() {
-    return Dismissible(
-      key: Key(event.id),
-      direction: onDelete != null ? DismissDirection.endToStart : DismissDirection.none,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
+    final content = GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: AppTheme.errorColor.withValues(alpha: 0.1),
+          color: AppTheme.cardColor,
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
+          boxShadow: AppTheme.cardShadow,
         ),
-        child: const Icon(
-          Icons.delete_outline,
-          color: AppTheme.errorColor,
-        ),
-      ),
-      onDismissed: (_) => onDelete?.call(),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: AppTheme.cardColor,
-            borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
-            boxShadow: AppTheme.cardShadow,
-          ),
+        child: IntrinsicHeight(
           child: Row(
             children: [
               Container(
                 width: 4,
-                height: 80,
                 decoration: BoxDecoration(
                   color: eventColor,
                   borderRadius: const BorderRadius.only(
@@ -122,11 +121,12 @@ class EventItem extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(14),
                   child: Row(
                     children: [
                       if (!event.isAllDay) ...[
                         Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
@@ -167,18 +167,32 @@ class EventItem extends StatelessWidget {
                       ],
                       Expanded(
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               event.title,
                               style: const TextStyle(
                                 color: AppTheme.textPrimary,
-                                fontSize: 16,
+                                fontSize: 15,
                                 fontWeight: FontWeight.w500,
                               ),
-                              maxLines: 1,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
+                            if (event.calendarName != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                event.calendarName!,
+                                style: TextStyle(
+                                  color: eventColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                             if (event.location != null) ...[
                               const SizedBox(height: 4),
                               Row(
@@ -203,18 +217,6 @@ class EventItem extends StatelessWidget {
                                 ],
                               ),
                             ],
-                            if (event.description != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                event.description!,
-                                style: const TextStyle(
-                                  color: AppTheme.textTertiary,
-                                  fontSize: 12,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
                           ],
                         ),
                       ),
@@ -226,6 +228,28 @@ class EventItem extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    if (onDelete == null) return content;
+
+    return Dismissible(
+      key: Key('${event.calendarId}_${event.eventId ?? event.title}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: AppTheme.errorColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
+        ),
+        child: const Icon(
+          Icons.delete_outline,
+          color: AppTheme.errorColor,
+        ),
+      ),
+      onDismissed: (_) => onDelete?.call(),
+      child: content,
     );
   }
 }

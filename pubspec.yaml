@@ -49,6 +49,9 @@ dependencies:
   # Connectivity monitoring
   connectivity_plus: ^6.1.5
 
+  # Device calendar integration
+  device_calendar: ^4.3.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
