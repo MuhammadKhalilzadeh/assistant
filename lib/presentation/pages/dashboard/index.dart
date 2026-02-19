@@ -334,14 +334,14 @@ class _JarvisTab extends StatelessWidget {
               child: const Icon(
                 Icons.auto_awesome,
                 size: 50,
-                color: Colors.white,
+                color: AppTheme.textOnPrimary,
               ),
             ),
             const SizedBox(height: AppTheme.spacingLG),
             Text(
               'Jarvis Assistant',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                   ),
             ),
             const SizedBox(height: AppTheme.spacingSM),

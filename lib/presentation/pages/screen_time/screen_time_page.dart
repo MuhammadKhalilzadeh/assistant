@@ -35,7 +35,7 @@ class _ScreenTimePageState extends ConsumerState<ScreenTimePage> with TickerProv
     super.initState();
 
     _listAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 
@@ -87,7 +87,7 @@ class _ScreenTimePageState extends ConsumerState<ScreenTimePage> with TickerProv
       context: context,
       backgroundColor: AppTheme.cardColor,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.borderRadiusXLarge)),
       ),
       builder: (context) => _GoalSettingsSheet(
         currentLimit: currentLimit,
@@ -131,7 +131,7 @@ class _ScreenTimePageState extends ConsumerState<ScreenTimePage> with TickerProv
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,
             ),
-            child: const Text('Open Settings', style: TextStyle(color: Colors.white)),
+            child: const Text('Open Settings', style: TextStyle(color: AppTheme.textOnPrimary)),
           ),
         ],
       ),
@@ -402,8 +402,9 @@ class _GoalSettingsSheetState extends State<_GoalSettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final sheetPadding = (MediaQuery.of(context).size.width * 0.04).clamp(16.0, 24.0);
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(sheetPadding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -494,7 +495,7 @@ class _GoalSettingsSheetState extends State<_GoalSettingsSheet> {
               onPressed: () => widget.onLimitChanged(_limit),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
+                foregroundColor: AppTheme.textOnPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -541,7 +542,7 @@ class _PresetButton extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : AppTheme.primaryColor,
+            color: isSelected ? AppTheme.textOnPrimary : AppTheme.primaryColor,
             fontWeight: FontWeight.w600,
             fontSize: 14,
           ),

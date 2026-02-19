@@ -25,7 +25,7 @@ class _InboxPageState extends ConsumerState<InboxPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showComposeDialog(),
         backgroundColor: AppTheme.primaryColor,
-        child: const Icon(Icons.edit, color: Colors.white),
+        child: const Icon(Icons.edit, color: AppTheme.textOnPrimary),
       ),
       body: SafeArea(
         child: Column(
@@ -146,7 +146,8 @@ class _InboxPageState extends ConsumerState<InboxPage> {
             style: TextStyle(
               color: AppTheme.textPrimary,
               fontSize: 24,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.3,
             ),
           ),
         ],
@@ -228,7 +229,8 @@ class _InboxPageState extends ConsumerState<InboxPage> {
               style: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.3,
               ),
             ),
             const SizedBox(width: 8),
@@ -267,7 +269,7 @@ class _InboxPageState extends ConsumerState<InboxPage> {
           color: AppTheme.errorColor,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: const Icon(Icons.delete, color: AppTheme.textOnPrimary),
       ),
       onDismissed: (_) {
         ref.read(inboxMessagesProvider.notifier).deleteMessage(message.id);
@@ -308,7 +310,7 @@ class _InboxPageState extends ConsumerState<InboxPage> {
                 ),
               ),
               if (message.isStarred)
-                const Icon(Icons.star, color: Colors.amber, size: 16),
+                const Icon(Icons.star, color: AppTheme.starActive, size: 16),
             ],
           ),
           subtitle: Column(
@@ -382,11 +384,13 @@ class _InboxPageState extends ConsumerState<InboxPage> {
       backgroundColor: AppTheme.cardColor,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.borderRadiusXLarge)),
       ),
-      builder: (context) => Padding(
+      builder: (context) {
+        final sheetPadding = (MediaQuery.of(context).size.width * 0.04).clamp(16.0, 24.0);
+        return Padding(
         padding: EdgeInsets.fromLTRB(
-          24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24,
+          sheetPadding, sheetPadding, sheetPadding, MediaQuery.of(context).viewInsets.bottom + sheetPadding,
         ),
         child: StatefulBuilder(
           builder: (context, setModalState) => Column(
@@ -468,7 +472,7 @@ class _InboxPageState extends ConsumerState<InboxPage> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppTheme.textOnPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -480,7 +484,8 @@ class _InboxPageState extends ConsumerState<InboxPage> {
             ],
           ),
         ),
-      ),
+      );
+      },
     );
   }
 

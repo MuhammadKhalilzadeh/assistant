@@ -37,12 +37,12 @@ class _CaloriesPageState extends ConsumerState<CaloriesPage>
     super.initState();
 
     _listAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 
     _progressAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 

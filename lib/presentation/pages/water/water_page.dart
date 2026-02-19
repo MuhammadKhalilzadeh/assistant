@@ -38,7 +38,7 @@ class _WaterPageState extends ConsumerState<WaterPage> with TickerProviderStateM
 
     // List stagger animation
     _listAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 

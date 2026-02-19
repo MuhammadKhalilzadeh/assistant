@@ -1,4 +1,5 @@
 import 'package:assistant/data/models/calorie_entry_model.dart';
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class FoodCategoryData {
@@ -30,55 +31,55 @@ class FoodCategorySelector extends StatelessWidget {
       category: FoodCategory.grains,
       label: 'Grains',
       icon: Icons.breakfast_dining,
-      color: Color(0xFFFFB74D),
+      color: AppTheme.foodGrains,
     ),
     FoodCategoryData(
       category: FoodCategory.protein,
       label: 'Protein',
       icon: Icons.egg_alt,
-      color: Color(0xFFFF6B6B),
+      color: AppTheme.foodProtein,
     ),
     FoodCategoryData(
       category: FoodCategory.dairy,
       label: 'Dairy',
       icon: Icons.water_drop,
-      color: Color(0xFF42A5F5),
+      color: AppTheme.foodDairy,
     ),
     FoodCategoryData(
       category: FoodCategory.fruits,
       label: 'Fruits',
       icon: Icons.apple,
-      color: Color(0xFF66BB6A),
+      color: AppTheme.foodFruits,
     ),
     FoodCategoryData(
       category: FoodCategory.vegetables,
       label: 'Veggies',
       icon: Icons.eco,
-      color: Color(0xFF4CAF50),
+      color: AppTheme.foodVegetables,
     ),
     FoodCategoryData(
       category: FoodCategory.fats,
       label: 'Fats',
       icon: Icons.opacity,
-      color: Color(0xFFFFC107),
+      color: AppTheme.foodFats,
     ),
     FoodCategoryData(
       category: FoodCategory.sweets,
       label: 'Sweets',
       icon: Icons.cake,
-      color: Color(0xFFEC407A),
+      color: AppTheme.foodSweets,
     ),
     FoodCategoryData(
       category: FoodCategory.beverages,
       label: 'Drinks',
       icon: Icons.local_cafe,
-      color: Color(0xFF8D6E63),
+      color: AppTheme.foodBeverages,
     ),
     FoodCategoryData(
       category: FoodCategory.other,
       label: 'Other',
       icon: Icons.more_horiz,
-      color: Color(0xFF78909C),
+      color: AppTheme.foodOther,
     ),
   ];
 
@@ -204,7 +205,7 @@ class _CategoryItemState extends State<_CategoryItem>
                   child: Icon(
                     widget.data.icon,
                     color: widget.isSelected
-                        ? Colors.white
+                        ? AppTheme.textOnPrimary
                         : widget.data.color,
                     size: 28,
                   ),
@@ -214,8 +215,8 @@ class _CategoryItemState extends State<_CategoryItem>
                   widget.data.label,
                   style: TextStyle(
                     color: widget.isSelected
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.7),
+                        ? AppTheme.textOnPrimary
+                        : AppTheme.textSecondary,
                     fontSize: 11,
                     fontWeight:
                         widget.isSelected ? FontWeight.bold : FontWeight.normal,

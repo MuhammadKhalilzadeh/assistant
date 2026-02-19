@@ -96,6 +96,20 @@ class AppTheme {
   static const Color secondaryGlow = Color(0xFF7C5CFC);
   static const Color accentGlow = Color(0xFF00D4AA);
 
+  // Star Color
+  static const Color starActive = Color(0xFFF59E0B);
+
+  // Food Category Colors
+  static const Color foodGrains = Color(0xFFFFB74D);
+  static const Color foodProtein = Color(0xFFFF6B6B);
+  static const Color foodDairy = Color(0xFF42A5F5);
+  static const Color foodFruits = Color(0xFF66BB6A);
+  static const Color foodVegetables = Color(0xFF4CAF50);
+  static const Color foodFats = Color(0xFFFFC107);
+  static const Color foodSweets = Color(0xFFEC407A);
+  static const Color foodBeverages = Color(0xFF8D6E63);
+  static const Color foodOther = Color(0xFF78909C);
+
   // Shimmer Colors
   static const Color shimmerBase = Color(0xFF282A32);
   static const Color shimmerHighlight = Color(0xFF3D4050);

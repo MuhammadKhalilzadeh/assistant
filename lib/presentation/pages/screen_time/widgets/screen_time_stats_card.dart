@@ -50,6 +50,7 @@ class ScreenTimeStatsCard extends StatelessWidget {
                   color: AppTheme.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  letterSpacing: -0.3,
                 ),
               ),
             ],
