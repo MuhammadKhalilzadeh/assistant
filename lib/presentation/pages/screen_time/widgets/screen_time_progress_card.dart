@@ -1,12 +1,12 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/screen_time_model.dart';
+import 'package:assistant/data/models/screen_time_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Main progress card displaying screen time vs daily limit
 class ScreenTimeProgressCard extends StatelessWidget {
-  final ScreenTimeModel? todayScreenTime;
-  final ScreenTimeModel? yesterdayScreenTime;
+  final ScreenTimeRecord? todayScreenTime;
+  final ScreenTimeRecord? yesterdayScreenTime;
   final int dailyLimit;
   final double progress;
   final double animationPhase;

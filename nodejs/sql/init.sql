@@ -356,3 +356,58 @@ CREATE TABLE IF NOT EXISTS weather_settings (
 
 INSERT INTO weather_settings (latitude, longitude, city_name, temperature_unit)
 SELECT 40.71280, -74.00600, 'New York', 'celsius' WHERE NOT EXISTS (SELECT 1 FROM weather_settings);
+
+-- =============================================
+-- SCREEN TIME TRACKING
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS screen_time_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  date DATE NOT NULL UNIQUE,
+  total_minutes INTEGER NOT NULL DEFAULT 0 CHECK (total_minutes >= 0 AND total_minutes <= 1440),
+  pickups INTEGER NOT NULL DEFAULT 0 CHECK (pickups >= 0),
+  note TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS app_usage (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  screen_time_id UUID NOT NULL REFERENCES screen_time_records(id) ON DELETE CASCADE,
+  app_name VARCHAR(255) NOT NULL,
+  category VARCHAR(50) DEFAULT 'other',
+  minutes_used INTEGER NOT NULL DEFAULT 0 CHECK (minutes_used >= 0),
+  icon_name VARCHAR(50) DEFAULT 'apps'
+);
+
+CREATE TABLE IF NOT EXISTS screen_time_goals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  daily_limit_minutes INTEGER NOT NULL DEFAULT 180 CHECK (daily_limit_minutes >= 30 AND daily_limit_minutes <= 1440),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_screen_time_records_date ON screen_time_records(date);
+CREATE INDEX IF NOT EXISTS idx_app_usage_screen_time_id ON app_usage(screen_time_id);
+
+INSERT INTO screen_time_goals (daily_limit_minutes)
+SELECT 180 WHERE NOT EXISTS (SELECT 1 FROM screen_time_goals);
+
+-- =============================================
+-- INBOX MESSAGES
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS inbox_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  service VARCHAR(50) NOT NULL DEFAULT 'General',
+  sender VARCHAR(255) NOT NULL,
+  subject VARCHAR(500) NOT NULL,
+  preview TEXT DEFAULT '',
+  is_read BOOLEAN DEFAULT FALSE,
+  is_starred BOOLEAN DEFAULT FALSE,
+  received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_inbox_messages_service ON inbox_messages(service);
+CREATE INDEX IF NOT EXISTS idx_inbox_messages_is_read ON inbox_messages(is_read);
+CREATE INDEX IF NOT EXISTS idx_inbox_messages_received_at ON inbox_messages(received_at);

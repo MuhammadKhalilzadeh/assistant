@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/screen_time_model.dart';
+import 'package:assistant/data/models/screen_time_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// 2x2 grid displaying weekly screen time statistics with animations

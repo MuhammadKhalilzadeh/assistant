@@ -1,4 +1,4 @@
-# Animation Guidelines
+# Animation Guidelines — Nexus Dark
 
 This document defines animation standards for consistent motion across the app.
 
@@ -6,9 +6,12 @@ This document defines animation standards for consistent motion across the app.
 
 | Duration | Value | Usage |
 |----------|-------|-------|
+| Micro | 100ms | Tiny feedback (opacity flicker, icon swap) |
 | Fast | 150ms | Button press, micro-interactions |
 | Standard | 300ms | Page transitions, focus states |
 | Slow | 500ms | Complex animations, loading states |
+| Ambient | 2000ms | Glow pulses, breathing effects |
+| Drift | 8000ms | Slow ambient float (dashboard only) |
 
 ---
 
@@ -55,7 +58,7 @@ onTapCancel: () => _animationController.reverse();
 | Property | Value |
 |----------|-------|
 | Duration | 150ms |
-| Scale range | 1.0 → 0.95 |
+| Scale range | 1.0 -> 0.95 |
 | Curve | `Curves.easeInOut` |
 
 ---
@@ -84,22 +87,171 @@ void _onFocusChange() {
 ### Visual Changes on Focus
 | Property | Unfocused | Focused |
 |----------|-----------|---------|
-| Border width | 1px | 2px |
-| Border alpha | 0.2 | 0.5 |
-| Shadow | none | white glow |
+| Border width | 1px | 1.5px |
+| Border color | `cardBorderColor` | `activeBorderColor` |
+| Shadow | none | blue glow |
 
 ```dart
 // Shadow on focus
 boxShadow: _isFocused
     ? [
         BoxShadow(
-          color: Colors.white.withValues(alpha: 0.2),
+          color: AppTheme.primaryColor.withValues(alpha: 0.15),
           blurRadius: 8,
           offset: const Offset(0, 2),
         ),
       ]
     : null,
 ```
+
+---
+
+## Glow Pulse Animation
+
+For active states like a running timer — a 2-second breathing glow cycle:
+
+```dart
+// Controller setup
+_glowController = AnimationController(
+  vsync: this,
+  duration: const Duration(milliseconds: 2000),
+);
+
+_glowAnimation = Tween<double>(begin: 0.15, end: 0.40).animate(
+  CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+);
+
+// Loop
+_glowController.repeat(reverse: true);
+
+// Apply to shadow
+BoxShadow(
+  color: AppTheme.primaryColor.withValues(alpha: _glowAnimation.value),
+  blurRadius: 20,
+  offset: Offset.zero,
+)
+```
+
+| Property | Value |
+|----------|-------|
+| Duration | 2000ms (full cycle) |
+| Opacity range | 0.15 -> 0.40 |
+| Curve | `Curves.easeInOut` |
+| Loop | `repeat(reverse: true)` |
+
+---
+
+## Shimmer Loading Effect
+
+For skeleton screens while data loads — a 1.5-second shimmer sweep:
+
+```dart
+// Shimmer widget
+AnimatedBuilder(
+  animation: _shimmerController,
+  builder: (context, child) {
+    return ShaderMask(
+      shaderCallback: (bounds) {
+        return LinearGradient(
+          colors: [
+            AppTheme.shimmerBase,
+            AppTheme.shimmerHighlight,
+            AppTheme.shimmerBase,
+          ],
+          stops: [
+            _shimmerAnimation.value - 0.3,
+            _shimmerAnimation.value,
+            _shimmerAnimation.value + 0.3,
+          ],
+        ).createShader(bounds);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.shimmerBase,
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  },
+)
+```
+
+| Property | Value |
+|----------|-------|
+| Duration | 1500ms |
+| Base color | `AppTheme.shimmerBase` (#1A2332) |
+| Highlight color | `AppTheme.shimmerHighlight` (#243044) |
+| Loop | `repeat()` |
+
+---
+
+## Card Entrance Animation
+
+Staggered fade+slide for list items on page load:
+
+```dart
+// Per-item animation
+_entranceController = AnimationController(
+  vsync: this,
+  duration: const Duration(milliseconds: 400),
+);
+
+_fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+  CurvedAnimation(parent: _entranceController, curve: Curves.easeOut),
+);
+
+_slideAnimation = Tween<Offset>(
+  begin: const Offset(0, 0.05),
+  end: Offset.zero,
+).animate(
+  CurvedAnimation(parent: _entranceController, curve: Curves.easeOut),
+);
+
+// Stagger: each card starts 60ms after the previous
+Future.delayed(Duration(milliseconds: index * 60), () {
+  _entranceController.forward();
+});
+```
+
+| Property | Value |
+|----------|-------|
+| Duration | 400ms per card |
+| Stagger delay | 60ms between cards |
+| Fade | 0.0 -> 1.0 |
+| Slide | 5% down -> center |
+| Curve | `Curves.easeOut` |
+
+---
+
+## Ambient Float (Dashboard Only)
+
+Very slow drift animation for decorative glow blobs:
+
+```dart
+_floatController = AnimationController(
+  vsync: this,
+  duration: const Duration(milliseconds: 8000),
+);
+
+_floatAnimation = Tween<double>(begin: -5.0, end: 5.0).animate(
+  CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
+);
+
+_floatController.repeat(reverse: true);
+
+// Apply as Transform.translate
+Transform.translate(
+  offset: Offset(0, _floatAnimation.value),
+  child: /* glow blob */,
+)
+```
+
+| Property | Value |
+|----------|-------|
+| Duration | 8000ms (full cycle) |
+| Drift range | -5px to +5px vertical |
+| Curve | `Curves.easeInOut` |
+| Loop | `repeat(reverse: true)` |
 
 ---
 
@@ -143,8 +295,8 @@ transitionsBuilder: (context, animation, secondaryAnimation, child) {
 
 | Transition | Duration | Direction |
 |------------|----------|-----------|
-| Fade | 300ms | Opacity 0 → 1 |
-| Slide | 300ms | Right → Center |
+| Fade | 300ms | Opacity 0 -> 1 |
+| Slide | 300ms | Right -> Center |
 
 ---
 
@@ -166,8 +318,8 @@ SizedBox(
 ```dart
 LinearProgressIndicator(
   value: progress,
-  backgroundColor: Colors.white.withValues(alpha: 0.2),
-  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+  backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.15),
+  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
   minHeight: 8,
 )
 ```
@@ -184,8 +336,11 @@ AnimatedContainer(
   duration: const Duration(milliseconds: 300),
   curve: Curves.easeInOut,
   decoration: BoxDecoration(
-    color: isSelected ? AppTheme.primaryColor : Colors.white,
+    color: isSelected ? AppTheme.primaryColor : AppTheme.cardColor,
     borderRadius: BorderRadius.circular(12),
+    border: Border.all(
+      color: isSelected ? AppTheme.activeBorderColor : AppTheme.cardBorderColor,
+    ),
   ),
 )
 ```
@@ -225,8 +380,10 @@ void dispose() {
 CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
 
 // Use standard durations
-const Duration(milliseconds: 150)  // Fast
-const Duration(milliseconds: 300)  // Standard
+const Duration(milliseconds: 100)   // Micro
+const Duration(milliseconds: 150)   // Fast
+const Duration(milliseconds: 300)   // Standard
+const Duration(milliseconds: 2000)  // Ambient
 ```
 
 ### DON'T
@@ -247,34 +404,17 @@ Curves.linear  // BAD for UI, feels robotic
 
 ```
 Is it a micro-interaction (button press, toggle)?
-├─ Yes → 150ms, easeInOut
-└─ No
+|- Yes -> 150ms, easeInOut
+|- No
     Is it a page transition?
-    ├─ Yes → 300ms, fade or slide
-    └─ No
-        Is it a complex sequence?
-        ├─ Yes → 500ms, consider stagger
-        └─ No → 300ms, easeInOut
-```
-
----
-
-## Staggered Animations (Future)
-
-For list item animations, consider staggering:
-
-```dart
-// Each item starts slightly after the previous
-AnimationController(
-  duration: const Duration(milliseconds: 500),
-)
-
-// Stagger calculation
-final interval = Interval(
-  index * 0.1,  // Start later for each item
-  (index * 0.1) + 0.5,  // End
-  curve: Curves.easeOut,
-)
+    |- Yes -> 300ms, fade or slide
+    |- No
+        Is it a glow/breathing effect?
+        |- Yes -> 2000ms, easeInOut, repeat(reverse: true)
+        |- No
+            Is it a complex sequence (card entrance)?
+            |- Yes -> 400ms per item, 60ms stagger, easeOut
+            |- No -> 300ms, easeInOut
 ```
 
 ---
@@ -286,3 +426,4 @@ final interval = Interval(
 3. **Use `const` constructors** where possible
 4. **Avoid animating layout** (prefer opacity and transform)
 5. **Test on lower-end devices** for jank detection
+6. **Dispose all controllers** — especially repeating ones (glow, shimmer, float)

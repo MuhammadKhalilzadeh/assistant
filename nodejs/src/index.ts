@@ -18,6 +18,8 @@ import workoutRoutes from './routes/workout.routes';
 import caloriesRoutes from './routes/calories.routes';
 import focusTimerRoutes from './routes/focus-timer.routes';
 import weatherRoutes from './routes/weather.routes';
+import screenTimeRoutes from './routes/screen-time.routes';
+import inboxRoutes from './routes/inbox.routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authMiddleware } from './middleware/auth.middleware';
 import { securityHeaders, rateLimiter } from './middleware/security.middleware';
@@ -56,6 +58,8 @@ app.use('/api/workouts', workoutRoutes);
 app.use('/api/calories', caloriesRoutes);
 app.use('/api/focus-timer', focusTimerRoutes);
 app.use('/api/weather', weatherRoutes);
+app.use('/api/screen-time', screenTimeRoutes);
+app.use('/api/inbox', inboxRoutes);
 
 // Enhanced health check with database status
 app.get('/api/health', async (_req, res) => {
@@ -172,6 +176,17 @@ async function startServer(): Promise<void> {
       logger.info('  GET    /api/weather/search');
       logger.info('  GET    /api/weather/settings');
       logger.info('  PUT    /api/weather/settings');
+      logger.info('  GET    /api/screen-time');
+      logger.info('  POST   /api/screen-time');
+      logger.info('  GET    /api/screen-time/stats');
+      logger.info('  GET    /api/screen-time/history');
+      logger.info('  GET    /api/screen-time/goal');
+      logger.info('  PUT    /api/screen-time/goal');
+      logger.info('  GET    /api/inbox');
+      logger.info('  POST   /api/inbox');
+      logger.info('  GET    /api/inbox/stats');
+      logger.info('  PATCH  /api/inbox/:id/read');
+      logger.info('  PATCH  /api/inbox/:id/star');
     });
   } catch (err) {
     logger.fatal({ err }, 'Failed to start server');

@@ -1,5 +1,4 @@
 import 'package:assistant/data/mock/models/todo_model.dart';
-import 'package:assistant/data/mock/models/inbox_message_model.dart';
 import 'package:assistant/data/mock/models/calendar_event_model.dart';
 import 'package:assistant/data/mock/models/focus_session_model.dart';
 import 'package:assistant/data/mock/models/habit_model.dart';
@@ -11,7 +10,6 @@ import 'package:assistant/data/mock/models/step_record_model.dart';
 import 'package:assistant/data/mock/models/workout_session_model.dart';
 import 'package:assistant/data/mock/models/heart_rate_record_model.dart';
 import 'package:assistant/data/mock/models/mood_entry_model.dart';
-import 'package:assistant/data/mock/models/screen_time_model.dart';
 import 'package:assistant/data/mock/models/meditation_session_model.dart';
 
 class MockRepository {
@@ -23,7 +21,6 @@ class MockRepository {
 
   // Data storage
   final List<TodoModel> _todos = [];
-  final List<InboxMessageModel> _messages = [];
   final List<CalendarEventModel> _events = [];
   final List<FocusSessionModel> _focusSessions = [];
   final List<HabitModel> _habits = [];
@@ -35,7 +32,6 @@ class MockRepository {
   final List<WorkoutSessionModel> _workoutSessions = [];
   final List<HeartRateRecordModel> _heartRateRecords = [];
   final List<MoodEntryModel> _moodEntries = [];
-  final List<ScreenTimeModel> _screenTimeRecords = [];
   final List<MeditationSessionModel> _meditationSessions = [];
 
   int _idCounter = 1;
@@ -82,53 +78,6 @@ class MockRepository {
         dueDate: today.add(const Duration(days: 3)),
         priority: 2,
         isCompleted: true,
-      ),
-    ]);
-
-    // Initialize Messages
-    _messages.addAll([
-      InboxMessageModel(
-        id: _generateId(),
-        service: 'Gmail',
-        sender: 'John Smith',
-        subject: 'Project Update',
-        preview: 'Hey, just wanted to give you a quick update on...',
-        receivedAt: now.subtract(const Duration(minutes: 15)),
-      ),
-      InboxMessageModel(
-        id: _generateId(),
-        service: 'Gmail',
-        sender: 'Sarah Johnson',
-        subject: 'Meeting Tomorrow',
-        preview: 'Don\'t forget about our meeting at 2 PM...',
-        receivedAt: now.subtract(const Duration(hours: 1)),
-        isStarred: true,
-      ),
-      InboxMessageModel(
-        id: _generateId(),
-        service: 'Slack',
-        sender: 'Dev Team',
-        subject: 'New deployment ready',
-        preview: 'The staging environment has been updated...',
-        receivedAt: now.subtract(const Duration(hours: 2)),
-        isRead: true,
-      ),
-      InboxMessageModel(
-        id: _generateId(),
-        service: 'Slack',
-        sender: 'Mike Chen',
-        subject: 'Bug report #123',
-        preview: 'Found an issue with the login flow...',
-        receivedAt: now.subtract(const Duration(hours: 3)),
-      ),
-      InboxMessageModel(
-        id: _generateId(),
-        service: 'Gmail',
-        sender: 'HR Department',
-        subject: 'Company Update',
-        preview: 'Please review the attached policy changes...',
-        receivedAt: now.subtract(const Duration(days: 1)),
-        isRead: true,
       ),
     ]);
 
@@ -517,36 +466,6 @@ class MockRepository {
       ),
     ]);
 
-    // Initialize Screen Time
-    _screenTimeRecords.addAll([
-      ScreenTimeModel(
-        id: _generateId(),
-        date: today,
-        totalMinutes: 225,
-        pickups: 45,
-        appUsage: [
-          AppUsageModel(appName: 'Social Media', category: 'Social', minutesUsed: 65, iconName: 'people'),
-          AppUsageModel(appName: 'Email', category: 'Productivity', minutesUsed: 45, iconName: 'email'),
-          AppUsageModel(appName: 'Browser', category: 'Productivity', minutesUsed: 55, iconName: 'language'),
-          AppUsageModel(appName: 'Games', category: 'Entertainment', minutesUsed: 30, iconName: 'games'),
-          AppUsageModel(appName: 'Other', category: 'Other', minutesUsed: 30, iconName: 'apps'),
-        ],
-      ),
-      ScreenTimeModel(
-        id: _generateId(),
-        date: today.subtract(const Duration(days: 1)),
-        totalMinutes: 260,
-        pickups: 52,
-        appUsage: [
-          AppUsageModel(appName: 'Social Media', category: 'Social', minutesUsed: 80, iconName: 'people'),
-          AppUsageModel(appName: 'Email', category: 'Productivity', minutesUsed: 50, iconName: 'email'),
-          AppUsageModel(appName: 'Browser', category: 'Productivity', minutesUsed: 60, iconName: 'language'),
-          AppUsageModel(appName: 'Games', category: 'Entertainment', minutesUsed: 40, iconName: 'games'),
-          AppUsageModel(appName: 'Other', category: 'Other', minutesUsed: 30, iconName: 'apps'),
-        ],
-      ),
-    ]);
-
     // Initialize Meditation Sessions
     _meditationSessions.addAll([
       MeditationSessionModel(
@@ -596,31 +515,6 @@ class MockRepository {
     if (index != -1) {
       _todos[index] = _todos[index].copyWith(isCompleted: !_todos[index].isCompleted);
     }
-  }
-
-  // ==================== MESSAGES ====================
-  List<InboxMessageModel> get messages => List.unmodifiable(_messages);
-
-  int get unreadMessagesCount => _messages.where((m) => !m.isRead).length;
-
-  Set<String> get messageServices => _messages.map((m) => m.service).toSet();
-
-  void markMessageAsRead(String id) {
-    final index = _messages.indexWhere((m) => m.id == id);
-    if (index != -1) {
-      _messages[index] = _messages[index].copyWith(isRead: true);
-    }
-  }
-
-  void toggleMessageStar(String id) {
-    final index = _messages.indexWhere((m) => m.id == id);
-    if (index != -1) {
-      _messages[index] = _messages[index].copyWith(isStarred: !_messages[index].isStarred);
-    }
-  }
-
-  void deleteMessage(String id) {
-    _messages.removeWhere((m) => m.id == id);
   }
 
   // ==================== CALENDAR EVENTS ====================
@@ -2168,157 +2062,6 @@ class MockRepository {
 
   void deleteMoodEntry(String id) {
     _moodEntries.removeWhere((m) => m.id == id);
-  }
-
-  // ==================== SCREEN TIME ====================
-  List<ScreenTimeModel> get screenTimeRecords => List.unmodifiable(_screenTimeRecords);
-
-  ScreenTimeGoal _screenTimeGoal = const ScreenTimeGoal();
-
-  ScreenTimeGoal get screenTimeGoal => _screenTimeGoal;
-
-  void updateScreenTimeGoal({int? dailyLimitMinutes}) {
-    _screenTimeGoal = _screenTimeGoal.copyWith(
-      dailyLimitMinutes: dailyLimitMinutes,
-    );
-  }
-
-  ScreenTimeModel? get todayScreenTime {
-    final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
-    return _screenTimeRecords.cast<ScreenTimeModel?>().firstWhere(
-      (r) => r != null && DateTime(r.date.year, r.date.month, r.date.day) == todayDate,
-      orElse: () => null,
-    );
-  }
-
-  ScreenTimeModel? get yesterdayScreenTime {
-    final yesterday = DateTime.now().subtract(const Duration(days: 1));
-    final yesterdayDate = DateTime(yesterday.year, yesterday.month, yesterday.day);
-    return _screenTimeRecords.cast<ScreenTimeModel?>().firstWhere(
-      (r) => r != null && DateTime(r.date.year, r.date.month, r.date.day) == yesterdayDate,
-      orElse: () => null,
-    );
-  }
-
-  ScreenTimeModel? getScreenTimeForDate(DateTime date) {
-    final targetDate = DateTime(date.year, date.month, date.day);
-    return _screenTimeRecords.cast<ScreenTimeModel?>().firstWhere(
-      (r) => r != null && DateTime(r.date.year, r.date.month, r.date.day) == targetDate,
-      orElse: () => null,
-    );
-  }
-
-  List<ScreenTimeModel> getLast7DaysScreenTime() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final List<ScreenTimeModel> result = [];
-
-    for (int i = 0; i < 7; i++) {
-      final date = today.subtract(Duration(days: i));
-      final record = getScreenTimeForDate(date);
-      if (record != null) {
-        result.add(record);
-      }
-    }
-
-    return result;
-  }
-
-  Map<String, int> getLast7DaysScreenTimeMap() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final Map<String, int> result = {};
-
-    for (int i = 6; i >= 0; i--) {
-      final date = today.subtract(Duration(days: i));
-      final dayName = dayNames[date.weekday - 1];
-      final record = getScreenTimeForDate(date);
-      result[dayName] = record?.totalMinutes ?? 0;
-    }
-
-    return result;
-  }
-
-  int getScreenTimeStreak() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    int streak = 0;
-
-    for (int i = 0; i < 365; i++) {
-      final date = today.subtract(Duration(days: i));
-      final record = getScreenTimeForDate(date);
-
-      if (record != null && record.totalMinutes <= _screenTimeGoal.dailyLimitMinutes) {
-        streak++;
-      } else if (i > 0) {
-        break;
-      }
-    }
-
-    return streak;
-  }
-
-  int getBestScreenTimeStreak() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    int bestStreak = 0;
-    int currentStreak = 0;
-
-    for (int i = 0; i < 365; i++) {
-      final date = today.subtract(Duration(days: i));
-      final record = getScreenTimeForDate(date);
-
-      if (record != null && record.totalMinutes <= _screenTimeGoal.dailyLimitMinutes) {
-        currentStreak++;
-        if (currentStreak > bestStreak) {
-          bestStreak = currentStreak;
-        }
-      } else {
-        currentStreak = 0;
-      }
-    }
-
-    return bestStreak;
-  }
-
-  ScreenTimeStats getWeeklyScreenTimeStats() {
-    final weekRecords = getLast7DaysScreenTime();
-
-    if (weekRecords.isEmpty) {
-      return const ScreenTimeStats();
-    }
-
-    final totalMinutes = weekRecords.fold(0, (sum, r) => sum + r.totalMinutes);
-    final totalPickups = weekRecords.fold(0, (sum, r) => sum + r.pickups);
-    final avgMinutes = totalMinutes / weekRecords.length;
-    final avgPickups = totalPickups / weekRecords.length;
-
-    int underLimitDays = 0;
-    for (final record in weekRecords) {
-      if (record.totalMinutes <= _screenTimeGoal.dailyLimitMinutes) {
-        underLimitDays++;
-      }
-    }
-    final completionRate = underLimitDays / weekRecords.length;
-
-    // App usage breakdown
-    final Map<String, int> appBreakdown = {};
-    for (final record in weekRecords) {
-      for (final app in record.appUsage) {
-        appBreakdown[app.appName] = (appBreakdown[app.appName] ?? 0) + app.minutesUsed;
-      }
-    }
-
-    return ScreenTimeStats(
-      dailyAverageMinutes: avgMinutes,
-      averagePickups: avgPickups,
-      currentStreak: getScreenTimeStreak(),
-      bestStreak: getBestScreenTimeStreak(),
-      goalCompletionRate: completionRate,
-      appUsageBreakdown: appBreakdown,
-    );
   }
 
   // ==================== MEDITATION SESSIONS ====================

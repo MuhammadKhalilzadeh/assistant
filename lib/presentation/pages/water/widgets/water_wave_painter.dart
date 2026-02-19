@@ -33,7 +33,7 @@ class WaterWavePainter extends CustomPainter {
         end: Alignment.bottomCenter,
         colors: [
           AppTheme.backgroundColor,
-          const Color(0xFFFFEBEE),
+          AppTheme.surfaceColor,
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, bgPaint);

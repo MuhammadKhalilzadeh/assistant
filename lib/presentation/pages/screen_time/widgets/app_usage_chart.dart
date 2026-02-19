@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/screen_time_model.dart';
+import 'package:assistant/data/models/screen_time_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Pie chart showing app usage breakdown
 class AppUsageChart extends StatelessWidget {
-  final List<AppUsageModel> appUsage;
+  final List<AppUsageEntry> appUsage;
   final double padding;
   final Animation<double>? animation;
 

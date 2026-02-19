@@ -12,6 +12,8 @@ import 'package:assistant/data/cache/water_cache.dart';
 import 'package:assistant/data/cache/focus_timer_cache.dart';
 import 'package:assistant/data/cache/calendar_cache.dart';
 import 'package:assistant/data/cache/weather_cache.dart';
+import 'package:assistant/data/cache/screen_time_cache.dart';
+import 'package:assistant/data/cache/inbox_cache.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/splash/index.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +44,8 @@ void main() async {
     CalendarCache().init(),
     FocusTimerCache().init(),
     WeatherCache().init(),
+    ScreenTimeCache().init(),
+    InboxCache().init(),
   ]);
 
   runApp(const ProviderScope(child: MyApp()));
@@ -55,7 +59,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Jarvis Assistant',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
+      theme: AppTheme.darkTheme,
       home: const SplashPage(),
     );
   }

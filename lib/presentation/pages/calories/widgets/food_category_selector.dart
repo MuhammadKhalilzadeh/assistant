@@ -36,7 +36,7 @@ class FoodCategorySelector extends StatelessWidget {
       category: FoodCategory.protein,
       label: 'Protein',
       icon: Icons.egg_alt,
-      color: Color(0xFFEF5350),
+      color: Color(0xFFFF6B6B),
     ),
     FoodCategoryData(
       category: FoodCategory.dairy,

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/models/screen_time_model.dart';
+import 'package:assistant/data/models/screen_time_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 
 /// Screen time history list showing recent daily records
 class ScreenTimeHistoryList extends StatelessWidget {
-  final List<ScreenTimeModel> records;
+  final List<ScreenTimeRecord> records;
   final int dailyLimit;
   final double padding;
   final Animation<double>? animation;
@@ -161,7 +161,7 @@ class ScreenTimeHistoryList extends StatelessWidget {
 }
 
 class _ScreenTimeHistoryItem extends StatefulWidget {
-  final ScreenTimeModel record;
+  final ScreenTimeRecord record;
   final String dateString;
   final String formattedTime;
   final bool isOverLimit;

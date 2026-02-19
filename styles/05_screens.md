@@ -1,12 +1,12 @@
-# Screen Structure Patterns
+# Screen Structure Patterns — Nexus Dark
 
 This document defines the standard patterns for screen layout across the app.
 
 ## Screen Types
 
 The app has two primary screen types:
-1. **Home/Dashboard** - Light pink background with white cards
-2. **Detail Pages** - Light pink background with white elevated cards
+1. **Home/Dashboard** — Dark ambient gradient background with dark cards
+2. **Detail Pages** — Dark scaffold with dark elevated cards
 
 ---
 
@@ -17,30 +17,40 @@ The app has two primary screen types:
 SafeArea(
   child: Container(
     decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          AppTheme.backgroundColor,  // #FFF5F5 (light pink)
-          AppTheme.surfaceColor,     // #FFFFFF
-        ],
-      ),
+      gradient: AppTheme.ambientGradient,  // #0F1728 -> #0A0E1A
     ),
-    child: SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(paddingValue),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // White feature cards with shadows
-            CustomTodosCard(...),
-            SizedBox(height: paddingValue),
-            CustomInboxCard(...),
-            SizedBox(height: paddingValue),
-            // ... more cards
-          ],
+    child: Stack(
+      children: [
+        // Optional: Radial glow blob for ambient effect
+        Positioned(
+          top: -100,
+          right: -50,
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              gradient: AppTheme.glowGradient,
+            ),
+          ),
         ),
-      ),
+        // Content
+        SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(paddingValue),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Dark cards with borders and glow shadows
+                CustomTodosCard(...),
+                SizedBox(height: paddingValue),
+                CustomInboxCard(...),
+                SizedBox(height: paddingValue),
+                // ... more cards
+              ],
+            ),
+          ),
+        ),
+      ],
     ),
   ),
 )
@@ -49,6 +59,7 @@ SafeArea(
 ### Dashboard with Bottom Navigation
 ```dart
 Scaffold(
+  backgroundColor: AppTheme.backgroundColor,
   body: _getCurrentPage(),
   bottomNavigationBar: CustomBottomNavigationBar(
     currentIndex: _currentIndex,
@@ -69,7 +80,7 @@ All detail pages follow this pattern:
 
 ```dart
 Scaffold(
-  backgroundColor: AppTheme.backgroundColor,  // Light pink #FFF5F5
+  backgroundColor: AppTheme.backgroundColor,  // #0A0E1A Void
   body: SafeArea(
     child: Column(
       children: [
@@ -93,11 +104,18 @@ Scaffold(
       ],
     ),
   ),
-  floatingActionButton: FloatingActionButton(
-    onPressed: _handleAdd,
-    backgroundColor: AppTheme.primaryColor,  // Red
-    foregroundColor: Colors.white,
-    child: const Icon(Icons.add),
+  floatingActionButton: Container(
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      gradient: AppTheme.primaryGradient,
+      boxShadow: AppTheme.neonGlow,
+    ),
+    child: FloatingActionButton(
+      onPressed: _handleAdd,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: const Icon(Icons.add, color: Colors.white),
+    ),
   ),
 )
 ```
@@ -106,7 +124,7 @@ Scaffold(
 
 ## Custom AppBar Pattern
 
-The app uses a custom Row-based AppBar instead of Material AppBar:
+The app uses a custom Row-based AppBar with contained icon buttons:
 
 ```dart
 Widget _buildAppBar(double padding) {
@@ -114,24 +132,39 @@ Widget _buildAppBar(double padding) {
     padding: EdgeInsets.all(padding),
     child: Row(
       children: [
-        IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+        Container(
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.cardBorderColor),
+          ),
+          child: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 12),
         Text(
           'Page Title',
           style: TextStyle(
             color: AppTheme.textPrimary,
             fontSize: 24,
             fontWeight: FontWeight.bold,
+            letterSpacing: -0.3,
           ),
         ),
         // Optional: Right side actions
         const Spacer(),
-        IconButton(
-          onPressed: _handleAction,
-          icon: Icon(Icons.more_vert, color: AppTheme.textPrimary),
+        Container(
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.cardBorderColor),
+          ),
+          child: IconButton(
+            onPressed: _handleAction,
+            icon: Icon(Icons.more_vert, color: AppTheme.textPrimary),
+          ),
         ),
       ],
     ),
@@ -143,11 +176,13 @@ Widget _buildAppBar(double padding) {
 | Property | Value |
 |----------|-------|
 | Padding | Same as content padding (responsive) |
+| Back button | Contained in dark surface with border |
 | Back icon | `Icons.arrow_back`, `AppTheme.textPrimary` |
-| Icon-to-title gap | 8px |
+| Icon-to-title gap | 12px |
 | Title font size | 24px |
 | Title font weight | Bold |
-| Title color | `AppTheme.textPrimary` |
+| Title color | `AppTheme.textPrimary` (#F1F5F9) |
+| Title letter spacing | -0.3 |
 
 ---
 
@@ -158,11 +193,7 @@ Widget _buildAppBar(double padding) {
 Widget _buildSummaryCard(double padding) {
   return Container(
     padding: EdgeInsets.all(padding),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: AppTheme.cardShadow,
-    ),
+    decoration: AppTheme.cardDecoration(),
     child: Column(
       children: [
         Row(
@@ -176,7 +207,7 @@ Widget _buildSummaryCard(double padding) {
                   style: TextStyle(
                     color: AppTheme.textPrimary,
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 SizedBox(height: 4),
@@ -211,7 +242,7 @@ Widget _buildList(List items, double padding) {
         style: TextStyle(
           color: AppTheme.textPrimary,
           fontSize: 18,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
         ),
       ),
       const SizedBox(height: 12),
@@ -225,16 +256,23 @@ Widget _buildList(List items, double padding) {
 
 ## FAB Placement and Styling
 
-Standard FAB configuration:
+Standard FAB configuration with gradient and neon glow:
 
 ```dart
 Scaffold(
   // ...
-  floatingActionButton: FloatingActionButton(
-    onPressed: _handleAdd,
-    backgroundColor: AppTheme.primaryColor,  // Red
-    foregroundColor: Colors.white,
-    child: const Icon(Icons.add),
+  floatingActionButton: Container(
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      gradient: AppTheme.primaryGradient,
+      boxShadow: AppTheme.neonGlow,
+    ),
+    child: FloatingActionButton(
+      onPressed: _handleAdd,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: const Icon(Icons.add, color: Colors.white),
+    ),
   ),
 )
 ```
@@ -242,15 +280,15 @@ Scaffold(
 | Property | Value |
 |----------|-------|
 | Position | Default (bottom right) |
-| Background | `AppTheme.primaryColor` (red) |
-| Foreground | White |
-| Icon | `Icons.add` (usually) |
+| Background | `AppTheme.primaryGradient` (blue-to-violet) |
+| Shadow | `AppTheme.neonGlow` (blue 40% + violet 20%) |
+| Icon | White `Icons.add` |
 
 ---
 
 ## Empty State Pattern
 
-When a list has no items:
+When a list has no items — tinted circle icon on dark background:
 
 ```dart
 Widget _buildEmptyState(double padding) {
@@ -259,10 +297,17 @@ Widget _buildEmptyState(double padding) {
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          Icons.check_circle_outline,
-          size: 64,
-          color: AppTheme.textTertiary,
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppTheme.primaryColor.withValues(alpha: 0.10),
+          ),
+          child: Icon(
+            Icons.check_circle_outline,
+            size: 64,
+            color: AppTheme.textTertiary,
+          ),
         ),
         const SizedBox(height: 16),
         Text(
@@ -320,24 +365,6 @@ Available for horizontal navigation:
 NavigationUtils.navigateWithSlide(context, page);
 ```
 
-```dart
-// Implementation
-transitionsBuilder: (context, animation, secondaryAnimation, child) {
-  const begin = Offset(1.0, 0.0);
-  const end = Offset.zero;
-  const curve = Curves.easeInOut;
-
-  var tween = Tween(begin: begin, end: end).chain(
-    CurveTween(curve: curve),
-  );
-
-  return SlideTransition(
-    position: animation.drive(tween),
-    child: child,
-  );
-}
-```
-
 ### Transition Duration
 - Default: 300ms
 - Curve: `Curves.easeInOut`
@@ -348,9 +375,10 @@ transitionsBuilder: (context, animation, secondaryAnimation, child) {
 
 | Screen Type | Background |
 |-------------|------------|
-| All screens | `AppTheme.backgroundColor` (#FFF5F5, light pink) |
-| Cards | White with `AppTheme.cardShadow` |
-| Dialogs/Sheets | White |
+| Dashboard | `AppTheme.ambientGradient` (or `backgroundColor`) |
+| Detail pages | `AppTheme.backgroundColor` (#0A0E1A) |
+| Cards | `AppTheme.cardColor` (#1A2332) with border + glow |
+| Dialogs/Sheets | `AppTheme.surfaceColor` (#111827) |
 
 ---
 
@@ -359,13 +387,13 @@ transitionsBuilder: (context, animation, secondaryAnimation, child) {
 When creating a new screen, ensure:
 
 - [ ] Uses `SafeArea` wrapper
-- [ ] Has light pink background (`AppTheme.backgroundColor`)
-- [ ] Uses custom AppBar pattern (not Material AppBar)
+- [ ] Has dark background (`AppTheme.backgroundColor`)
+- [ ] Uses custom AppBar pattern with contained icon buttons
 - [ ] Uses responsive padding formula
-- [ ] Has white elevated summary card at top (if applicable)
-- [ ] Uses white elevated list items with shadows
-- [ ] Has red FAB with white foreground (if add action needed)
-- [ ] Has empty state for empty lists
+- [ ] Has dark summary card at top with border and glow (if applicable)
+- [ ] Uses dark list items with borders and subtle glow shadows
+- [ ] Has gradient FAB with neon glow (if add action needed)
+- [ ] Has empty state with tinted circle icon
 - [ ] Uses `NavigationUtils.navigateWithFade` for navigation
-- [ ] Uses dark text (`AppTheme.textPrimary`) on light backgrounds
-- [ ] Uses red (`AppTheme.primaryColor`) for accents and highlights
+- [ ] Uses light text (`AppTheme.textPrimary`) on dark backgrounds
+- [ ] Uses blue (`AppTheme.primaryColor`) for accents and highlights

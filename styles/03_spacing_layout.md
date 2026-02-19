@@ -1,4 +1,4 @@
-# Spacing & Layout
+# Spacing & Layout — Nexus Dark
 
 All spacing tokens are defined in `lib/presentation/constants/app_theme.dart`.
 
@@ -12,6 +12,29 @@ All spacing tokens are defined in `lib/presentation/constants/app_theme.dart`.
 | `spacingLG` | 24px | Section spacing, button padding |
 | `spacingXL` | 32px | Large section gaps |
 | `spacingXXL` | 48px | Page-level major sections |
+
+---
+
+## Border Radius Tokens
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `borderRadiusSmall` | 8px | Buttons, small elements |
+| `borderRadiusMedium` | 12px | Input fields, chips |
+| `borderRadiusLarge` | 16px | Navigation bars, dialogs |
+| `borderRadiusCard` | 16px | Cards (was 20px, tighter for dark theme) |
+| `borderRadiusXLarge` | 24px | Modal sheets |
+
+---
+
+## Glow & Glass Tokens
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `glowRadius` | 20px | Default blur radius for glow effects |
+| `glassBlurAmount` | 10px | Backdrop blur sigma for glassmorphism |
+| `glassBorderWidth` | 1px | Border width for glass containers |
+| `activeBorderWidth` | 1.5px | Border width for focused/active elements |
 
 ---
 
@@ -36,7 +59,7 @@ This ensures:
 ### Standard Screen Template
 ```dart
 Scaffold(
-  backgroundColor: AppTheme.backgroundColor,  // Light pink #FFF5F5
+  backgroundColor: AppTheme.backgroundColor,  // #0A0E1A Void
   body: SafeArea(
     child: Column(
       children: [
@@ -49,7 +72,7 @@ Scaffold(
               padding: EdgeInsets.all(padding),
               child: Column(
                 children: [
-                  // White cards with shadows
+                  // Dark cards with borders and glow shadows
                 ],
               ),
             ),
@@ -66,14 +89,7 @@ Scaffold(
 SafeArea(
   child: Container(
     decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          AppTheme.backgroundColor,
-          AppTheme.surfaceColor,
-        ],
-      ),
+      gradient: AppTheme.ambientGradient,  // Subtle depth
     ),
     child: SingleChildScrollView(
       child: Padding(
@@ -81,7 +97,7 @@ SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Cards with SizedBox(height: paddingValue) between them
+            // Dark cards with SizedBox(height: paddingValue) between them
           ],
         ),
       ),
@@ -106,15 +122,11 @@ Padding(
 
 Where `responsivePadding = screenWidth * 0.05`
 
-### White Elevated Cards (Primary Pattern)
+### Dark Elevated Cards (Primary Pattern)
 ```dart
 Container(
   padding: EdgeInsets.all(padding),  // Same as screen padding
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(20),
-    boxShadow: AppTheme.cardShadow,
-  ),
+  decoration: AppTheme.cardDecoration(),
 )
 
 // Or use helper
@@ -253,16 +265,7 @@ Container(
 Always wrap full-screen content with SafeArea:
 ```dart
 Scaffold(
-  body: SafeArea(
-    child: /* content */,
-  ),
-)
-```
-
-For screens with solid light background:
-```dart
-Scaffold(
-  backgroundColor: AppTheme.backgroundColor,
+  backgroundColor: AppTheme.backgroundColor,  // #0A0E1A Void
   body: SafeArea(
     child: /* content */,
   ),
@@ -286,6 +289,9 @@ SizedBox(height: paddingValue)
 
 // Wrap with SafeArea
 SafeArea(child: content)
+
+// Use 16px card border radius (borderRadiusCard)
+BorderRadius.circular(AppTheme.borderRadiusCard)
 ```
 
 ### DON'T
@@ -298,6 +304,9 @@ Padding(padding: EdgeInsets.all(20)) // BAD - not responsive
 
 // Don't skip SafeArea
 Scaffold(body: content) // BAD - might overlap status bar
+
+// Don't use old 20px card radius
+BorderRadius.circular(20) // BAD - use borderRadiusCard (16)
 ```
 
 ---

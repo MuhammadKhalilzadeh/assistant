@@ -1,4 +1,3 @@
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
 import 'package:assistant/data/models/calorie_entry_model.dart';
 import 'package:assistant/data/models/habit_stats.dart';
 import 'package:assistant/data/models/heart_rate_model.dart';
@@ -9,6 +8,8 @@ import 'package:assistant/data/models/step_record_model.dart';
 import 'package:assistant/data/models/todo_stats.dart';
 import 'package:assistant/data/models/water_log_model.dart';
 import 'package:assistant/data/models/workout_session_model.dart';
+import 'package:assistant/data/models/screen_time_model.dart';
+import 'package:assistant/data/models/inbox_message_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/calendar/index.dart';
 import 'package:assistant/presentation/pages/calories/index.dart';
@@ -55,6 +56,8 @@ import 'package:assistant/providers/calendar_provider.dart';
 import 'package:assistant/providers/workout_provider.dart';
 import 'package:assistant/providers/focus_timer_provider.dart';
 import 'package:assistant/providers/weather_provider.dart';
+import 'package:assistant/providers/screen_time_provider.dart';
+import 'package:assistant/providers/inbox_provider.dart';
 import 'package:assistant/data/models/focus_session_model.dart';
 import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/data/models/weather_forecast_model.dart';
@@ -118,7 +121,7 @@ class _HomeTab extends ConsumerWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double paddingValue = (screenWidth * 0.04).clamp(16.0, 24.0);
 
-    // Watch real providers for 10 backend-connected features
+    // Watch real providers for all backend-connected features
     final todoStats = ref.watch(todoStatsProvider).valueOrNull ?? TodoStats.empty();
     final habitStats = ref.watch(habitStatsProvider).valueOrNull ?? HabitStats.empty();
     final waterStats = ref.watch(waterStatsProvider).valueOrNull ?? WaterStats.empty();
@@ -136,12 +139,11 @@ class _HomeTab extends ConsumerWidget {
     // Real weather data from provider
     final weather = ref.watch(weatherProvider).valueOrNull;
 
-    // Mock data for 2 UI-only features (no backend yet)
-    final repository = MockRepository();
-    final unreadMessages = repository.unreadMessagesCount;
-    final messageServices = repository.messageServices.length;
-    final todayScreenTime = repository.todayScreenTime;
-    final yesterdayScreenTime = repository.yesterdayScreenTime;
+    // Real screen time data from provider
+    final screenTimeStats = ref.watch(screenTimeStatsProvider).valueOrNull ?? ScreenTimeStats.empty();
+
+    // Real inbox data from provider
+    final inboxStats = ref.watch(inboxStatsProvider).valueOrNull ?? InboxStats.empty();
 
     void navigateTo(Widget page) {
       NavigationUtils.navigateWithFade(context, page);
@@ -165,8 +167,8 @@ class _HomeTab extends ConsumerWidget {
               ),
               SizedBox(height: paddingValue),
               CustomGeneralInboxCard(
-                unreadCount: unreadMessages,
-                servicesCount: messageServices,
+                unreadCount: inboxStats.unreadCount,
+                servicesCount: inboxStats.services.length,
                 onTap: () => navigateTo(const InboxPage()),
               ),
               SizedBox(height: paddingValue),
@@ -257,8 +259,8 @@ class _HomeTab extends ConsumerWidget {
               ),
               SizedBox(height: paddingValue),
               CustomScreenTimeCard(
-                todayMinutes: todayScreenTime?.totalMinutes ?? 225,
-                yesterdayMinutes: yesterdayScreenTime?.totalMinutes ?? 260,
+                todayMinutes: screenTimeStats.todayMinutes,
+                yesterdayMinutes: 0,
                 onTap: () => navigateTo(const ScreenTimePage()),
               ),
               SizedBox(height: paddingValue),

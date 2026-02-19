@@ -1,4 +1,4 @@
-# Component Styling
+# Component Styling — Nexus Dark
 
 This document covers the styling rules for all reusable components in the app.
 
@@ -7,21 +7,7 @@ This document covers the styling rules for all reusable components in the app.
 ### CustomButton
 Location: `lib/presentation/widgets/buttons/custom_button.dart`
 
-#### Default Style (Red Background)
-```dart
-CustomButton(
-  text: 'Sign In',
-  onPressed: () {},
-)
-```
-- Background: `AppTheme.primaryColor` (Red #D32F2F)
-- Text: `AppTheme.textOnPrimary` (white)
-- Border radius: `AppTheme.borderRadiusMedium` (12px)
-- Padding: 24px horizontal, 16px vertical
-- Font: 16px, weight 600, 0.5 letter spacing
-- Shadow: Primary color at 0.3 alpha, 8px blur
-
-#### Gradient Style
+#### Primary Style (Gradient)
 ```dart
 CustomButton(
   text: 'Get Started',
@@ -29,8 +15,43 @@ CustomButton(
   onPressed: () {},
 )
 ```
-- Background: `AppTheme.primaryGradient` (Red gradient)
+- Background: `AppTheme.primaryGradient` (blue-to-violet)
 - Text: `AppTheme.textOnPrimary` (white)
+- Border radius: `AppTheme.borderRadiusMedium` (12px)
+- Shadow: `AppTheme.glowShadow` (blue glow)
+- Padding: 24px horizontal, 16px vertical
+- Font: 16px, weight 600, 0.5 letter spacing
+
+#### Default Style (Solid Blue)
+```dart
+CustomButton(
+  text: 'Sign In',
+  onPressed: () {},
+)
+```
+- Background: `AppTheme.primaryColor` (#5B8DEF)
+- Text: `AppTheme.textOnPrimary` (white)
+- Shadow: Primary color at 0.3 alpha, 8px blur
+
+#### Secondary Style (Outline)
+```dart
+Container(
+  decoration: BoxDecoration(
+    color: Colors.transparent,
+    borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+    border: Border.all(color: AppTheme.primaryColor, width: 1.5),
+  ),
+  child: Text('Cancel', style: TextStyle(color: AppTheme.primaryColor)),
+)
+```
+
+#### Ghost Style (Text Only)
+```dart
+TextButton(
+  onPressed: () {},
+  child: Text('Skip', style: TextStyle(color: AppTheme.textSecondary)),
+)
+```
 
 #### With Icon
 ```dart
@@ -55,7 +76,7 @@ CustomButton(
 
 #### Press Animation
 - Duration: 150ms
-- Scale: 1.0 → 0.95
+- Scale: 1.0 -> 0.95
 - Curve: `Curves.easeInOut`
 
 ---
@@ -65,7 +86,7 @@ CustomButton(
 ### CustomTextField
 Location: `lib/presentation/widgets/textfields/custom_text_field.dart`
 
-Designed for use on light backgrounds with clean styling.
+Designed for use on dark backgrounds with clean styling.
 
 #### Default Style
 ```dart
@@ -79,36 +100,37 @@ CustomTextField(
 #### Styling Details
 | Property | Value |
 |----------|-------|
-| Background | `AppTheme.surfaceColor` (white) |
-| Border (default) | `Colors.grey.shade200`, 1px |
-| Border (focused) | `AppTheme.primaryColor` (red), 2px |
+| Background | `AppTheme.surfaceColor` (#111827) |
+| Border (default) | `AppTheme.cardBorderColor` (#243044), 1px |
+| Border (focused) | `AppTheme.activeBorderColor` (#5B8DEF), 1.5px |
 | Border radius | `AppTheme.borderRadiusMedium` (12px) |
-| Text color | `AppTheme.textPrimary` |
-| Hint color | `AppTheme.textTertiary` |
-| Label color | `AppTheme.textPrimary` |
+| Text color | `AppTheme.textPrimary` (#F1F5F9) |
+| Hint color | `AppTheme.textTertiary` (#4B5563) |
+| Label color | `AppTheme.textSecondary` (#94A3B8) |
 | Icon color | `AppTheme.textSecondary` |
 | Content padding | 16px horizontal & vertical |
 | Font size | 16px |
 
 #### Focus Animation
 - Duration: 300ms
-- Focus shadow: Primary color at 0.1 alpha, 8px blur, 2px Y offset
+- Focus shadow: Blue glow (`primaryColor` at 0.15 alpha, 8px blur)
 
 ---
 
 ## Cards
 
-### White Elevated Cards
+### Dark Elevated Cards
 15 card variants located in `lib/presentation/widgets/cards/`
 
 #### Common Properties
 | Property | Value |
 |----------|-------|
-| Border radius | 20px (default) |
-| Background | White (`AppTheme.cardColor`) |
-| Shadow | `AppTheme.cardShadow` |
-| Text | Dark (`AppTheme.textPrimary`) |
-| Accent | Red (`AppTheme.primaryColor`) |
+| Border radius | 16px (`borderRadiusCard`) |
+| Background | Dark navy (`AppTheme.cardColor` #1A2332) |
+| Border | `AppTheme.cardBorderColor` (#243044), 1px |
+| Shadow | `AppTheme.cardShadow` (blue glow + black) |
+| Text | Light (`AppTheme.textPrimary` #F1F5F9) |
+| Accent | Blue (`AppTheme.primaryColor` #5B8DEF) |
 
 #### Card Structure Template
 ```dart
@@ -116,13 +138,9 @@ Material(
   color: Colors.transparent,
   child: InkWell(
     onTap: enabled ? onTap : null,
-    borderRadius: BorderRadius.circular(borderRadius),
+    borderRadius: BorderRadius.circular(AppTheme.borderRadiusCard),
     child: Ink(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: AppTheme.cardShadow,
-      ),
+      decoration: AppTheme.cardDecoration(),
       child: Padding(
         padding: EdgeInsets.all(responsivePadding.clamp(16.0, 24.0)),
         child: /* content */,
@@ -168,7 +186,7 @@ Container(
 Container(
   padding: EdgeInsets.all(padding),
   decoration: BoxDecoration(
-    color: AppTheme.primaryColor.withValues(alpha: 0.1),
+    color: AppTheme.primaryColor.withValues(alpha: 0.15),
     borderRadius: BorderRadius.circular(containerRadius),
   ),
   child: Icon(icon, color: AppTheme.primaryColor, size: iconSize),
@@ -181,14 +199,15 @@ Container(
   width: buttonSize,
   height: buttonSize,
   decoration: BoxDecoration(
-    color: AppTheme.primaryColor.withValues(alpha: 0.1),
+    color: AppTheme.primaryColor.withValues(alpha: 0.15),
     shape: BoxShape.circle,
   ),
   child: Icon(Icons.add, color: AppTheme.primaryColor, size: iconSize),
 )
 ```
 
-### Badge/Pill Style
+### Badge/Chip Style
+Tinted background with colored text (not solid color blocks):
 ```dart
 Container(
   padding: EdgeInsets.symmetric(
@@ -196,13 +215,13 @@ Container(
     vertical: verticalPadding,      // 6-10px
   ),
   decoration: BoxDecoration(
-    color: AppTheme.primaryColor,
+    color: AppTheme.primaryColor.withValues(alpha: 0.15),
     borderRadius: BorderRadius.circular(12),
   ),
   child: Text(
-    'H:28° L:18°',
+    'H:28 L:18',
     style: TextStyle(
-      color: Colors.white,
+      color: AppTheme.primaryColor,
       fontSize: badgeFontSize,
       fontWeight: FontWeight.w600,
     ),
@@ -214,16 +233,12 @@ Container(
 
 ## Summary Cards (inside detail pages)
 
-White elevated card for displaying aggregated information:
+Dark elevated card for displaying aggregated information:
 
 ```dart
 Container(
   padding: EdgeInsets.all(padding),
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(20),
-    boxShadow: AppTheme.cardShadow,
-  ),
+  decoration: AppTheme.cardDecoration(),
   child: /* content */,
 )
 ```
@@ -238,8 +253,9 @@ For todo items, message items, etc.:
 Container(
   margin: const EdgeInsets.only(bottom: 12),
   decoration: BoxDecoration(
-    color: Colors.white,
+    color: AppTheme.cardColor,
     borderRadius: BorderRadius.circular(16),
+    border: Border.all(color: AppTheme.cardBorderColor, width: 1),
     boxShadow: AppTheme.cardShadow,
   ),
   child: ListTile(
@@ -253,7 +269,7 @@ Container(
 
 ## Checkbox Style
 
-Custom circular checkbox on light backgrounds:
+Custom circular checkbox on dark backgrounds:
 
 ```dart
 Container(
@@ -285,7 +301,7 @@ ClipRRect(
   borderRadius: BorderRadius.circular(8),
   child: LinearProgressIndicator(
     value: progress,
-    backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
+    backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.15),
     valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
     minHeight: 8,
   ),
@@ -311,7 +327,7 @@ Container(
   height: 60,
   decoration: BoxDecoration(
     shape: BoxShape.circle,
-    color: AppTheme.primaryColor.withValues(alpha: 0.1),
+    color: AppTheme.primaryColor.withValues(alpha: 0.15),
   ),
   child: Center(
     child: Text(
@@ -332,14 +348,14 @@ Container(
 
 Location: `lib/presentation/widgets/bottom_navigation_bar/custom_bottom_navigation_bar.dart`
 
+Flat top edge with border line on dark background:
+
 ```dart
 Container(
   decoration: BoxDecoration(
     color: AppTheme.surfaceColor,
-    boxShadow: AppTheme.cardShadow,
-    borderRadius: BorderRadius.only(
-      topLeft: Radius.circular(AppTheme.borderRadiusLarge),  // 16px
-      topRight: Radius.circular(AppTheme.borderRadiusLarge),
+    border: Border(
+      top: BorderSide(color: AppTheme.dividerColor, width: 1),
     ),
   ),
 )
@@ -347,46 +363,56 @@ Container(
 
 | Property | Value |
 |----------|-------|
-| Background | `AppTheme.surfaceColor` (white) |
-| Selected color | `AppTheme.primaryColor` (red) |
-| Unselected color | `AppTheme.textSecondary` |
+| Background | `AppTheme.surfaceColor` (#111827) |
+| Top border | `AppTheme.dividerColor` (#1E293B), 1px |
+| Selected color | `AppTheme.primaryColor` (#5B8DEF) |
+| Unselected color | `AppTheme.textSecondary` (#94A3B8) |
 | Selected label | 12px, weight 600 |
 | Unselected label | 12px, weight 400 |
-| Elevation | 0 (uses boxShadow instead) |
-| Corner radius | 16px top corners only |
-| Selected indicator | Red pill background |
+| Elevation | 0 |
+| Corner radius | None (flat top edge) |
+| Selected indicator | Blue pill background |
 
 ---
 
 ## FAB (Floating Action Button)
 
-Standard FAB styling:
+Gradient background with neon glow:
 ```dart
-FloatingActionButton(
-  onPressed: onPressed,
-  backgroundColor: Colors.white,
-  foregroundColor: AppTheme.primaryColor,
-  child: const Icon(Icons.add),
+Container(
+  decoration: BoxDecoration(
+    shape: BoxShape.circle,
+    gradient: AppTheme.primaryGradient,
+    boxShadow: AppTheme.neonGlow,
+  ),
+  child: FloatingActionButton(
+    onPressed: onPressed,
+    backgroundColor: Colors.transparent,
+    elevation: 0,
+    child: const Icon(Icons.add, color: Colors.white),
+  ),
 )
 ```
 
 | Property | Value |
 |----------|-------|
-| Background | White |
-| Icon color | `AppTheme.primaryColor` |
+| Background | `AppTheme.primaryGradient` (blue-to-violet) |
+| Shadow | `AppTheme.neonGlow` (blue 40% + violet 20%) |
+| Icon color | White |
 | Default icon | `Icons.add` |
 
 ---
 
 ## Dialogs
 
-Standard AlertDialog:
+Standard AlertDialog with dark surface:
 ```dart
 AlertDialog(
-  title: const Text('Add Task'),
+  backgroundColor: AppTheme.surfaceColor,
+  title: Text('Add Task', style: TextStyle(color: AppTheme.textPrimary)),
   content: /* form fields */,
   actions: [
-    TextButton(child: Text('Cancel')),
+    TextButton(child: Text('Cancel', style: TextStyle(color: AppTheme.textSecondary))),
     FilledButton(child: Text('Add')),
   ],
 )

@@ -1,5 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:assistant/data/mock/repositories/mock_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:assistant/data/models/screen_time_model.dart';
+import 'package:assistant/data/services/device_screen_time_service.dart';
+import 'package:assistant/providers/screen_time_provider.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'widgets/screen_time_app_bar.dart';
 import 'widgets/screen_time_progress_card.dart';
@@ -10,21 +14,21 @@ import 'widgets/app_usage_chart.dart';
 import 'widgets/goal_celebration.dart';
 
 /// Main Screen Time page with auto-tracked usage and goal monitoring
-class ScreenTimePage extends StatefulWidget {
+class ScreenTimePage extends ConsumerStatefulWidget {
   const ScreenTimePage({super.key});
 
   @override
-  State<ScreenTimePage> createState() => _ScreenTimePageState();
+  ConsumerState<ScreenTimePage> createState() => _ScreenTimePageState();
 }
 
-class _ScreenTimePageState extends State<ScreenTimePage> with TickerProviderStateMixin {
-  final MockRepository _repository = MockRepository();
-
+class _ScreenTimePageState extends ConsumerState<ScreenTimePage> with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late AnimationController _progressAnimationController;
   late Animation<double> _listAnimation;
 
   bool _showCelebration = false;
+  final DeviceScreenTimeService _deviceService = DeviceScreenTimeService();
+  bool _syncedDeviceData = false;
 
   @override
   void initState() {
@@ -46,6 +50,26 @@ class _ScreenTimePageState extends State<ScreenTimePage> with TickerProviderStat
     )..repeat();
 
     _listAnimationController.forward();
+
+    // Auto-sync device data on Android
+    _syncDeviceData();
+  }
+
+  Future<void> _syncDeviceData() async {
+    if (_syncedDeviceData || !_deviceService.isAndroid) return;
+    _syncedDeviceData = true;
+
+    final hasPermission = await _deviceService.hasPermission();
+    if (!hasPermission) return;
+
+    try {
+      final record = await _deviceService.buildRecordFromDevice();
+      if (record != null) {
+        await ref.read(screenTimeRecordProvider.notifier).syncRecord(record);
+      }
+    } catch (_) {
+      // Silently fail device sync - user can still see cached/manual data
+    }
   }
 
   @override
@@ -56,6 +80,9 @@ class _ScreenTimePageState extends State<ScreenTimePage> with TickerProviderStat
   }
 
   void _showGoalSettings() {
+    final goalAsync = ref.read(screenTimeGoalProvider);
+    final currentLimit = goalAsync.valueOrNull?.dailyLimitMinutes ?? 180;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: AppTheme.cardColor,
@@ -63,12 +90,50 @@ class _ScreenTimePageState extends State<ScreenTimePage> with TickerProviderStat
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => _GoalSettingsSheet(
-        currentLimit: _repository.screenTimeGoal.dailyLimitMinutes,
-        onLimitChanged: (newLimit) {
-          _repository.updateScreenTimeGoal(dailyLimitMinutes: newLimit);
-          setState(() {});
+        currentLimit: currentLimit,
+        onLimitChanged: (newLimit) async {
+          final goal = ref.read(screenTimeGoalProvider).valueOrNull;
+          if (goal != null) {
+            await ref.read(screenTimeGoalProvider.notifier).updateGoal(
+              goal.copyWith(dailyLimitMinutes: newLimit),
+            );
+          }
+          if (!context.mounted) return;
           Navigator.pop(context);
         },
+      ),
+    );
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.cardColor,
+        title: Text(
+          'Usage Access Required',
+          style: TextStyle(color: AppTheme.textPrimary),
+        ),
+        content: Text(
+          'To track your screen time automatically, please grant usage access permission in Settings.',
+          style: TextStyle(color: AppTheme.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Later', style: TextStyle(color: AppTheme.textTertiary)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _deviceService.openUsageSettings();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+            ),
+            child: const Text('Open Settings', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
@@ -83,15 +148,31 @@ class _ScreenTimePageState extends State<ScreenTimePage> with TickerProviderStat
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = (screenWidth * 0.04).clamp(16.0, 24.0);
-    final todayScreenTime = _repository.todayScreenTime;
-    final yesterdayScreenTime = _repository.yesterdayScreenTime;
-    final dailyLimit = _repository.screenTimeGoal.dailyLimitMinutes;
-    final totalMinutes = todayScreenTime?.totalMinutes ?? 0;
-    final progress = totalMinutes / dailyLimit;
+
+    final recordAsync = ref.watch(screenTimeRecordProvider);
+    final goalAsync = ref.watch(screenTimeGoalProvider);
+    final statsAsync = ref.watch(screenTimeStatsProvider);
+    final historyAsync = ref.watch(screenTimeHistoryProvider);
+
+    final todayRecord = recordAsync.valueOrNull;
+    final dailyLimit = goalAsync.valueOrNull?.dailyLimitMinutes ?? 180;
+    final totalMinutes = todayRecord?.totalMinutes ?? 0;
+    final progress = dailyLimit > 0 ? totalMinutes / dailyLimit : 0.0;
     final isOverLimit = totalMinutes > dailyLimit;
-    final stats = _repository.getWeeklyScreenTimeStats();
-    final records = _repository.screenTimeRecords.toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+
+    // Build stats from provider or use empty
+    final stats = statsAsync.valueOrNull ?? ScreenTimeStats.empty();
+
+    // Build history records for the history list
+    final historyRecords = historyAsync.valueOrNull
+        ?.map((s) => ScreenTimeRecord(
+              id: '',
+              date: s.date,
+              totalMinutes: s.totalMinutes,
+              pickups: s.pickups,
+            ))
+        .toList()
+      ?..sort((a, b) => b.date.compareTo(a.date));
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -107,58 +188,105 @@ class _ScreenTimePageState extends State<ScreenTimePage> with TickerProviderStat
                   onSettingsTap: _showGoalSettings,
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: EdgeInsets.all(padding),
-                      child: Column(
-                        children: [
-                          AnimatedBuilder(
-                            animation: _progressAnimationController,
-                            builder: (context, child) {
-                              return ScreenTimeProgressCard(
-                                todayScreenTime: todayScreenTime,
-                                yesterdayScreenTime: yesterdayScreenTime,
-                                dailyLimit: dailyLimit,
-                                progress: progress,
-                                animationPhase: _progressAnimationController.value,
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      ref.invalidate(screenTimeRecordProvider);
+                      ref.invalidate(screenTimeStatsProvider);
+                      ref.invalidate(screenTimeGoalProvider);
+                      ref.invalidate(screenTimeHistoryProvider);
+                      _syncedDeviceData = false;
+                      await _syncDeviceData();
+                    },
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(padding),
+                        child: Column(
+                          children: [
+                            // Android permission prompt
+                            if (Platform.isAndroid)
+                              FutureBuilder<bool>(
+                                future: _deviceService.hasPermission(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.data == false) {
+                                    return Column(
+                                      children: [
+                                        _buildPermissionBanner(padding),
+                                        SizedBox(height: padding),
+                                      ],
+                                    );
+                                  }
+                                  return const SizedBox.shrink();
+                                },
+                              ),
+
+                            // iOS info banner
+                            if (Platform.isIOS)
+                              Column(
+                                children: [
+                                  _buildIOSInfoBanner(padding),
+                                  SizedBox(height: padding),
+                                ],
+                              ),
+
+                            // Loading state
+                            if (recordAsync.isLoading && !recordAsync.hasValue)
+                              const Padding(
+                                padding: EdgeInsets.all(32),
+                                child: CircularProgressIndicator(),
+                              )
+                            else ...[
+                              AnimatedBuilder(
+                                animation: _progressAnimationController,
+                                builder: (context, child) {
+                                  return ScreenTimeProgressCard(
+                                    todayScreenTime: todayRecord,
+                                    yesterdayScreenTime: null, // We use stats comparison instead
+                                    dailyLimit: dailyLimit,
+                                    progress: progress,
+                                    animationPhase: _progressAnimationController.value,
+                                    padding: padding,
+                                  );
+                                },
+                              ),
+                              SizedBox(height: padding),
+
+                              // App usage breakdown
+                              if (todayRecord != null && todayRecord.appUsage.isNotEmpty)
+                                AppUsageChart(
+                                  appUsage: todayRecord.appUsage,
+                                  padding: padding,
+                                  animation: _listAnimation,
+                                ),
+                              if (todayRecord != null && todayRecord.appUsage.isNotEmpty)
+                                SizedBox(height: padding),
+
+                              ScreenTimeTipsCard(
                                 padding: padding,
-                              );
-                            },
-                          ),
-                          SizedBox(height: padding),
+                                animation: _listAnimation,
+                              ),
+                              SizedBox(height: padding),
 
-                          // App usage breakdown
-                          if (todayScreenTime != null && todayScreenTime.appUsage.isNotEmpty)
-                            AppUsageChart(
-                              appUsage: todayScreenTime.appUsage,
-                              padding: padding,
-                              animation: _listAnimation,
-                            ),
-                          if (todayScreenTime != null && todayScreenTime.appUsage.isNotEmpty)
-                            SizedBox(height: padding),
+                              ScreenTimeStatsCard(
+                                stats: stats,
+                                padding: padding,
+                                animation: _listAnimation,
+                              ),
+                              SizedBox(height: padding),
 
-                          ScreenTimeTipsCard(
-                            padding: padding,
-                            animation: _listAnimation,
-                          ),
-                          SizedBox(height: padding),
-
-                          ScreenTimeStatsCard(
-                            stats: stats,
-                            padding: padding,
-                            animation: _listAnimation,
-                          ),
-                          SizedBox(height: padding),
-
-                          ScreenTimeHistoryList(
-                            records: records,
-                            dailyLimit: dailyLimit,
-                            padding: padding,
-                            animation: _listAnimation,
-                          ),
-                          SizedBox(height: padding * 2),
-                        ],
+                              if (historyRecords != null && historyRecords.isNotEmpty)
+                                ScreenTimeHistoryList(
+                                  records: historyRecords,
+                                  dailyLimit: dailyLimit,
+                                  padding: padding,
+                                  animation: _listAnimation,
+                                ),
+                              SizedBox(height: padding * 2),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -172,6 +300,70 @@ class _ScreenTimePageState extends State<ScreenTimePage> with TickerProviderStat
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPermissionBanner(double padding) {
+    return Container(
+      padding: EdgeInsets.all(padding),
+      decoration: BoxDecoration(
+        color: AppTheme.infoColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.infoColor.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: AppTheme.infoColor, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Enable Auto-Tracking',
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Grant usage access to automatically track your screen time.',
+                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: _showPermissionDialog,
+            child: Text('Enable', style: TextStyle(color: AppTheme.infoColor)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIOSInfoBanner(double padding) {
+    return Container(
+      padding: EdgeInsets.all(padding),
+      decoration: BoxDecoration(
+        color: AppTheme.warningColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.warningColor.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.phone_iphone, color: AppTheme.warningColor, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Automatic screen time tracking is not available on iOS. You can manually log your usage.',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+            ),
+          ),
+        ],
       ),
     );
   }
