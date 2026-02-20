@@ -139,7 +139,7 @@ class CalendarViewToggle extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: AppTheme.cardColor,
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
         ),
         child: Row(

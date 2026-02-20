@@ -219,7 +219,7 @@ class _DailyForecastWidgetState extends ConsumerState<DailyForecastWidget>
             return Container(
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+                color: AppTheme.dividerColor,
                 borderRadius: BorderRadius.circular(2),
               ),
               child: Stack(

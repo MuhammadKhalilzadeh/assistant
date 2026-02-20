@@ -22,7 +22,7 @@ class TodoSummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: AppTheme.cardShadow,
       ),
@@ -181,7 +181,7 @@ class TodoSummaryCard extends StatelessWidget {
     return Container(
       width: 1,
       height: 40,
-      color: Colors.grey.shade200,
+      color: AppTheme.cardBorderColor,
     );
   }
 }

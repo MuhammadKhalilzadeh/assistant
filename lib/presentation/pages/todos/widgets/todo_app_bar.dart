@@ -77,7 +77,7 @@ class _TodoAppBarState extends State<TodoAppBar>
           // Back button
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.cardColor,
               shape: BoxShape.circle,
               boxShadow: AppTheme.cardShadow,
             ),
@@ -112,7 +112,7 @@ class _TodoAppBarState extends State<TodoAppBar>
           // Search toggle button
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.cardColor,
               shape: BoxShape.circle,
               boxShadow: AppTheme.cardShadow,
             ),
@@ -159,10 +159,10 @@ class _TodoAppBarState extends State<TodoAppBar>
       key: const ValueKey('search'),
       height: 44,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.grey.shade200,
+          color: AppTheme.cardBorderColor,
         ),
         boxShadow: AppTheme.cardShadow,
       ),

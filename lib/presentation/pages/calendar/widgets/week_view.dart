@@ -264,7 +264,7 @@ class _WeekViewState extends State<WeekView> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
-                  top: BorderSide(color: Colors.grey.shade200, width: 1),
+                  top: BorderSide(color: AppTheme.dividerColor, width: 1),
                 ),
               ),
               child: Row(
@@ -280,7 +280,7 @@ class _WeekViewState extends State<WeekView> {
                         decoration: BoxDecoration(
                           border: Border(
                             left: BorderSide(
-                              color: Colors.grey.shade100,
+                              color: AppTheme.cardColor,
                               width: dayIndex == 0 ? 0 : 1,
                             ),
                           ),

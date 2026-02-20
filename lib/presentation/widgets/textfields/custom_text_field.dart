@@ -135,14 +135,14 @@ class _CustomTextFieldState extends State<CustomTextField>
                         BorderRadius.circular(AppTheme.borderRadiusMedium),
                     border: Border.all(
                       color: _isFocused
-                          ? AppTheme.primaryColor
-                          : Colors.grey.shade200,
-                      width: _isFocused ? 2 : 1,
+                          ? AppTheme.activeBorderColor
+                          : AppTheme.cardBorderColor,
+                      width: _isFocused ? AppTheme.activeBorderWidth : 1,
                     ),
                     boxShadow: _isFocused
                         ? [
                             BoxShadow(
-                              color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                              color: AppTheme.primaryColor.withValues(alpha: 0.15),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),

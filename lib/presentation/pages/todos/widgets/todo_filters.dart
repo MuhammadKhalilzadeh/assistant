@@ -83,7 +83,7 @@ class TodoFilters extends StatelessWidget {
                     border: Border.all(
                       color: isSelected
                           ? AppTheme.primaryColor
-                          : Colors.grey.shade200,
+                          : AppTheme.cardBorderColor,
                       width: 1,
                     ),
                     boxShadow: isSelected ? AppTheme.cardShadow : null,

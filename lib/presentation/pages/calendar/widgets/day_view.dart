@@ -330,8 +330,8 @@ class _DayViewState extends State<DayView> {
               child: Container(
                 decoration: BoxDecoration(
                   border: Border(
-                    top: BorderSide(color: Colors.grey.shade200, width: 1),
-                    left: BorderSide(color: Colors.grey.shade200, width: 1),
+                    top: BorderSide(color: AppTheme.dividerColor, width: 1),
+                    left: BorderSide(color: AppTheme.dividerColor, width: 1),
                   ),
                 ),
               ),

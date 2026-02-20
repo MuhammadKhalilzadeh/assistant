@@ -163,7 +163,7 @@ class _SunArcPainter extends CustomPainter {
 
     // Draw horizon line
     final horizonPaint = Paint()
-      ..color = Colors.grey.shade300
+      ..color = AppTheme.cardBorderColor
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
@@ -195,7 +195,7 @@ class _SunArcPainter extends CustomPainter {
 
     // Draw dotted line for future path
     final futurePaint = Paint()
-      ..color = Colors.grey.shade300
+      ..color = AppTheme.cardBorderColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 

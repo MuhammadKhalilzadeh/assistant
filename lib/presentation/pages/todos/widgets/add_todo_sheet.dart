@@ -144,7 +144,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
       constraints: BoxConstraints(maxHeight: maxSheetHeight),
       child: Container(
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surfaceColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -157,7 +157,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: AppTheme.cardBorderColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -213,7 +213,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                           decoration: BoxDecoration(
                             color: AppTheme.primaryColor.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.grey.shade200),
+                            border: Border.all(color: AppTheme.cardBorderColor),
                           ),
                           child: Row(
                             children: [
@@ -284,9 +284,9 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppTheme.cardColor,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: AppTheme.cardBorderColor),
                         ),
                         child: Row(
                           children: [
@@ -321,7 +321,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
-                                side: BorderSide(color: Colors.grey.shade300),
+                                side: BorderSide(color: AppTheme.cardBorderColor),
                               ),
                             ),
                             child: const Text(
@@ -387,7 +387,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
               border: Border.all(
                 color: _selectedCategoryId == null
                     ? AppTheme.textTertiary
-                    : Colors.grey.shade200,
+                    : AppTheme.cardBorderColor,
                 width: _selectedCategoryId == null ? 2 : 1,
               ),
             ),
@@ -432,7 +432,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                     : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? category.colorValue : Colors.grey.shade200,
+                  color: isSelected ? category.colorValue : AppTheme.cardBorderColor,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -502,13 +502,13 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: Colors.grey.shade200,
+                color: AppTheme.cardBorderColor,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: Colors.grey.shade200,
+                color: AppTheme.cardBorderColor,
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -543,7 +543,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                 : Colors.white,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? color : Colors.grey.shade200,
+              color: isSelected ? color : AppTheme.cardBorderColor,
               width: isSelected ? 2 : 1,
             ),
           ),

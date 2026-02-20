@@ -114,10 +114,10 @@ class _AddEventSheetState extends State<AddEventSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.dark(
               primary: AppTheme.primaryColor,
               onPrimary: Colors.white,
-              surface: Colors.white,
+              surface: AppTheme.surfaceColor,
               onSurface: AppTheme.textPrimary,
             ),
           ),
@@ -138,10 +138,10 @@ class _AddEventSheetState extends State<AddEventSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.dark(
               primary: AppTheme.primaryColor,
               onPrimary: Colors.white,
-              surface: Colors.white,
+              surface: AppTheme.surfaceColor,
               onSurface: AppTheme.textPrimary,
             ),
           ),
@@ -171,10 +171,10 @@ class _AddEventSheetState extends State<AddEventSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.dark(
               primary: AppTheme.primaryColor,
               onPrimary: Colors.white,
-              surface: Colors.white,
+              surface: AppTheme.surfaceColor,
               onSurface: AppTheme.textPrimary,
             ),
           ),
@@ -303,7 +303,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: AppTheme.cardBorderColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -334,7 +334,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
           ),
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Divider(height: 1, color: Colors.grey.shade200),
+            child: Divider(height: 1, color: AppTheme.cardBorderColor),
           ),
           // Scrollable content
           Expanded(
@@ -449,8 +449,8 @@ class _AddEventSheetState extends State<AddEventSheet> {
                           onChanged: (value) => setState(() => _isAllDay = value),
                           activeThumbColor: AppTheme.primaryColor,
                           activeTrackColor: AppTheme.primaryColor.withValues(alpha: 0.3),
-                          inactiveThumbColor: Colors.grey.shade400,
-                          inactiveTrackColor: Colors.grey.shade200,
+                          inactiveThumbColor: AppTheme.textTertiary,
+                          inactiveTrackColor: AppTheme.cardBorderColor,
                         ),
                       ),
                     ],
@@ -513,8 +513,8 @@ class _AddEventSheetState extends State<AddEventSheet> {
                           onChanged: (value) => setState(() => _showDescription = value),
                           activeThumbColor: AppTheme.primaryColor,
                           activeTrackColor: AppTheme.primaryColor.withValues(alpha: 0.3),
-                          inactiveThumbColor: Colors.grey.shade400,
-                          inactiveTrackColor: Colors.grey.shade200,
+                          inactiveThumbColor: AppTheme.textTertiary,
+                          inactiveTrackColor: AppTheme.cardBorderColor,
                         ),
                       ),
                     ],
@@ -538,7 +538,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
             padding: EdgeInsets.fromLTRB(24, 12, 24, bottomPadding > 0 ? bottomPadding : 16),
             decoration: BoxDecoration(
               color: AppTheme.cardColor,
-              border: Border(top: BorderSide(color: Colors.grey.shade100)),
+              border: Border(top: BorderSide(color: AppTheme.cardColor)),
             ),
             child: Row(
               children: [
@@ -547,7 +547,7 @@ class _AddEventSheetState extends State<AddEventSheet> {
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.textSecondary,
-                      side: BorderSide(color: Colors.grey.shade300),
+                      side: BorderSide(color: AppTheme.cardBorderColor),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -618,15 +618,15 @@ class _AddEventSheetState extends State<AddEventSheet> {
                 ? Icon(prefixIcon, color: AppTheme.textSecondary, size: 20)
                 : null,
             filled: true,
-            fillColor: Colors.grey.shade50,
+            fillColor: AppTheme.surfaceColor,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: AppTheme.cardBorderColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: AppTheme.cardBorderColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -649,9 +649,9 @@ class _AddEventSheetState extends State<AddEventSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: AppTheme.surfaceColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppTheme.cardBorderColor),
         ),
         child: Row(
           children: [

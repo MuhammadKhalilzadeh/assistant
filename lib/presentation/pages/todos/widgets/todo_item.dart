@@ -28,9 +28,9 @@ class _TodoItemState extends State<TodoItem>
   late Animation<double> _scaleAnimation;
 
   // Priority colors
-  static const Color highPriorityColor = Color(0xFFEF4444);
-  static const Color mediumPriorityColor = Color(0xFFF59E0B);
-  static const Color lowPriorityColor = Color(0xFF10B981);
+  static const Color highPriorityColor = AppTheme.errorColor;
+  static const Color mediumPriorityColor = AppTheme.warningColor;
+  static const Color lowPriorityColor = AppTheme.successColor;
 
   Color get _priorityColor {
     switch (widget.todo.priority) {
@@ -165,10 +165,10 @@ class _TodoItemState extends State<TodoItem>
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.cardColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.grey.shade200,
+              color: AppTheme.cardBorderColor,
             ),
             boxShadow: AppTheme.cardShadow,
           ),

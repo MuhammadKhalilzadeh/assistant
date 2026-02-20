@@ -340,7 +340,7 @@ class _HabitsPageState extends ConsumerState<HabitsPage>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddHabitSheet(),
-        backgroundColor: isOffline ? Colors.grey : AppTheme.primaryColor,
+        backgroundColor: isOffline ? AppTheme.textTertiary : AppTheme.primaryColor,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),

@@ -95,7 +95,7 @@ class CurrentWeatherCard extends StatelessWidget {
                 width: 1,
                 height: 24,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
-                color: Colors.grey.shade300,
+                color: AppTheme.cardBorderColor,
               ),
               _buildHighLow(),
             ],

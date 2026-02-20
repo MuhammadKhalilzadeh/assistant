@@ -2,31 +2,31 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-/// Nexus Dark — Premium dark theme for the Jarvis AI Assistant
+/// Ember Dark — Premium warm dark theme for the Jarvis AI Assistant
 ///
 /// Design Philosophy:
 /// 1. Depth Through Darkness — Layered dark surfaces create hierarchy
-/// 2. Intelligence Glow — Electric blue and violet accents signal AI presence
+/// 2. Warm Presence — Orange and amber accents create an inviting, energetic feel
 /// 3. Contained Color — Color used surgically for status, actions, and data
 /// 4. Breathing Space — Generous spacing; content floats in dark canvas
 /// 5. Subtle Motion — Glow pulses, shimmer loading, smooth transitions
 class AppTheme {
-  // Primary Color Palette — Nexus Blue
-  static const Color primaryColor = Color(0xFF6B9EFF); // Nexus Blue
-  static const Color primaryDark = Color(0xFF4A7DE0); // Deep Nexus
-  static const Color primaryLight = Color(0xFF8BB3FF); // Light Nexus
+  // Primary Color Palette — Ember Orange
+  static const Color primaryColor = Color(0xFFFF7A2F); // Ember Orange
+  static const Color primaryDark = Color(0xFFE06515); // Deep Ember
+  static const Color primaryLight = Color(0xFFFF9A5C); // Light Ember
 
   // Secondary Colors
-  static const Color secondaryColor = Color(0xFF7C5CFC); // Nexus Violet
-  static const Color accentColor = Color(0xFF00D4AA); // Nexus Cyan
+  static const Color secondaryColor = Color(0xFFFF5500); // Burnt Orange
+  static const Color accentColor = Color(0xFFFFB347); // Warm Amber
 
   // Gradient Definitions
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF6B9EFF), // Nexus Blue
-      Color(0xFF7C5CFC), // Nexus Violet
+      Color(0xFFFF7A2F), // Ember Orange
+      Color(0xFFFF5500), // Burnt Orange
     ],
   );
 
@@ -34,8 +34,8 @@ class AppTheme {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF282A32), // Card surface
-      Color(0xFF242630), // Subtle variation
+      Color(0xFF26262C), // Card surface
+      Color(0xFF242428), // Subtle variation
     ],
   );
 
@@ -43,8 +43,8 @@ class AppTheme {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [
-      Color(0xFF1D1E24), // Surface depth
-      Color(0xFF15161A), // Background
+      Color(0xFF1C1C20), // Surface depth
+      Color(0xFF141416), // Background
     ],
   );
 
@@ -52,39 +52,50 @@ class AppTheme {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF00D4AA), // Nexus Cyan
-      Color(0xFF6B9EFF), // Nexus Blue
+      Color(0xFFFFB347), // Warm Amber
+      Color(0xFFFF7A2F), // Ember Orange
     ],
   );
 
   static RadialGradient get glowGradient => RadialGradient(
         colors: [
-          primaryColor.withValues(alpha: 0.12),
+          primaryColor.withValues(alpha: 0.10),
           Colors.transparent,
         ],
       );
 
-  // Neutral Colors — Layered Dark Surfaces
-  static const Color backgroundColor = Color(0xFF15161A); // Background (deepest)
-  static const Color surfaceColor = Color(0xFF1D1E24); // Surface (elevated)
-  static const Color cardColor = Color(0xFF282A32); // Card surface
-  static const Color cardBorderColor = Color(0xFF3D4050); // Visible border
+  /// Bottom ambient glow — warm radial glow at screen bottom
+  static RadialGradient bottomAmbientGlow({double opacity = 0.08}) =>
+      RadialGradient(
+        center: Alignment.bottomCenter,
+        radius: 0.8,
+        colors: [
+          primaryColor.withValues(alpha: opacity),
+          Colors.transparent,
+        ],
+      );
 
-  // Text Colors — Light on Dark (WCAG compliant)
-  static const Color textPrimary = Color(0xFFF0F1F4); // Primary text ~12.9:1
-  static const Color textSecondary = Color(0xFFA0A8B4); // Secondary text ~5.9:1 AA
-  static const Color textTertiary = Color(0xFF757A85); // Hint/disabled ~3.2:1 AA large
+  // Neutral Colors — Layered Dark Surfaces (warm-shifted)
+  static const Color backgroundColor = Color(0xFF141416); // Background (deepest)
+  static const Color surfaceColor = Color(0xFF1C1C20); // Surface (elevated)
+  static const Color cardColor = Color(0xFF26262C); // Card surface
+  static const Color cardBorderColor = Color(0xFF3A3A44); // Visible border
+
+  // Text Colors — Light on Dark (WCAG compliant, warm-shifted)
+  static const Color textPrimary = Color(0xFFF2F0ED); // Primary text ~12.5:1
+  static const Color textSecondary = Color(0xFFA8A4A0); // Secondary text ~5.8:1 AA
+  static const Color textTertiary = Color(0xFF7A7774); // Hint/disabled ~3.2:1 AA large
   static const Color textOnPrimary = Color(0xFFFFFFFF);
 
-  // Status Colors — Universal UX (unchanged)
+  // Status Colors — Universal UX
   static const Color successColor = Color(0xFF10B981);
-  static const Color warningColor = Color(0xFFF59E0B);
+  static const Color warningColor = Color(0xFFF5B731); // Yellow-amber (distinct from orange primary)
   static const Color errorColor = Color(0xFFEF4444);
-  static const Color infoColor = Color(0xFF6B9EFF); // Matches primary
+  static const Color infoColor = Color(0xFFFF7A2F); // Matches primary
 
   // Divider & Border Colors
-  static const Color dividerColor = Color(0xFF2E3038);
-  static const Color activeBorderColor = Color(0xFF6B9EFF);
+  static const Color dividerColor = Color(0xFF2E2E34);
+  static const Color activeBorderColor = Color(0xFFFF7A2F);
   static Color get glassBorderColor => Colors.white.withValues(alpha: 0.12);
 
   // Overlay Colors
@@ -92,14 +103,14 @@ class AppTheme {
   static Color get overlayMedium => Colors.white.withValues(alpha: 0.12);
 
   // Glow Colors
-  static const Color primaryGlow = Color(0xFF6B9EFF);
-  static const Color secondaryGlow = Color(0xFF7C5CFC);
-  static const Color accentGlow = Color(0xFF00D4AA);
+  static const Color primaryGlow = Color(0xFFFF7A2F);
+  static const Color secondaryGlow = Color(0xFFFF5500);
+  static const Color accentGlow = Color(0xFFFFB347);
 
   // Star Color
-  static const Color starActive = Color(0xFFF59E0B);
+  static const Color starActive = Color(0xFFF5B731);
 
-  // Food Category Colors
+  // Food Category Colors (contextual, unchanged)
   static const Color foodGrains = Color(0xFFFFB74D);
   static const Color foodProtein = Color(0xFFFF6B6B);
   static const Color foodDairy = Color(0xFF42A5F5);
@@ -110,9 +121,19 @@ class AppTheme {
   static const Color foodBeverages = Color(0xFF8D6E63);
   static const Color foodOther = Color(0xFF78909C);
 
+  // Chart Color Palette — ordered orange/amber sequence for data visualization
+  static const List<Color> chartPalette = [
+    Color(0xFFFF7A2F), // Orange (primary)
+    Color(0xFFFFB347), // Amber (accent)
+    Color(0xFFFF5500), // Burnt Orange (secondary)
+    Color(0xFFF5B731), // Gold
+    Color(0xFFFF9A5C), // Peach (primaryLight)
+    Color(0xFFF2F0ED), // White (textPrimary)
+  ];
+
   // Shimmer Colors
-  static const Color shimmerBase = Color(0xFF282A32);
-  static const Color shimmerHighlight = Color(0xFF3D4050);
+  static const Color shimmerBase = Color(0xFF26262C);
+  static const Color shimmerHighlight = Color(0xFF3A3A44);
 
   // Glow & Glass Tokens
   static const double glowRadius = 20.0;
@@ -120,10 +141,10 @@ class AppTheme {
   static const double glassBorderWidth = 1.0;
   static const double activeBorderWidth = 1.5;
 
-  // Shadows — Glow-Based for Dark Theme
+  // Shadows — Glow-Based for Dark Theme (reduced opacities for orange)
   static List<BoxShadow> get cardShadow => [
         BoxShadow(
-          color: primaryColor.withValues(alpha: 0.06),
+          color: primaryColor.withValues(alpha: 0.05),
           blurRadius: 12,
           offset: Offset.zero,
         ),
@@ -136,7 +157,7 @@ class AppTheme {
 
   static List<BoxShadow> get elevatedShadow => [
         BoxShadow(
-          color: primaryColor.withValues(alpha: 0.12),
+          color: primaryColor.withValues(alpha: 0.10),
           blurRadius: 24,
           offset: Offset.zero,
         ),
@@ -149,7 +170,7 @@ class AppTheme {
 
   static List<BoxShadow> get glowShadow => [
         BoxShadow(
-          color: primaryColor.withValues(alpha: 0.25),
+          color: primaryColor.withValues(alpha: 0.20),
           blurRadius: 20,
           offset: Offset.zero,
         ),
@@ -157,12 +178,12 @@ class AppTheme {
 
   static List<BoxShadow> get neonGlow => [
         BoxShadow(
-          color: primaryColor.withValues(alpha: 0.40),
+          color: primaryColor.withValues(alpha: 0.30),
           blurRadius: 20,
           offset: Offset.zero,
         ),
         BoxShadow(
-          color: secondaryColor.withValues(alpha: 0.20),
+          color: secondaryColor.withValues(alpha: 0.15),
           blurRadius: 30,
           offset: Offset.zero,
         ),
@@ -181,7 +202,8 @@ class AppTheme {
   static const double borderRadiusMedium = 12.0;
   static const double borderRadiusLarge = 16.0;
   static const double borderRadiusXLarge = 24.0;
-  static const double borderRadiusCard = 16.0; // Was 20, tighter for dark theme
+  static const double borderRadiusCard = 16.0;
+  static const double borderRadiusPill = 999.0; // Pill-shaped CTA buttons
 
   // Spacing
   static const double spacingXS = 4.0;
@@ -501,7 +523,7 @@ class AppTheme {
         boxShadow: cardShadow,
       );
 
-  /// Glow card decoration — card with blue border glow for interactive elements
+  /// Glow card decoration — card with orange border glow for interactive elements
   static BoxDecoration glowCardDecoration({double? borderRadius}) =>
       BoxDecoration(
         color: cardColor,
@@ -510,7 +532,7 @@ class AppTheme {
         boxShadow: glowShadow,
       );
 
-  /// Gradient card decoration — blue-tinted card surface
+  /// Gradient card decoration — warm-tinted card surface
   static BoxDecoration gradientCardDecoration({double? borderRadius}) =>
       BoxDecoration(
         gradient: secondaryGradient,
@@ -519,7 +541,7 @@ class AppTheme {
         boxShadow: cardShadow,
       );
 
-  /// Gradient text effect via ShaderMask
+  /// Gradient text effect via ShaderMask (orange-to-burnt-orange)
   static Widget gradientText({
     required Widget child,
     Gradient? gradient,

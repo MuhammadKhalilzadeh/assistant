@@ -1,3 +1,4 @@
+import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -50,16 +51,16 @@ class _StepsGoalSheetState extends State<StepsGoalSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF10B981),
-            Color(0xFF06B6D4),
+            AppTheme.successColor,
+            AppTheme.primaryColor,
           ],
         ),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
         child: SingleChildScrollView(
@@ -212,7 +213,7 @@ class _StepsGoalSheetState extends State<StepsGoalSheet> {
                         _formatNumber(goal),
                         style: TextStyle(
                           color: isSelected
-                              ? const Color(0xFF10B981)
+                              ? AppTheme.successColor
                               : Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
@@ -233,7 +234,7 @@ class _StepsGoalSheetState extends State<StepsGoalSheet> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF10B981),
+                    foregroundColor: AppTheme.successColor,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),

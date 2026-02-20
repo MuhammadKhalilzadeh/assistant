@@ -89,9 +89,9 @@ class _GoalCelebrationState extends State<GoalCelebration>
     AppTheme.warningColor,
     AppTheme.successColor,
     AppTheme.infoColor,
-    Color(0xFFA78BFA),
+    AppTheme.accentColor,
     AppTheme.secondaryColor,
-    Color(0xFF34D399),
+    AppTheme.primaryLight,
   ];
 
   @override

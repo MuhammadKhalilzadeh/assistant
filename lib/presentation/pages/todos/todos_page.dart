@@ -353,7 +353,7 @@ class _TodosPageState extends ConsumerState<TodosPage>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddSheet,
-        backgroundColor: isOffline ? Colors.grey : AppTheme.primaryColor,
+        backgroundColor: isOffline ? AppTheme.textTertiary : AppTheme.primaryColor,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),

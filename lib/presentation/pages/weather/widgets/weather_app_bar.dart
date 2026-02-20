@@ -108,7 +108,7 @@ class WeatherAppBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: AppTheme.cardBorderColor),
       ),
       child: TextField(
         autofocus: true,

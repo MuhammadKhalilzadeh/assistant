@@ -245,7 +245,7 @@ class _HabitStreakDisplayState extends State<HabitStreakDisplay>
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppTheme.warningColor, Color(0xFFFFA500)],
+                colors: [AppTheme.warningColor, AppTheme.accentColor],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [

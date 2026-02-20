@@ -89,8 +89,8 @@ class _GoalCelebrationState extends State<GoalCelebration>
       AppTheme.warningColor, // Amber
       AppTheme.successColor, // Green
       AppTheme.infoColor, // Blue
-      const Color(0xFF8B5CF6), // Purple (night theme)
-      const Color(0xFF6366F1), // Indigo
+      AppTheme.accentColor, // Warm amber
+      AppTheme.primaryLight, // Light ember
     ];
     return colors[_random.nextInt(colors.length)];
   }

@@ -126,7 +126,7 @@ class _GmailConnectionPageState extends State<GmailConnectionPage>
                             width: 100,
                             height: 100,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppTheme.cardColor,
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: AppTheme.elevatedShadow,
                             ),

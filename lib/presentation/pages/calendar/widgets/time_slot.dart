@@ -34,7 +34,7 @@ class TimeSlot extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: Colors.grey.shade200,
+              color: AppTheme.dividerColor,
               width: 1,
             ),
           ),
@@ -65,7 +65,7 @@ class TimeSlot extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: Colors.grey.shade200,
+                          color: AppTheme.dividerColor,
                           width: 1,
                           style: BorderStyle.solid,
                         ),

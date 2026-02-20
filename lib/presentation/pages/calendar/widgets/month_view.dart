@@ -322,7 +322,7 @@ class _MonthViewState extends State<MonthView> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: AppTheme.cardBorderColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -347,7 +347,7 @@ class _MonthViewState extends State<MonthView> {
                   decoration: BoxDecoration(
                     color: events.isNotEmpty
                         ? AppTheme.primaryColor.withValues(alpha: 0.1)
-                        : Colors.grey.shade100,
+                        : AppTheme.cardColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -382,7 +382,7 @@ class _MonthViewState extends State<MonthView> {
               ],
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade100),
+          Divider(height: 1, color: AppTheme.dividerColor),
           // Events list or empty state
           Expanded(
             child: events.isEmpty

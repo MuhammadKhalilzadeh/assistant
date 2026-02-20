@@ -260,7 +260,7 @@ class _MiniCalendarSheetState extends State<_MiniCalendarSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: AppTheme.cardBorderColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -301,7 +301,7 @@ class _MiniCalendarSheetState extends State<_MiniCalendarSheet> {
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.textSecondary,
-                      side: BorderSide(color: Colors.grey.shade300),
+                      side: BorderSide(color: AppTheme.cardBorderColor),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

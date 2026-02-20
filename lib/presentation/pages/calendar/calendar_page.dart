@@ -298,7 +298,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: isOffline ? null : () => _onAddEvent(),
-        backgroundColor: isOffline ? Colors.grey : AppTheme.primaryColor,
+        backgroundColor: isOffline ? AppTheme.textTertiary : AppTheme.primaryColor,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
