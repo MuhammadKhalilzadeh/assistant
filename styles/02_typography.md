@@ -1,4 +1,4 @@
-# Typography — Nexus Dark
+# Typography — Ember Dark
 
 All typography is defined in the `textTheme` within `lib/presentation/constants/app_theme.dart`. The app uses Material 3 typography scale with custom adjustments for the dark theme.
 
@@ -46,7 +46,7 @@ All typography is defined in the `textTheme` within `lib/presentation/constants/
 Text(
   'Tasks',
   style: TextStyle(
-    color: AppTheme.textPrimary,  // #F1F5F9 light text
+    color: AppTheme.textPrimary,  // #F2F0ED
     fontSize: 24,
     fontWeight: FontWeight.bold,
     letterSpacing: -0.3,
@@ -142,16 +142,16 @@ final badgeFontSize = (maxWidth * 0.035).clamp(12.0, 16.0);
 ### On Dark Backgrounds (Standard)
 ```dart
 // Primary text
-style: TextStyle(color: AppTheme.textPrimary) // #F1F5F9
+style: TextStyle(color: AppTheme.textPrimary) // #F2F0ED
 
 // Secondary text
-style: TextStyle(color: AppTheme.textSecondary) // #94A3B8
+style: TextStyle(color: AppTheme.textSecondary) // #A8A4A0
 
 // Disabled/placeholder
-style: TextStyle(color: AppTheme.textTertiary) // #4B5563
+style: TextStyle(color: AppTheme.textTertiary) // #7A7774
 ```
 
-### On Gradient Backgrounds (Blue/Violet)
+### On Gradient Backgrounds (Orange)
 ```dart
 // Primary text
 style: TextStyle(color: Colors.white)
@@ -184,7 +184,7 @@ AppTheme.gradientText(
 )
 ```
 
-This applies the primary gradient (blue-to-violet) as a text color via ShaderMask.
+This applies the primary gradient (orange-to-burnt-orange) as a text color via ShaderMask.
 
 ---
 
@@ -199,7 +199,7 @@ Text(
     color: AppTheme.primaryColor,
     fontSize: 48,
     fontWeight: FontWeight.w700,
-    shadows: AppTheme.textGlow,  // Blue glow at 60% opacity, 12px blur
+    shadows: AppTheme.textGlow,  // Orange glow at 60% opacity, 12px blur
   ),
 )
 ```

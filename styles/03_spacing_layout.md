@@ -1,4 +1,4 @@
-# Spacing & Layout — Nexus Dark
+# Spacing & Layout — Ember Dark
 
 All spacing tokens are defined in `lib/presentation/constants/app_theme.dart`.
 
@@ -24,6 +24,7 @@ All spacing tokens are defined in `lib/presentation/constants/app_theme.dart`.
 | `borderRadiusLarge` | 16px | Navigation bars, dialogs |
 | `borderRadiusCard` | 16px | Cards (was 20px, tighter for dark theme) |
 | `borderRadiusXLarge` | 24px | Modal sheets |
+| `borderRadiusPill` | 999px | Pill-shaped CTA buttons (StadiumBorder) |
 
 ---
 
@@ -59,7 +60,7 @@ This ensures:
 ### Standard Screen Template
 ```dart
 Scaffold(
-  backgroundColor: AppTheme.backgroundColor,  // #0A0E1A Void
+  backgroundColor: AppTheme.backgroundColor,  // #141416
   body: SafeArea(
     child: Column(
       children: [
@@ -209,6 +210,14 @@ padding: const EdgeInsets.symmetric(
 )
 ```
 
+### Pill Buttons
+```dart
+padding: const EdgeInsets.symmetric(
+  horizontal: 32,                   // Wider than standard
+  vertical: AppTheme.spacingMD,     // 16px
+)
+```
+
 ### Text Fields
 ```dart
 contentPadding: const EdgeInsets.symmetric(
@@ -265,7 +274,7 @@ Container(
 Always wrap full-screen content with SafeArea:
 ```dart
 Scaffold(
-  backgroundColor: AppTheme.backgroundColor,  // #0A0E1A Void
+  backgroundColor: AppTheme.backgroundColor,  // #141416
   body: SafeArea(
     child: /* content */,
   ),
@@ -292,6 +301,9 @@ SafeArea(child: content)
 
 // Use 16px card border radius (borderRadiusCard)
 BorderRadius.circular(AppTheme.borderRadiusCard)
+
+// Use pill radius for primary CTAs
+BorderRadius.circular(AppTheme.borderRadiusPill)
 ```
 
 ### DON'T

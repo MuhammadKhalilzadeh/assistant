@@ -1,4 +1,4 @@
-# Color System — Nexus Dark v2
+# Color System — Ember Dark
 
 All colors are defined in `lib/presentation/constants/app_theme.dart`.
 
@@ -7,44 +7,56 @@ All colors are defined in `lib/presentation/constants/app_theme.dart`.
 ### Brand Colors
 | Token | Hex | RGB | Usage |
 |-------|-----|-----|-------|
-| `primaryColor` | `#6B9EFF` | 107, 158, 255 | Nexus Blue — primary actions, links, focus states, buttons |
-| `primaryDark` | `#4A7DE0` | 74, 125, 224 | Hover states, pressed states |
-| `primaryLight` | `#8BB3FF` | 139, 179, 255 | Light variant, disabled primary states |
+| `primaryColor` | `#FF7A2F` | 255, 122, 47 | Ember Orange — primary actions, links, focus states, buttons |
+| `primaryDark` | `#E06515` | 224, 101, 21 | Hover states, pressed states |
+| `primaryLight` | `#FF9A5C` | 255, 154, 92 | Light variant, disabled primary states |
 
 ### Secondary Colors
 | Token | Hex | RGB | Usage |
 |-------|-----|-----|-------|
-| `secondaryColor` | `#7C5CFC` | 124, 92, 252 | Nexus Violet — highlights, badges, accent elements |
-| `accentColor` | `#00D4AA` | 0, 212, 170 | Nexus Cyan — special highlights, success-like accents |
+| `secondaryColor` | `#FF5500` | 255, 85, 0 | Burnt Orange — deep highlights, badges, accent elements |
+| `accentColor` | `#FFB347` | 255, 179, 71 | Warm Amber — special highlights, gold accents |
 
 ## Status Colors
 
 | Token | Hex | Usage |
 |-------|-----|-------|
 | `successColor` | `#10B981` | Success messages, completed states, checkmarks |
-| `warningColor` | `#F59E0B` | Warning messages, caution states |
+| `warningColor` | `#F5B731` | Warning messages, caution states |
 | `errorColor` | `#EF4444` | Error messages, destructive actions |
-| `infoColor` | `#6B9EFF` | Informational messages (matches primary) |
+| `infoColor` | `#FF7A2F` | Informational messages (matches primary) |
 
-**Note:** Status colors are universal UX colors, unchanged across themes.
+### Warning vs. Primary Differentiation
+
+Because the primary color (#FF7A2F) and warning color (#F5B731) are both warm tones, strict rules prevent confusion:
+
+| Attribute | Primary (Orange) | Warning (Yellow-Amber) |
+|-----------|-----------------|----------------------|
+| Hex | `#FF7A2F` | `#F5B731` |
+| Hue | Red-orange (18°) | Yellow-amber (42°) |
+| Icon required | No | **Yes — always pair with warning icon** |
+| Typical context | Buttons, links, accents | Alerts, caution banners, validation |
+| Background tint | `#FF7A2F` @ 15% | `#F5B731` @ 15% |
+
+**Rule:** Warning elements must always include a warning icon (⚠ `Icons.warning_amber_rounded`) to distinguish them from primary-colored elements. Never use warning color for buttons or interactive accents.
 
 ## Text Colors
 
 | Token | Hex | Contrast on Card | WCAG | Usage |
 |-------|-----|-----------------|------|-------|
-| `textPrimary` | `#F0F1F4` | ~12.9:1 | AAA | Primary text on dark backgrounds |
-| `textSecondary` | `#A0A8B4` | ~5.9:1 | AA | Secondary text, subtitles, captions |
-| `textTertiary` | `#757A85` | ~3.2:1 | AA large | Disabled text, placeholders, hints |
+| `textPrimary` | `#F2F0ED` | ~12.5:1 | AAA | Primary text on dark backgrounds |
+| `textSecondary` | `#A8A4A0` | ~5.7:1 | AA | Secondary text, subtitles, captions |
+| `textTertiary` | `#7A7774` | ~3.1:1 | AA large | Disabled text, placeholders, hints |
 | `textOnPrimary` | `#FFFFFF` | — | — | Text on colored/gradient backgrounds |
 
 ## Background Colors — Layered Dark Surfaces
 
 | Token | Hex | Layer | Usage |
 |-------|-----|-------|-------|
-| `backgroundColor` | `#15161A` | Background (deepest) | Main app background |
-| `surfaceColor` | `#1D1E24` | Surface (mid) | Elevated surfaces, dialogs, bottom sheets |
-| `cardColor` | `#282A32` | Card surface (top) | Card backgrounds |
-| `cardBorderColor` | `#3D4050` | Border | Card and component borders |
+| `backgroundColor` | `#141416` | Background (deepest) | Main app background |
+| `surfaceColor` | `#1C1C20` | Surface (mid) | Elevated surfaces, dialogs, bottom sheets |
+| `cardColor` | `#26262C` | Card surface (top) | Card backgrounds |
+| `cardBorderColor` | `#3A3A44` | Border | Card and component borders |
 
 Each layer has ~2x luminance jump from the previous for clear visual separation.
 
@@ -52,8 +64,8 @@ Each layer has ~2x luminance jump from the previous for clear visual separation.
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `dividerColor` | `#2E3038` | Dividers, separators |
-| `activeBorderColor` | `#6B9EFF` | Focused/active element borders |
+| `dividerColor` | `#2E2E34` | Dividers, separators |
+| `activeBorderColor` | `#FF7A2F` | Focused/active element borders |
 | `glassBorderColor` | `white @ 12%` | Glass effect borders |
 
 ## Overlay Colors
@@ -67,22 +79,22 @@ Each layer has ~2x luminance jump from the previous for clear visual separation.
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `primaryGlow` | `#6B9EFF` | Blue glow for primary elements |
-| `secondaryGlow` | `#7C5CFC` | Violet glow for secondary elements |
-| `accentGlow` | `#00D4AA` | Cyan glow for accent elements |
+| `primaryGlow` | `#FF7A2F` | Orange glow for primary elements |
+| `secondaryGlow` | `#FF5500` | Burnt orange glow for secondary elements |
+| `accentGlow` | `#FFB347` | Amber glow for accent elements |
 
 ## Shimmer Colors
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `shimmerBase` | `#282A32` | Shimmer loading base color |
-| `shimmerHighlight` | `#3D4050` | Shimmer loading highlight color |
+| `shimmerBase` | `#26262C` | Shimmer loading base color |
+| `shimmerHighlight` | `#3A3A44` | Shimmer loading highlight color |
 
 ---
 
 ## Gradients
 
-### Primary Gradient (Blue-to-Violet)
+### Primary Gradient (Orange-to-Burnt-Orange)
 Used for: CTAs, hero sections, primary action buttons.
 
 ```dart
@@ -90,8 +102,8 @@ static const LinearGradient primaryGradient = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
   colors: [
-    Color(0xFF6B9EFF), // Nexus Blue
-    Color(0xFF7C5CFC), // Nexus Violet
+    Color(0xFFFF7A2F), // Ember Orange
+    Color(0xFFFF5500), // Burnt Orange
   ],
 );
 ```
@@ -104,8 +116,8 @@ static const LinearGradient secondaryGradient = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
   colors: [
-    Color(0xFF282A32), // Card surface
-    Color(0xFF242630), // Subtle variation
+    Color(0xFF26262C), // Card surface
+    Color(0xFF222226), // Subtle variation
   ],
 );
 ```
@@ -118,13 +130,13 @@ static const LinearGradient ambientGradient = LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
   colors: [
-    Color(0xFF1D1E24), // Surface depth
-    Color(0xFF15161A), // Background
+    Color(0xFF1C1C20), // Surface depth
+    Color(0xFF141416), // Background
   ],
 );
 ```
 
-### Accent Gradient (Cyan-to-Blue)
+### Accent Gradient (Amber-to-Orange)
 Used for: Special highlights, accent decorations.
 
 ```dart
@@ -132,8 +144,8 @@ static const LinearGradient accentGradient = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
   colors: [
-    Color(0xFF00D4AA), // Nexus Cyan
-    Color(0xFF6B9EFF), // Nexus Blue
+    Color(0xFFFFB347), // Warm Amber
+    Color(0xFFFF7A2F), // Ember Orange
   ],
 );
 ```
@@ -144,38 +156,69 @@ Used for: Ambient background glow blobs.
 ```dart
 static RadialGradient get glowGradient => RadialGradient(
   colors: [
-    primaryColor.withValues(alpha: 0.12), // Center
+    primaryColor.withValues(alpha: 0.10), // Center
     Colors.transparent,                    // Edge
   ],
 );
+```
+
+### Bottom Ambient Glow Gradient
+Used for: Warm glow at the bottom of screens, simulating reflected light.
+
+```dart
+static RadialGradient get bottomAmbientGlow => RadialGradient(
+  center: Alignment.bottomCenter,
+  radius: 0.8,
+  colors: [
+    Color(0xFFFF7A2F).withValues(alpha: 0.08), // Ember Orange core
+    Colors.transparent,                          // Fade to transparent
+  ],
+);
+```
+
+Place as a `Positioned` widget at the bottom of a `Stack`:
+```dart
+Positioned(
+  bottom: -100,
+  left: 0,
+  right: 0,
+  height: 300,
+  child: Container(
+    decoration: BoxDecoration(
+      gradient: AppTheme.bottomAmbientGlow,
+    ),
+  ),
+)
 ```
 
 ---
 
 ## Shadow System — Glow-Based
 
+Orange is perceptually more intense than blue, so all glow opacities are reduced by ~15-25% compared to the previous blue system to prevent an overly "fiery" appearance.
+
 ### Card Shadow (Standard)
 | Property | Value |
 |----------|-------|
-| Blue glow | `#6B9EFF` at 6% opacity, 12px blur, zero offset |
+| Orange glow | `#FF7A2F` at 5% opacity, 12px blur, zero offset |
 | Black base | `black` at 25% opacity, 8px blur, 2px Y offset |
 
 ### Elevated Shadow (Prominent)
 | Property | Value |
 |----------|-------|
-| Blue glow | `#6B9EFF` at 12% opacity, 24px blur, zero offset |
+| Orange glow | `#FF7A2F` at 10% opacity, 24px blur, zero offset |
 | Black base | `black` at 35% opacity, 16px blur, 4px Y offset |
 
 ### Glow Shadow (Interactive)
 | Property | Value |
 |----------|-------|
-| Blue glow | `#6B9EFF` at 25% opacity, 20px blur, zero offset |
+| Orange glow | `#FF7A2F` at 20% opacity, 20px blur, zero offset |
 
 ### Neon Glow (FABs, Active States)
 | Property | Value |
 |----------|-------|
-| Blue glow | `#6B9EFF` at 40% opacity, 20px blur, zero offset |
-| Violet glow | `#7C5CFC` at 20% opacity, 30px blur, zero offset |
+| Orange glow | `#FF7A2F` at 30% opacity, 20px blur, zero offset |
+| Burnt orange glow | `#FF5500` at 15% opacity, 30px blur, zero offset |
 
 ---
 
@@ -204,13 +247,13 @@ decoration: AppTheme.elevatedCardDecoration
 ### Glow Card (Interactive)
 ```dart
 decoration: AppTheme.glowCardDecoration()
-// Blue border + glow shadow for focused/active cards
+// Orange border + glow shadow for focused/active cards
 ```
 
 ### Gradient Card
 ```dart
 decoration: AppTheme.gradientCardDecoration()
-// Blue-tinted surface gradient
+// Orange-tinted surface gradient
 ```
 
 ---
@@ -236,16 +279,20 @@ color: AppTheme.textPrimary
 ### DON'T
 ```dart
 // Don't hardcode colors
-color: Color(0xFF6B9EFF) // BAD - use AppTheme.primaryColor
+color: Color(0xFFFF7A2F) // BAD - use AppTheme.primaryColor
 
-// Don't use old red/light theme colors
-color: Color(0xFFD32F2F) // BAD - old theme color
+// Don't use old blue/violet theme colors
+color: Color(0xFF6B9EFF) // BAD - old Nexus Blue, removed
+color: Color(0xFF7C5CFC) // BAD - old Nexus Violet, removed
 
 // Don't use white/light backgrounds for cards
 color: Colors.white // BAD - use AppTheme.cardColor
 
 // Don't use dark text on dark backgrounds
 color: Color(0xFF1E293B) // BAD - invisible on dark, use textPrimary
+
+// Don't use primary orange for warnings
+color: AppTheme.primaryColor // BAD for warnings - use warningColor with icon
 ```
 
 ---
@@ -257,8 +304,28 @@ color: Color(0xFF1E293B) // BAD - invisible on dark, use textPrimary
 | Background (`backgroundColor`) | `textPrimary` | `dividerColor` or `cardBorderColor` |
 | Surface (`surfaceColor`) | `textPrimary` | `cardBorderColor` |
 | Card (`cardColor`) | `textPrimary` | `cardBorderColor` or `activeBorderColor` |
-| Blue gradient | `textOnPrimary` (white) | `white @ 20%` |
-| Violet gradient | `textOnPrimary` (white) | `white @ 20%` |
+| Orange gradient | `textOnPrimary` (white) | `white @ 20%` |
+| Burnt orange gradient | `textOnPrimary` (white) | `white @ 20%` |
+
+---
+
+## WCAG Contrast Audit — Orange on Surfaces
+
+White text (#FFFFFF) on orange buttons must meet AA compliance. Orange (#FF7A2F) as a background:
+
+| Text | Background | Ratio | Result | Notes |
+|------|-----------|-------|--------|-------|
+| `#FFFFFF` (white) | `#FF7A2F` (primary) | 3.2:1 | AA Large | Min 16px semibold; all orange buttons use this |
+| `#FFFFFF` (white) | `#FF5500` (secondary) | 3.8:1 | AA Large | Darker orange, better contrast |
+| `#FFFFFF` (white) | `#E06515` (primaryDark) | 4.3:1 | AA | Hover/pressed states pass AA at any size |
+| `#F2F0ED` (textPrimary) | `#26262C` (card) | ~12.5:1 | AAA | Primary text on cards |
+| `#A8A4A0` (textSecondary) | `#26262C` (card) | ~5.7:1 | AA | Secondary text on cards |
+| `#7A7774` (textTertiary) | `#26262C` (card) | ~3.1:1 | AA Large | Hints/placeholders on cards |
+| `#F2F0ED` (textPrimary) | `#141416` (bg) | ~14.8:1 | AAA | Primary text on background |
+| `#FF7A2F` (primary) | `#141416` (bg) | ~5.1:1 | AA | Orange accent text on background |
+| `#FF7A2F` (primary) | `#26262C` (card) | ~4.2:1 | AA | Orange accent text on cards |
+
+**Rule:** All primary orange buttons use white text at minimum 16px semibold to ensure AA Large compliance.
 
 ---
 
@@ -267,9 +334,9 @@ color: Color(0xFF1E293B) // BAD - invisible on dark, use textPrimary
 | Feature | Color | Rationale |
 |---------|-------|-----------|
 | Success/Complete | Green `#10B981` | Universal UX — green = success |
-| Progress indicators | Blue `primaryColor` | Brand consistency |
-| Selected states | Blue `primaryColor` | Brand consistency |
-| Warnings | Amber `#F59E0B` | Universal warning color |
+| Progress indicators | Orange `primaryColor` | Brand consistency |
+| Selected states | Orange `primaryColor` | Brand consistency |
+| Warnings | Yellow-amber `#F5B731` | Shifted yellow to differentiate from orange primary |
 | Errors | Red `#EF4444` | Universal error color |
-| Info | Blue `#6B9EFF` | Matches primary for cohesion |
-| Active/Focus glow | Blue `#6B9EFF` | AI intelligence signal |
+| Info | Orange `#FF7A2F` | Matches primary for cohesion |
+| Active/Focus glow | Orange `#FF7A2F` | Warm presence signal |

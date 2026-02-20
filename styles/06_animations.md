@@ -1,4 +1,4 @@
-# Animation Guidelines — Nexus Dark
+# Animation Guidelines — Ember Dark
 
 This document defines animation standards for consistent motion across the app.
 
@@ -11,6 +11,7 @@ This document defines animation standards for consistent motion across the app.
 | Standard | 300ms | Page transitions, focus states |
 | Slow | 500ms | Complex animations, loading states |
 | Ambient | 2000ms | Glow pulses, breathing effects |
+| Ambient Slow | 4000ms | Bottom ambient glow pulse |
 | Drift | 8000ms | Slow ambient float (dashboard only) |
 
 ---
@@ -88,8 +89,8 @@ void _onFocusChange() {
 | Property | Unfocused | Focused |
 |----------|-----------|---------|
 | Border width | 1px | 1.5px |
-| Border color | `cardBorderColor` | `activeBorderColor` |
-| Shadow | none | blue glow |
+| Border color | `cardBorderColor` | `activeBorderColor` (#FF7A2F) |
+| Shadow | none | orange glow |
 
 ```dart
 // Shadow on focus
@@ -136,6 +137,61 @@ BoxShadow(
 |----------|-------|
 | Duration | 2000ms (full cycle) |
 | Opacity range | 0.15 -> 0.40 |
+| Glow color | `AppTheme.primaryColor` (#FF7A2F) |
+| Curve | `Curves.easeInOut` |
+| Loop | `repeat(reverse: true)` |
+
+---
+
+## Bottom Ambient Glow Pulse
+
+A slow-breathing warm glow at the bottom of dashboard/hero screens:
+
+```dart
+// Controller setup
+_ambientGlowController = AnimationController(
+  vsync: this,
+  duration: const Duration(milliseconds: 4000),
+);
+
+_ambientGlowAnimation = Tween<double>(begin: 0.04, end: 0.10).animate(
+  CurvedAnimation(parent: _ambientGlowController, curve: Curves.easeInOut),
+);
+
+// Loop
+_ambientGlowController.repeat(reverse: true);
+
+// Apply to bottom glow container
+Positioned(
+  bottom: -100,
+  left: 0,
+  right: 0,
+  height: 300,
+  child: AnimatedBuilder(
+    animation: _ambientGlowAnimation,
+    builder: (context, child) {
+      return Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.bottomCenter,
+            radius: 0.8,
+            colors: [
+              Color(0xFFFF7A2F).withValues(alpha: _ambientGlowAnimation.value),
+              Colors.transparent,
+            ],
+          ),
+        ),
+      );
+    },
+  ),
+)
+```
+
+| Property | Value |
+|----------|-------|
+| Duration | 4000ms (full cycle) |
+| Opacity range | 0.04 -> 0.10 |
+| Glow color | `#FF7A2F` (Ember Orange) |
 | Curve | `Curves.easeInOut` |
 | Loop | `repeat(reverse: true)` |
 
@@ -154,9 +210,9 @@ AnimatedBuilder(
       shaderCallback: (bounds) {
         return LinearGradient(
           colors: [
-            AppTheme.shimmerBase,
-            AppTheme.shimmerHighlight,
-            AppTheme.shimmerBase,
+            AppTheme.shimmerBase,      // #26262C
+            AppTheme.shimmerHighlight, // #3A3A44
+            AppTheme.shimmerBase,      // #26262C
           ],
           stops: [
             _shimmerAnimation.value - 0.3,
@@ -179,8 +235,8 @@ AnimatedBuilder(
 | Property | Value |
 |----------|-------|
 | Duration | 1500ms |
-| Base color | `AppTheme.shimmerBase` (#1A2332) |
-| Highlight color | `AppTheme.shimmerHighlight` (#243044) |
+| Base color | `AppTheme.shimmerBase` (#26262C) |
+| Highlight color | `AppTheme.shimmerHighlight` (#3A3A44) |
 | Loop | `repeat()` |
 
 ---
@@ -384,6 +440,7 @@ const Duration(milliseconds: 100)   // Micro
 const Duration(milliseconds: 150)   // Fast
 const Duration(milliseconds: 300)   // Standard
 const Duration(milliseconds: 2000)  // Ambient
+const Duration(milliseconds: 4000)  // Ambient Slow
 ```
 
 ### DON'T
@@ -412,9 +469,12 @@ Is it a micro-interaction (button press, toggle)?
         Is it a glow/breathing effect?
         |- Yes -> 2000ms, easeInOut, repeat(reverse: true)
         |- No
-            Is it a complex sequence (card entrance)?
-            |- Yes -> 400ms per item, 60ms stagger, easeOut
-            |- No -> 300ms, easeInOut
+            Is it a bottom ambient glow?
+            |- Yes -> 4000ms, easeInOut, repeat(reverse: true)
+            |- No
+                Is it a complex sequence (card entrance)?
+                |- Yes -> 400ms per item, 60ms stagger, easeOut
+                |- No -> 300ms, easeInOut
 ```
 
 ---
@@ -426,4 +486,4 @@ Is it a micro-interaction (button press, toggle)?
 3. **Use `const` constructors** where possible
 4. **Avoid animating layout** (prefer opacity and transform)
 5. **Test on lower-end devices** for jank detection
-6. **Dispose all controllers** — especially repeating ones (glow, shimmer, float)
+6. **Dispose all controllers** — especially repeating ones (glow, shimmer, float, ambient glow)

@@ -1,11 +1,11 @@
-# Jarvis Assistant - Nexus Dark v2 Design System
+# Jarvis Assistant - Ember Dark Design System
 
-This directory contains the official UI/UX design rules for the Jarvis Assistant app. The **Nexus Dark v2** theme evokes a futuristic command center aesthetic with layered dark surfaces, electric blue accents, and intelligence glow effects.
+This directory contains the official UI/UX design rules for the Jarvis Assistant app. The **Ember Dark** theme evokes a warm, focused command center aesthetic with layered dark surfaces, warm orange accents, and ambient glow effects.
 
 ## Design Philosophy
 
-1. **Depth Through Darkness** — Layered dark surfaces (#15161A -> #1D1E24 -> #282A32) create hierarchy with ~2x luminance jumps
-2. **Intelligence Glow** — Electric blue (#6B9EFF) and violet (#7C5CFC) accents signal AI presence
+1. **Depth Through Darkness** — Layered dark surfaces (#141416 -> #1C1C20 -> #26262C) create hierarchy with ~2x luminance jumps
+2. **Warm Presence** — Ember orange (#FF7A2F) and burnt orange (#FF5500) accents signal energy and focus
 3. **Contained Color** — Color used surgically for status, actions, and data — never decorative
 4. **Breathing Space** — Generous spacing; content floats in dark canvas
 5. **Subtle Motion** — Glow pulses, shimmer loading, smooth transitions — alive but not distracting
@@ -22,15 +22,15 @@ lib/presentation/constants/app_theme.dart
 ### Colors
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `primaryColor` | `#6B9EFF` | Nexus Blue — primary actions, accents |
-| `secondaryColor` | `#7C5CFC` | Nexus Violet — secondary highlights |
-| `accentColor` | `#00D4AA` | Nexus Cyan — special highlights |
-| `textPrimary` | `#F0F1F4` | Main text on dark backgrounds (~12.9:1) |
-| `textSecondary` | `#A0A8B4` | Secondary/muted text (~5.9:1 AA) |
+| `primaryColor` | `#FF7A2F` | Ember Orange — primary actions, accents |
+| `secondaryColor` | `#FF5500` | Burnt Orange — secondary highlights |
+| `accentColor` | `#FFB347` | Warm Amber — special highlights |
+| `textPrimary` | `#F2F0ED` | Main text on dark backgrounds (~12.5:1) |
+| `textSecondary` | `#A8A4A0` | Secondary/muted text (~5.7:1 AA) |
 | `textOnPrimary` | `#FFFFFF` | Text on gradient backgrounds |
-| `backgroundColor` | `#15161A` | Background — deepest layer |
-| `surfaceColor` | `#1D1E24` | Surface — elevated layer |
-| `cardColor` | `#282A32` | Card surface — card backgrounds |
+| `backgroundColor` | `#141416` | Background — deepest layer |
+| `surfaceColor` | `#1C1C20` | Surface — elevated layer |
+| `cardColor` | `#26262C` | Card surface — card backgrounds |
 
 ### Spacing Scale
 | Token | Value | Usage |
@@ -50,6 +50,7 @@ lib/presentation/constants/app_theme.dart
 | `borderRadiusLarge` | 16px | Navigation bars |
 | `borderRadiusCard` | 16px | Cards (default) |
 | `borderRadiusXLarge` | 24px | Modal sheets |
+| `borderRadiusPill` | 999px | Pill-shaped CTA buttons |
 
 ### Responsive Padding Formula
 ```dart
@@ -72,6 +73,7 @@ blur: ImageFilter.blur(sigmaX: 10, sigmaY: 10)
 4. **[04_components.md](./04_components.md)** - Button, card, input styling
 5. **[05_screens.md](./05_screens.md)** - Screen structure patterns
 6. **[06_animations.md](./06_animations.md)** - Animation guidelines
+7. **[07_data_visualization.md](./07_data_visualization.md)** - Chart and data visualization styling
 
 ## Usage Guidelines
 

@@ -1,4 +1,4 @@
-# Component Styling — Nexus Dark
+# Component Styling — Ember Dark
 
 This document covers the styling rules for all reusable components in the app.
 
@@ -15,21 +15,68 @@ CustomButton(
   onPressed: () {},
 )
 ```
-- Background: `AppTheme.primaryGradient` (blue-to-violet)
+- Background: `AppTheme.primaryGradient` (orange-to-burnt-orange)
 - Text: `AppTheme.textOnPrimary` (white)
 - Border radius: `AppTheme.borderRadiusMedium` (12px)
-- Shadow: `AppTheme.glowShadow` (blue glow)
+- Shadow: `AppTheme.glowShadow` (orange glow)
 - Padding: 24px horizontal, 16px vertical
 - Font: 16px, weight 600, 0.5 letter spacing
 
-#### Default Style (Solid Blue)
+#### Pill Button Style (Primary CTAs)
+For hero-level call-to-action buttons, use the pill shape:
+```dart
+CustomButton(
+  text: 'Get Started',
+  useGradient: true,
+  isPill: true,
+  onPressed: () {},
+)
+```
+- Background: `AppTheme.primaryGradient` (orange-to-burnt-orange)
+- Text: `AppTheme.textOnPrimary` (white), minimum 16px semibold
+- Border radius: `borderRadiusPill` (999px / `StadiumBorder`)
+- Shadow: `AppTheme.glowShadow` (orange glow)
+- Padding: 32px horizontal, 16px vertical (wider than standard)
+
+```dart
+// Implementation
+Container(
+  decoration: BoxDecoration(
+    gradient: AppTheme.primaryGradient,
+    borderRadius: BorderRadius.circular(999),
+    boxShadow: AppTheme.glowShadow,
+  ),
+  child: Material(
+    color: Colors.transparent,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    ),
+  ),
+)
+```
+
+**Rule:** Primary screen-level CTAs use pill shape. Secondary/smaller buttons keep 12px radius.
+
+#### Default Style (Solid Orange)
 ```dart
 CustomButton(
   text: 'Sign In',
   onPressed: () {},
 )
 ```
-- Background: `AppTheme.primaryColor` (#5B8DEF)
+- Background: `AppTheme.primaryColor` (#FF7A2F)
 - Text: `AppTheme.textOnPrimary` (white)
 - Shadow: Primary color at 0.3 alpha, 8px blur
 
@@ -100,20 +147,20 @@ CustomTextField(
 #### Styling Details
 | Property | Value |
 |----------|-------|
-| Background | `AppTheme.surfaceColor` (#111827) |
-| Border (default) | `AppTheme.cardBorderColor` (#243044), 1px |
-| Border (focused) | `AppTheme.activeBorderColor` (#5B8DEF), 1.5px |
+| Background | `AppTheme.surfaceColor` (#1C1C20) |
+| Border (default) | `AppTheme.cardBorderColor` (#3A3A44), 1px |
+| Border (focused) | `AppTheme.activeBorderColor` (#FF7A2F), 1.5px |
 | Border radius | `AppTheme.borderRadiusMedium` (12px) |
-| Text color | `AppTheme.textPrimary` (#F1F5F9) |
-| Hint color | `AppTheme.textTertiary` (#4B5563) |
-| Label color | `AppTheme.textSecondary` (#94A3B8) |
+| Text color | `AppTheme.textPrimary` (#F2F0ED) |
+| Hint color | `AppTheme.textTertiary` (#7A7774) |
+| Label color | `AppTheme.textSecondary` (#A8A4A0) |
 | Icon color | `AppTheme.textSecondary` |
 | Content padding | 16px horizontal & vertical |
 | Font size | 16px |
 
 #### Focus Animation
 - Duration: 300ms
-- Focus shadow: Blue glow (`primaryColor` at 0.15 alpha, 8px blur)
+- Focus shadow: Orange glow (`primaryColor` at 0.15 alpha, 8px blur)
 
 ---
 
@@ -126,11 +173,11 @@ CustomTextField(
 | Property | Value |
 |----------|-------|
 | Border radius | 16px (`borderRadiusCard`) |
-| Background | Dark navy (`AppTheme.cardColor` #1A2332) |
-| Border | `AppTheme.cardBorderColor` (#243044), 1px |
-| Shadow | `AppTheme.cardShadow` (blue glow + black) |
-| Text | Light (`AppTheme.textPrimary` #F1F5F9) |
-| Accent | Blue (`AppTheme.primaryColor` #5B8DEF) |
+| Background | Dark surface (`AppTheme.cardColor` #26262C) |
+| Border | `AppTheme.cardBorderColor` (#3A3A44), 1px |
+| Shadow | `AppTheme.cardShadow` (orange glow + black) |
+| Text | Light (`AppTheme.textPrimary` #F2F0ED) |
+| Accent | Orange (`AppTheme.primaryColor` #FF7A2F) |
 
 #### Card Structure Template
 ```dart
@@ -228,6 +275,71 @@ Container(
   ),
 )
 ```
+
+---
+
+## Avatar Ring
+
+Orange-bordered circular avatar for user profiles and contact displays:
+
+```dart
+Container(
+  padding: const EdgeInsets.all(3), // Ring thickness
+  decoration: BoxDecoration(
+    shape: BoxShape.circle,
+    border: Border.all(
+      color: AppTheme.primaryColor,
+      width: 2.5,
+    ),
+  ),
+  child: CircleAvatar(
+    radius: 24,
+    backgroundColor: AppTheme.surfaceColor,
+    backgroundImage: imageProvider, // or null for initials
+    child: imageProvider == null
+        ? Text(
+            initials,
+            style: TextStyle(
+              color: AppTheme.primaryColor,
+              fontWeight: FontWeight.w600,
+            ),
+          )
+        : null,
+  ),
+)
+```
+
+| Property | Value |
+|----------|-------|
+| Ring color | `AppTheme.primaryColor` (#FF7A2F) |
+| Ring width | 2.5px |
+| Ring padding | 3px (gap between ring and avatar) |
+| Fallback background | `AppTheme.surfaceColor` |
+| Fallback text color | `AppTheme.primaryColor` |
+
+---
+
+## Toggle / Switch
+
+Orange active track for toggle switches:
+
+```dart
+Switch(
+  value: isEnabled,
+  onChanged: onChanged,
+  activeColor: Colors.white,
+  activeTrackColor: AppTheme.primaryColor,
+  inactiveThumbColor: AppTheme.textTertiary,
+  inactiveTrackColor: AppTheme.cardBorderColor,
+)
+```
+
+| Property | Value |
+|----------|-------|
+| Active track | `AppTheme.primaryColor` (#FF7A2F) |
+| Active thumb | `Colors.white` |
+| Inactive track | `AppTheme.cardBorderColor` (#3A3A44) |
+| Inactive thumb | `AppTheme.textTertiary` (#7A7774) |
 
 ---
 
@@ -363,15 +475,15 @@ Container(
 
 | Property | Value |
 |----------|-------|
-| Background | `AppTheme.surfaceColor` (#111827) |
-| Top border | `AppTheme.dividerColor` (#1E293B), 1px |
-| Selected color | `AppTheme.primaryColor` (#5B8DEF) |
-| Unselected color | `AppTheme.textSecondary` (#94A3B8) |
+| Background | `AppTheme.surfaceColor` (#1C1C20) |
+| Top border | `AppTheme.dividerColor` (#2E2E34), 1px |
+| Selected color | `AppTheme.primaryColor` (#FF7A2F) |
+| Unselected color | `AppTheme.textSecondary` (#A8A4A0) |
 | Selected label | 12px, weight 600 |
 | Unselected label | 12px, weight 400 |
 | Elevation | 0 |
 | Corner radius | None (flat top edge) |
-| Selected indicator | Blue pill background |
+| Selected indicator | Orange pill background |
 
 ---
 
@@ -396,8 +508,8 @@ Container(
 
 | Property | Value |
 |----------|-------|
-| Background | `AppTheme.primaryGradient` (blue-to-violet) |
-| Shadow | `AppTheme.neonGlow` (blue 40% + violet 20%) |
+| Background | `AppTheme.primaryGradient` (orange-to-burnt-orange) |
+| Shadow | `AppTheme.neonGlow` (orange 30% + burnt orange 15%) |
 | Icon color | White |
 | Default icon | `Icons.add` |
 

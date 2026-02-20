@@ -1,4 +1,4 @@
-# Screen Structure Patterns — Nexus Dark
+# Screen Structure Patterns — Ember Dark
 
 This document defines the standard patterns for screen layout across the app.
 
@@ -17,7 +17,7 @@ The app has two primary screen types:
 SafeArea(
   child: Container(
     decoration: const BoxDecoration(
-      gradient: AppTheme.ambientGradient,  // #0F1728 -> #0A0E1A
+      gradient: AppTheme.ambientGradient,  // #1C1C20 -> #141416
     ),
     child: Stack(
       children: [
@@ -30,6 +30,18 @@ SafeArea(
             height: 300,
             decoration: BoxDecoration(
               gradient: AppTheme.glowGradient,
+            ),
+          ),
+        ),
+        // Bottom ambient glow
+        Positioned(
+          bottom: -100,
+          left: 0,
+          right: 0,
+          height: 300,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: AppTheme.bottomAmbientGlow,
             ),
           ),
         ),
@@ -80,7 +92,7 @@ All detail pages follow this pattern:
 
 ```dart
 Scaffold(
-  backgroundColor: AppTheme.backgroundColor,  // #0A0E1A Void
+  backgroundColor: AppTheme.backgroundColor,  // #141416
   body: SafeArea(
     child: Column(
       children: [
@@ -181,7 +193,7 @@ Widget _buildAppBar(double padding) {
 | Icon-to-title gap | 12px |
 | Title font size | 24px |
 | Title font weight | Bold |
-| Title color | `AppTheme.textPrimary` (#F1F5F9) |
+| Title color | `AppTheme.textPrimary` (#F2F0ED) |
 | Title letter spacing | -0.3 |
 
 ---
@@ -254,6 +266,39 @@ Widget _buildList(List items, double padding) {
 
 ---
 
+## Bottom Ambient Glow Pattern
+
+Screens that benefit from a warm glow at the bottom (dashboards, hero screens):
+
+```dart
+Stack(
+  children: [
+    // Main content
+    SingleChildScrollView(
+      child: /* content */,
+    ),
+    // Bottom ambient glow (non-interactive, behind content)
+    Positioned(
+      bottom: -100,
+      left: 0,
+      right: 0,
+      height: 300,
+      child: IgnorePointer(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: AppTheme.bottomAmbientGlow,
+          ),
+        ),
+      ),
+    ),
+  ],
+)
+```
+
+Use `IgnorePointer` to ensure the glow layer doesn't intercept touch events.
+
+---
+
 ## FAB Placement and Styling
 
 Standard FAB configuration with gradient and neon glow:
@@ -280,8 +325,8 @@ Scaffold(
 | Property | Value |
 |----------|-------|
 | Position | Default (bottom right) |
-| Background | `AppTheme.primaryGradient` (blue-to-violet) |
-| Shadow | `AppTheme.neonGlow` (blue 40% + violet 20%) |
+| Background | `AppTheme.primaryGradient` (orange-to-burnt-orange) |
+| Shadow | `AppTheme.neonGlow` (orange 30% + burnt orange 15%) |
 | Icon | White `Icons.add` |
 
 ---
@@ -376,9 +421,9 @@ NavigationUtils.navigateWithSlide(context, page);
 | Screen Type | Background |
 |-------------|------------|
 | Dashboard | `AppTheme.ambientGradient` (or `backgroundColor`) |
-| Detail pages | `AppTheme.backgroundColor` (#0A0E1A) |
-| Cards | `AppTheme.cardColor` (#1A2332) with border + glow |
-| Dialogs/Sheets | `AppTheme.surfaceColor` (#111827) |
+| Detail pages | `AppTheme.backgroundColor` (#141416) |
+| Cards | `AppTheme.cardColor` (#26262C) with border + glow |
+| Dialogs/Sheets | `AppTheme.surfaceColor` (#1C1C20) |
 
 ---
 
@@ -396,4 +441,5 @@ When creating a new screen, ensure:
 - [ ] Has empty state with tinted circle icon
 - [ ] Uses `NavigationUtils.navigateWithFade` for navigation
 - [ ] Uses light text (`AppTheme.textPrimary`) on dark backgrounds
-- [ ] Uses blue (`AppTheme.primaryColor`) for accents and highlights
+- [ ] Uses orange (`AppTheme.primaryColor`) for accents and highlights
+- [ ] Considers bottom ambient glow for hero/dashboard screens
