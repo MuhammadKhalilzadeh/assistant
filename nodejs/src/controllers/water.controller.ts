@@ -6,8 +6,9 @@ import { logger } from '../config/logger';
 export const waterController = {
   async getLogsForDate(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { date } = req.query;
-      const logs = await waterModel.getLogsForDate(date as string | undefined);
+      const logs = await waterModel.getLogsForDate(userId, date as string | undefined);
       logger.debug({ count: logs.length, date }, 'Fetched water logs for date');
       res.json(logs);
     } catch (error) {
@@ -18,8 +19,9 @@ export const waterController = {
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const log = await waterModel.findById(id);
+      const log = await waterModel.findById(userId, id);
 
       if (!log) {
         return next(new NotFoundError('Water log'));
@@ -35,9 +37,10 @@ export const waterController = {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { amountMl, beverageType, note, loggedAt } = req.body;
 
-      const log = await waterModel.create({
+      const log = await waterModel.create(userId, {
         amountMl,
         beverageType: beverageType || 'water',
         note: note || undefined,
@@ -54,6 +57,7 @@ export const waterController = {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
       const { amountMl, beverageType, note, loggedAt } = req.body;
 
@@ -64,7 +68,7 @@ export const waterController = {
       if (note !== undefined) updateData.note = note || null;
       if (loggedAt !== undefined) updateData.loggedAt = loggedAt;
 
-      const log = await waterModel.update(id, updateData);
+      const log = await waterModel.update(userId, id, updateData);
 
       if (!log) {
         return next(new NotFoundError('Water log'));
@@ -80,8 +84,9 @@ export const waterController = {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const deleted = await waterModel.delete(id);
+      const deleted = await waterModel.delete(userId, id);
 
       if (!deleted) {
         return next(new NotFoundError('Water log'));
@@ -97,7 +102,8 @@ export const waterController = {
 
   async getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const stats = await waterModel.getStats();
+      const userId = req.user!.userId;
+      const stats = await waterModel.getStats(userId);
       logger.debug('Fetched water stats');
       res.json(stats);
     } catch (error) {
@@ -108,7 +114,8 @@ export const waterController = {
 
   async getHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const history = await waterModel.getLast7Days();
+      const userId = req.user!.userId;
+      const history = await waterModel.getLast7Days(userId);
       logger.debug('Fetched water history');
       res.json(history);
     } catch (error) {
@@ -119,7 +126,8 @@ export const waterController = {
 
   async getGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const goal = await waterModel.getGoal();
+      const userId = req.user!.userId;
+      const goal = await waterModel.getGoal(userId);
       logger.debug('Fetched hydration goal');
       res.json(goal);
     } catch (error) {
@@ -130,9 +138,10 @@ export const waterController = {
 
   async updateGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { dailyGoalMl, reminderIntervalMinutes, remindersEnabled } = req.body;
 
-      const goal = await waterModel.updateGoal({
+      const goal = await waterModel.updateGoal(userId, {
         dailyGoalMl,
         reminderIntervalMinutes,
         remindersEnabled,

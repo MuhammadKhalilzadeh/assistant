@@ -132,32 +132,33 @@ function rowToGoal(row: FocusTimerGoalRow): FocusTimerGoal {
 }
 
 export const focusTimerModel = {
-  async getSessionsForDate(date?: string): Promise<FocusTimerSession[]> {
+  async getSessionsForDate(userId: string, date?: string): Promise<FocusTimerSession[]> {
     const targetDate = date || new Date().toISOString().split('T')[0];
     const result = await pool.query<FocusTimerSessionRow>(`
       SELECT id, type, start_time, end_time, duration_minutes, is_completed, task, created_at
-      FROM focus_timer_sessions WHERE DATE(start_time) = $1
+      FROM focus_timer_sessions WHERE DATE(start_time) = $1 AND user_id = $2
       ORDER BY start_time DESC
-    `, [targetDate]);
+    `, [targetDate, userId]);
     return result.rows.map(rowToSession);
   },
 
-  async findById(id: string): Promise<FocusTimerSession | null> {
+  async findById(userId: string, id: string): Promise<FocusTimerSession | null> {
     const result = await pool.query<FocusTimerSessionRow>(
       `SELECT id, type, start_time, end_time, duration_minutes, is_completed, task, created_at
-       FROM focus_timer_sessions WHERE id = $1`,
-      [id]
+       FROM focus_timer_sessions WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
     if (!result.rows[0]) return null;
     return rowToSession(result.rows[0]);
   },
 
-  async create(input: CreateFocusTimerSessionInput): Promise<FocusTimerSession> {
+  async create(userId: string, input: CreateFocusTimerSessionInput): Promise<FocusTimerSession> {
     const result = await pool.query<FocusTimerSessionRow>(
-      `INSERT INTO focus_timer_sessions (type, start_time, end_time, duration_minutes, is_completed, task)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO focus_timer_sessions (user_id, type, start_time, end_time, duration_minutes, is_completed, task)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id, type, start_time, end_time, duration_minutes, is_completed, task, created_at`,
       [
+        userId,
         input.type,
         input.startTime ? new Date(input.startTime) : new Date(),
         input.endTime ? new Date(input.endTime) : null,
@@ -169,8 +170,8 @@ export const focusTimerModel = {
     return rowToSession(result.rows[0]);
   },
 
-  async update(id: string, input: UpdateFocusTimerSessionInput): Promise<FocusTimerSession | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateFocusTimerSessionInput): Promise<FocusTimerSession | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const updates: string[] = [];
@@ -205,50 +206,52 @@ export const focusTimerModel = {
     if (updates.length === 0) return existing;
 
     values.push(id);
+    values.push(userId);
     await pool.query(
-      `UPDATE focus_timer_sessions SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE focus_timer_sessions SET ${updates.join(', ')} WHERE id = $${paramIndex} AND user_id = $${paramIndex + 1}`,
       values
     );
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async markComplete(id: string): Promise<FocusTimerSession | null> {
-    const existing = await this.findById(id);
+  async markComplete(userId: string, id: string): Promise<FocusTimerSession | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
     await pool.query(
-      `UPDATE focus_timer_sessions SET is_completed = TRUE, end_time = CURRENT_TIMESTAMP WHERE id = $1`,
-      [id]
+      `UPDATE focus_timer_sessions SET is_completed = TRUE, end_time = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM focus_timer_sessions WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM focus_timer_sessions WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async getGoal(): Promise<FocusTimerGoal> {
+  async getGoal(userId: string): Promise<FocusTimerGoal> {
     const result = await pool.query<FocusTimerGoalRow>(`
       SELECT id, daily_goal_sessions, focus_duration, short_break_duration, long_break_duration,
              sessions_before_long_break, auto_start_breaks, auto_start_focus,
              sound_enabled, vibration_enabled, created_at, updated_at
-      FROM focus_timer_goals ORDER BY created_at DESC LIMIT 1
-    `);
+      FROM focus_timer_goals WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1
+    `, [userId]);
     if (!result.rows[0]) {
       const insertResult = await pool.query<FocusTimerGoalRow>(
-        `INSERT INTO focus_timer_goals (daily_goal_sessions, focus_duration, short_break_duration, long_break_duration, sessions_before_long_break)
-         VALUES (8, 25, 5, 15, 4)
+        `INSERT INTO focus_timer_goals (user_id, daily_goal_sessions, focus_duration, short_break_duration, long_break_duration, sessions_before_long_break)
+         VALUES ($1, 8, 25, 5, 15, 4)
          RETURNING id, daily_goal_sessions, focus_duration, short_break_duration, long_break_duration,
                    sessions_before_long_break, auto_start_breaks, auto_start_focus,
-                   sound_enabled, vibration_enabled, created_at, updated_at`
+                   sound_enabled, vibration_enabled, created_at, updated_at`,
+        [userId]
       );
       return rowToGoal(insertResult.rows[0]);
     }
     return rowToGoal(result.rows[0]);
   },
 
-  async updateGoal(input: UpdateFocusTimerGoalInput): Promise<FocusTimerGoal> {
-    const goal = await this.getGoal();
+  async updateGoal(userId: string, input: UpdateFocusTimerGoalInput): Promise<FocusTimerGoal> {
+    const goal = await this.getGoal(userId);
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
     const values: (number | boolean | string)[] = [];
     let paramIndex = 1;
@@ -293,42 +296,43 @@ export const focusTimerModel = {
     if (values.length === 0) return goal;
 
     values.push(goal.id);
+    values.push(userId);
     await pool.query(
-      `UPDATE focus_timer_goals SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE focus_timer_goals SET ${updates.join(', ')} WHERE id = $${paramIndex} AND user_id = $${paramIndex + 1}`,
       values
     );
-    return this.getGoal();
+    return this.getGoal(userId);
   },
 
-  async getStats(): Promise<FocusTimerStats> {
-    const goal = await this.getGoal();
+  async getStats(userId: string): Promise<FocusTimerStats> {
+    const goal = await this.getGoal(userId);
 
     // Today totals
     const todayResult = await pool.query<{ total_min: string; total_sessions: string }>(`
       SELECT COALESCE(SUM(duration_minutes), 0) as total_min, COUNT(*) as total_sessions
       FROM focus_timer_sessions
-      WHERE DATE(start_time) = CURRENT_DATE AND is_completed = TRUE AND type = 'focus'
-    `);
+      WHERE DATE(start_time) = CURRENT_DATE AND is_completed = TRUE AND type = 'focus' AND user_id = $1
+    `, [userId]);
 
     // Weekly totals
     const weeklyResult = await pool.query<{ total_min: string; total_sessions: string }>(`
       SELECT COALESCE(SUM(duration_minutes), 0) as total_min, COUNT(*) as total_sessions
       FROM focus_timer_sessions
-      WHERE start_time >= CURRENT_DATE - INTERVAL '7 days' AND is_completed = TRUE AND type = 'focus'
-    `);
+      WHERE start_time >= CURRENT_DATE - INTERVAL '7 days' AND is_completed = TRUE AND type = 'focus' AND user_id = $1
+    `, [userId]);
 
     // Sessions by type
     const typeResult = await pool.query<{ type: string; count: string }>(`
       SELECT type, COUNT(*) as count FROM focus_timer_sessions
-      WHERE start_time >= CURRENT_DATE - INTERVAL '7 days' AND is_completed = TRUE
+      WHERE start_time >= CURRENT_DATE - INTERVAL '7 days' AND is_completed = TRUE AND user_id = $1
       GROUP BY type
-    `);
+    `, [userId]);
     const sessionsByType: Record<string, number> = {};
     for (const row of typeResult.rows) {
       sessionsByType[row.type] = parseInt(row.count);
     }
 
-    const { currentStreak, bestStreak } = await this.calculateStreaks(goal.dailyGoalSessions);
+    const { currentStreak, bestStreak } = await this.calculateStreaks(userId, goal.dailyGoalSessions);
 
     // Goal completion rate
     const completionResult = await pool.query<{ days_met: string; total_days: string }>(`
@@ -338,10 +342,10 @@ export const focusTimerModel = {
       FROM (
         SELECT DATE(start_time) as session_date, COUNT(*) as daily_total
         FROM focus_timer_sessions
-        WHERE start_time >= CURRENT_DATE - INTERVAL '30 days' AND is_completed = TRUE AND type = 'focus'
+        WHERE start_time >= CURRENT_DATE - INTERVAL '30 days' AND is_completed = TRUE AND type = 'focus' AND user_id = $2
         GROUP BY DATE(start_time)
       ) daily_totals
-    `, [goal.dailyGoalSessions]);
+    `, [goal.dailyGoalSessions, userId]);
     const daysMet = parseInt(completionResult.rows[0].days_met);
     const totalDays = parseInt(completionResult.rows[0].total_days);
     const goalCompletionRate = totalDays > 0 ? Math.round((daysMet / totalDays) * 100) / 100 : 0;
@@ -358,12 +362,12 @@ export const focusTimerModel = {
     };
   },
 
-  async calculateStreaks(dailyGoalSessions: number): Promise<{ currentStreak: number; bestStreak: number }> {
+  async calculateStreaks(userId: string, dailyGoalSessions: number): Promise<{ currentStreak: number; bestStreak: number }> {
     const result = await pool.query<{ session_date: Date; daily_total: string }>(`
       SELECT DATE(start_time) as session_date, COUNT(*) as daily_total
-      FROM focus_timer_sessions WHERE is_completed = TRUE AND type = 'focus'
+      FROM focus_timer_sessions WHERE is_completed = TRUE AND type = 'focus' AND user_id = $1
       GROUP BY DATE(start_time) ORDER BY session_date DESC
-    `);
+    `, [userId]);
     if (result.rows.length === 0) return { currentStreak: 0, bestStreak: 0 };
 
     const dateMap = new Map<string, number>();
@@ -406,8 +410,8 @@ export const focusTimerModel = {
     return { currentStreak, bestStreak };
   },
 
-  async getLast7Days(): Promise<FocusTimerDailySummary[]> {
-    const goal = await this.getGoal();
+  async getLast7Days(userId: string): Promise<FocusTimerDailySummary[]> {
+    const goal = await this.getGoal(userId);
     const summaries: FocusTimerDailySummary[] = [];
 
     for (let i = 6; i >= 0; i--) {
@@ -417,8 +421,8 @@ export const focusTimerModel = {
 
       const result = await pool.query<{ total_min: string; count: string }>(
         `SELECT COALESCE(SUM(duration_minutes), 0) as total_min, COUNT(*) as count
-         FROM focus_timer_sessions WHERE DATE(start_time) = $1 AND is_completed = TRUE AND type = 'focus'`,
-        [dateStr]
+         FROM focus_timer_sessions WHERE DATE(start_time) = $1 AND is_completed = TRUE AND type = 'focus' AND user_id = $2`,
+        [dateStr, userId]
       );
 
       const totalMinutes = parseInt(result.rows[0].total_min);

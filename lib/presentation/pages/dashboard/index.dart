@@ -61,6 +61,8 @@ import 'package:assistant/providers/inbox_provider.dart';
 import 'package:assistant/data/models/focus_session_model.dart';
 import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/data/models/weather_forecast_model.dart';
+import 'package:assistant/providers/auth_provider.dart';
+import 'package:assistant/presentation/widgets/sheets/account_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -149,6 +151,9 @@ class _HomeTab extends ConsumerWidget {
       NavigationUtils.navigateWithFade(context, page);
     }
 
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
+
     return SafeArea(
       child: Container(
         color: AppTheme.backgroundColor,
@@ -158,6 +163,8 @@ class _HomeTab extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+              // Greeting Header
+              _buildGreetingHeader(context, ref, user, paddingValue),
               // Productivity Section
               CustomTodosCard(
                 totalTodos: todoStats.total,
@@ -274,6 +281,81 @@ class _HomeTab extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGreetingHeader(BuildContext context, WidgetRef ref, dynamic user, double paddingValue) {
+    final now = DateTime.now();
+    final hour = now.hour;
+    String greeting;
+    if (hour < 12) {
+      greeting = 'Good morning';
+    } else if (hour < 17) {
+      greeting = 'Good afternoon';
+    } else {
+      greeting = 'Good evening';
+    }
+
+    final nickname = user?.greeting ?? 'there';
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final dateStr = '${days[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: paddingValue),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$greeting, $nickname',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  dateStr,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (_) => const AccountSheet(),
+              );
+            },
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: AppTheme.primaryColor,
+              backgroundImage: user?.photoUrl != null
+                  ? NetworkImage(user!.photoUrl!)
+                  : null,
+              child: user?.photoUrl == null
+                  ? Text(
+                      (user?.greeting ?? '?')[0].toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
+                  : null,
+            ),
+          ),
+        ],
       ),
     );
   }

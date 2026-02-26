@@ -6,7 +6,8 @@ import { logger } from '../config/logger';
 export const todoController = {
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const todos = await todoModel.findAll();
+      const userId = req.user!.userId;
+      const todos = await todoModel.findAll(userId);
       logger.debug({ count: todos.length }, 'Fetched all todos');
       res.json(todos);
     } catch (error) {
@@ -17,8 +18,9 @@ export const todoController = {
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const todo = await todoModel.findById(id);
+      const todo = await todoModel.findById(userId, id);
 
       if (!todo) {
         return next(new NotFoundError('Todo'));
@@ -34,9 +36,10 @@ export const todoController = {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { title, description, dueDate, priority, categoryId } = req.body;
 
-      const todo = await todoModel.create({
+      const todo = await todoModel.create(userId, {
         title,
         description: description || undefined,
         dueDate: dueDate ? new Date(dueDate) : null,
@@ -54,6 +57,7 @@ export const todoController = {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
       const { title, description, isCompleted, dueDate, priority, categoryId } = req.body;
 
@@ -66,7 +70,7 @@ export const todoController = {
       if (priority !== undefined) updateData.priority = priority;
       if (categoryId !== undefined) updateData.categoryId = categoryId;
 
-      const todo = await todoModel.update(id, updateData);
+      const todo = await todoModel.update(userId, id, updateData);
 
       if (!todo) {
         return next(new NotFoundError('Todo'));
@@ -82,8 +86,9 @@ export const todoController = {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const deleted = await todoModel.delete(id);
+      const deleted = await todoModel.delete(userId, id);
 
       if (!deleted) {
         return next(new NotFoundError('Todo'));
@@ -99,8 +104,9 @@ export const todoController = {
 
   async toggleComplete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const todo = await todoModel.toggleComplete(id);
+      const todo = await todoModel.toggleComplete(userId, id);
 
       if (!todo) {
         return next(new NotFoundError('Todo'));
@@ -116,7 +122,8 @@ export const todoController = {
 
   async getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const stats = await todoModel.getStats();
+      const userId = req.user!.userId;
+      const stats = await todoModel.getStats(userId);
       logger.debug('Fetched todo stats');
       res.json(stats);
     } catch (error) {

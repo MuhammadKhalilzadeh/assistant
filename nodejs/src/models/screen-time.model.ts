@@ -121,58 +121,60 @@ function rowToGoal(row: ScreenTimeGoalRow): ScreenTimeGoal {
 }
 
 export const screenTimeModel = {
-  async getAppUsageForRecord(recordId: string): Promise<AppUsageEntry[]> {
+  async getAppUsageForRecord(userId: string, recordId: string): Promise<AppUsageEntry[]> {
     const result = await pool.query<AppUsageRow>(
-      `SELECT id, screen_time_id, app_name, category, minutes_used, icon_name
-       FROM app_usage WHERE screen_time_id = $1
-       ORDER BY minutes_used DESC`,
-      [recordId]
+      `SELECT au.id, au.screen_time_id, au.app_name, au.category, au.minutes_used, au.icon_name
+       FROM app_usage au
+       JOIN screen_time_records str ON au.screen_time_id = str.id
+       WHERE au.screen_time_id = $1 AND str.user_id = $2
+       ORDER BY au.minutes_used DESC`,
+      [recordId, userId]
     );
     return result.rows.map(rowToAppUsage);
   },
 
-  async getByDate(date?: string): Promise<ScreenTimeRecord | null> {
+  async getByDate(userId: string, date?: string): Promise<ScreenTimeRecord | null> {
     const targetDate = date || new Date().toISOString().split('T')[0];
 
     const result = await pool.query<ScreenTimeRecordRow>(
       `SELECT id, date, total_minutes, pickups, note, created_at
-       FROM screen_time_records WHERE date = $1`,
-      [targetDate]
+       FROM screen_time_records WHERE date = $1 AND user_id = $2`,
+      [targetDate, userId]
     );
 
     if (!result.rows[0]) return null;
 
-    const appUsage = await this.getAppUsageForRecord(result.rows[0].id);
+    const appUsage = await this.getAppUsageForRecord(userId, result.rows[0].id);
     return rowToRecord(result.rows[0], appUsage);
   },
 
-  async findById(id: string): Promise<ScreenTimeRecord | null> {
+  async findById(userId: string, id: string): Promise<ScreenTimeRecord | null> {
     const result = await pool.query<ScreenTimeRecordRow>(
       `SELECT id, date, total_minutes, pickups, note, created_at
-       FROM screen_time_records WHERE id = $1`,
-      [id]
+       FROM screen_time_records WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
 
     if (!result.rows[0]) return null;
 
-    const appUsage = await this.getAppUsageForRecord(result.rows[0].id);
+    const appUsage = await this.getAppUsageForRecord(userId, result.rows[0].id);
     return rowToRecord(result.rows[0], appUsage);
   },
 
-  async create(input: CreateScreenTimeInput): Promise<ScreenTimeRecord> {
+  async create(userId: string, input: CreateScreenTimeInput): Promise<ScreenTimeRecord> {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
 
       const result = await client.query<ScreenTimeRecordRow>(
-        `INSERT INTO screen_time_records (date, total_minutes, pickups, note)
-         VALUES ($1, $2, $3, $4)
-         ON CONFLICT (date) DO UPDATE SET
+        `INSERT INTO screen_time_records (user_id, date, total_minutes, pickups, note)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (user_id, date) DO UPDATE SET
            total_minutes = EXCLUDED.total_minutes,
            pickups = EXCLUDED.pickups,
            note = COALESCE(EXCLUDED.note, screen_time_records.note)
          RETURNING id, date, total_minutes, pickups, note, created_at`,
-        [input.date, input.totalMinutes, input.pickups || 0, input.note || null]
+        [userId, input.date, input.totalMinutes, input.pickups || 0, input.note || null]
       );
 
       const recordId = result.rows[0].id;
@@ -204,8 +206,8 @@ export const screenTimeModel = {
     }
   },
 
-  async update(id: string, input: UpdateScreenTimeInput): Promise<ScreenTimeRecord | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateScreenTimeInput): Promise<ScreenTimeRecord | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const client = await pool.connect();
@@ -231,8 +233,11 @@ export const screenTimeModel = {
 
       if (updates.length > 0) {
         values.push(id);
+        const idParam = paramIndex++;
+        values.push(userId);
+        const userIdParam = paramIndex;
         await client.query(
-          `UPDATE screen_time_records SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+          `UPDATE screen_time_records SET ${updates.join(', ')} WHERE id = $${idParam} AND user_id = $${userIdParam}`,
           values
         );
       }
@@ -250,7 +255,7 @@ export const screenTimeModel = {
       }
 
       await client.query('COMMIT');
-      return this.findById(id);
+      return this.findById(userId, id);
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
@@ -259,24 +264,26 @@ export const screenTimeModel = {
     }
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM screen_time_records WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM screen_time_records WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async getGoal(): Promise<ScreenTimeGoal> {
+  async getGoal(userId: string): Promise<ScreenTimeGoal> {
     const result = await pool.query<ScreenTimeGoalRow>(`
       SELECT id, daily_limit_minutes, created_at, updated_at
       FROM screen_time_goals
+      WHERE user_id = $1
       ORDER BY created_at DESC
       LIMIT 1
-    `);
+    `, [userId]);
 
     if (!result.rows[0]) {
       const insertResult = await pool.query<ScreenTimeGoalRow>(
-        `INSERT INTO screen_time_goals (daily_limit_minutes)
-         VALUES (180)
-         RETURNING id, daily_limit_minutes, created_at, updated_at`
+        `INSERT INTO screen_time_goals (user_id, daily_limit_minutes)
+         VALUES ($1, 180)
+         RETURNING id, daily_limit_minutes, created_at, updated_at`,
+        [userId]
       );
       return rowToGoal(insertResult.rows[0]);
     }
@@ -284,26 +291,26 @@ export const screenTimeModel = {
     return rowToGoal(result.rows[0]);
   },
 
-  async updateGoal(input: UpdateScreenTimeGoalInput): Promise<ScreenTimeGoal> {
-    const goal = await this.getGoal();
+  async updateGoal(userId: string, input: UpdateScreenTimeGoalInput): Promise<ScreenTimeGoal> {
+    const goal = await this.getGoal(userId);
 
     await pool.query(
-      `UPDATE screen_time_goals SET daily_limit_minutes = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-      [input.dailyLimitMinutes, goal.id]
+      `UPDATE screen_time_goals SET daily_limit_minutes = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3`,
+      [input.dailyLimitMinutes, goal.id, userId]
     );
 
-    return this.getGoal();
+    return this.getGoal(userId);
   },
 
-  async getStats(): Promise<ScreenTimeStats> {
-    const goal = await this.getGoal();
+  async getStats(userId: string): Promise<ScreenTimeStats> {
+    const goal = await this.getGoal(userId);
     const today = new Date().toISOString().split('T')[0];
 
     // Get today's record
     const todayResult = await pool.query<{ total_minutes: number; pickups: number }>(
       `SELECT COALESCE(total_minutes, 0) as total_minutes, COALESCE(pickups, 0) as pickups
-       FROM screen_time_records WHERE date = $1`,
-      [today]
+       FROM screen_time_records WHERE date = $1 AND user_id = $2`,
+      [today, userId]
     );
     const todayMinutes = todayResult.rows[0]?.total_minutes ?? 0;
     const todayPickups = todayResult.rows[0]?.pickups ?? 0;
@@ -314,13 +321,13 @@ export const screenTimeModel = {
         COALESCE(AVG(total_minutes), 0) as avg_minutes,
         COALESCE(AVG(pickups), 0) as avg_pickups
       FROM screen_time_records
-      WHERE date >= CURRENT_DATE - INTERVAL '7 days'
-    `);
+      WHERE date >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1
+    `, [userId]);
     const dailyAverageMinutes = Math.round(parseFloat(weeklyResult.rows[0].avg_minutes) * 10) / 10;
     const averagePickups = Math.round(parseFloat(weeklyResult.rows[0].avg_pickups) * 10) / 10;
 
     // Calculate streaks (days under limit)
-    const { currentStreak, bestStreak } = await this.calculateStreaks(goal.dailyLimitMinutes);
+    const { currentStreak, bestStreak } = await this.calculateStreaks(userId, goal.dailyLimitMinutes);
 
     // Goal completion rate (last 30 days - days under limit)
     const completionResult = await pool.query<{ days_met: string; total_days: string }>(`
@@ -328,8 +335,8 @@ export const screenTimeModel = {
         COUNT(*) FILTER (WHERE total_minutes <= $1) as days_met,
         COUNT(*) as total_days
       FROM screen_time_records
-      WHERE date >= CURRENT_DATE - INTERVAL '30 days'
-    `, [goal.dailyLimitMinutes]);
+      WHERE date >= CURRENT_DATE - INTERVAL '30 days' AND user_id = $2
+    `, [goal.dailyLimitMinutes, userId]);
 
     const daysMet = parseInt(completionResult.rows[0].days_met);
     const totalDays = parseInt(completionResult.rows[0].total_days);
@@ -340,9 +347,9 @@ export const screenTimeModel = {
       SELECT au.app_name, au.minutes_used
       FROM app_usage au
       JOIN screen_time_records str ON au.screen_time_id = str.id
-      WHERE str.date = $1
+      WHERE str.date = $1 AND str.user_id = $2
       ORDER BY au.minutes_used DESC
-    `, [today]);
+    `, [today, userId]);
 
     const appUsageBreakdown: Record<string, number> = {};
     for (const row of appBreakdownResult.rows) {
@@ -362,12 +369,13 @@ export const screenTimeModel = {
     };
   },
 
-  async calculateStreaks(dailyLimitMinutes: number): Promise<{ currentStreak: number; bestStreak: number }> {
+  async calculateStreaks(userId: string, dailyLimitMinutes: number): Promise<{ currentStreak: number; bestStreak: number }> {
     const result = await pool.query<{ date: Date; total_minutes: number }>(`
       SELECT date, total_minutes
       FROM screen_time_records
+      WHERE user_id = $1
       ORDER BY date DESC
-    `);
+    `, [userId]);
 
     if (result.rows.length === 0) {
       return { currentStreak: 0, bestStreak: 0 };
@@ -429,8 +437,8 @@ export const screenTimeModel = {
     return { currentStreak, bestStreak };
   },
 
-  async getHistory(): Promise<ScreenTimeDailySummary[]> {
-    const goal = await this.getGoal();
+  async getHistory(userId: string): Promise<ScreenTimeDailySummary[]> {
+    const goal = await this.getGoal(userId);
     const summaries: ScreenTimeDailySummary[] = [];
 
     for (let i = 6; i >= 0; i--) {
@@ -439,8 +447,8 @@ export const screenTimeModel = {
       const dateStr = date.toISOString().split('T')[0];
 
       const result = await pool.query<{ total_minutes: number; pickups: number }>(
-        `SELECT total_minutes, pickups FROM screen_time_records WHERE date = $1`,
-        [dateStr]
+        `SELECT total_minutes, pickups FROM screen_time_records WHERE date = $1 AND user_id = $2`,
+        [dateStr, userId]
       );
 
       const totalMinutes = result.rows[0]?.total_minutes ?? 0;

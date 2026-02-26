@@ -6,8 +6,9 @@ import { logger } from '../config/logger';
 export const sleepController = {
   async getRecordsForDate(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { date } = req.query;
-      const records = await sleepModel.getRecordsForDate(date as string | undefined);
+      const records = await sleepModel.getRecordsForDate(userId, date as string | undefined);
       logger.debug({ count: records.length, date }, 'Fetched sleep records for date');
       res.json(records);
     } catch (error) {
@@ -18,8 +19,9 @@ export const sleepController = {
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const record = await sleepModel.findById(id);
+      const record = await sleepModel.findById(userId, id);
       if (!record) return next(new NotFoundError('Sleep record'));
       logger.debug({ recordId: id }, 'Fetched sleep record by ID');
       res.json(record);
@@ -31,8 +33,9 @@ export const sleepController = {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { bedTime, wakeTime, quality, notes } = req.body;
-      const record = await sleepModel.create({ bedTime, wakeTime, quality, notes });
+      const record = await sleepModel.create(userId, { bedTime, wakeTime, quality, notes });
       logger.info({ recordId: record.id, durationMinutes: record.durationMinutes }, 'Created new sleep record');
       res.status(201).json(record);
     } catch (error) {
@@ -43,6 +46,7 @@ export const sleepController = {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
       const { bedTime, wakeTime, quality, notes } = req.body;
       const updateData: Record<string, unknown> = {};
@@ -50,7 +54,7 @@ export const sleepController = {
       if (wakeTime !== undefined) updateData.wakeTime = wakeTime;
       if (quality !== undefined) updateData.quality = quality;
       if (notes !== undefined) updateData.notes = notes;
-      const record = await sleepModel.update(id, updateData);
+      const record = await sleepModel.update(userId, id, updateData);
       if (!record) return next(new NotFoundError('Sleep record'));
       logger.info({ recordId: id }, 'Updated sleep record');
       res.json(record);
@@ -62,8 +66,9 @@ export const sleepController = {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const deleted = await sleepModel.delete(id);
+      const deleted = await sleepModel.delete(userId, id);
       if (!deleted) return next(new NotFoundError('Sleep record'));
       logger.info({ recordId: id }, 'Deleted sleep record');
       res.status(204).send();
@@ -75,7 +80,8 @@ export const sleepController = {
 
   async getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const stats = await sleepModel.getStats();
+      const userId = req.user!.userId;
+      const stats = await sleepModel.getStats(userId);
       logger.debug('Fetched sleep stats');
       res.json(stats);
     } catch (error) {
@@ -86,7 +92,8 @@ export const sleepController = {
 
   async getHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const history = await sleepModel.getLast7Days();
+      const userId = req.user!.userId;
+      const history = await sleepModel.getLast7Days(userId);
       logger.debug('Fetched sleep history');
       res.json(history);
     } catch (error) {
@@ -97,7 +104,8 @@ export const sleepController = {
 
   async getGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const goal = await sleepModel.getGoal();
+      const userId = req.user!.userId;
+      const goal = await sleepModel.getGoal(userId);
       logger.debug('Fetched sleep goal');
       res.json(goal);
     } catch (error) {
@@ -108,8 +116,9 @@ export const sleepController = {
 
   async updateGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { goalMinutes } = req.body;
-      const goal = await sleepModel.updateGoal({ goalMinutes });
+      const goal = await sleepModel.updateGoal(userId, { goalMinutes });
       logger.info({ goalMinutes: goal.goalMinutes }, 'Updated sleep goal');
       res.json(goal);
     } catch (error) {

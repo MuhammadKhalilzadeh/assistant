@@ -6,9 +6,10 @@ import { logger } from '../config/logger';
 export const weatherController = {
   async getWeather(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { lat, lon } = req.query as unknown as { lat: number; lon: number };
-      const settings = await weatherModel.getSettings();
-      const weather = await weatherModel.fetchWeather(lat, lon, settings.temperatureUnit);
+      const settings = await weatherModel.getSettings(userId);
+      const weather = await weatherModel.fetchWeather(userId, lat, lon, settings.temperatureUnit);
       logger.debug({ lat, lon }, 'Fetched weather data');
       res.json(weather);
     } catch (error) {
@@ -19,8 +20,9 @@ export const weatherController = {
 
   async getHourlyForDate(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { lat, lon, date } = req.query as unknown as { lat: number; lon: number; date: string };
-      const settings = await weatherModel.getSettings();
+      const settings = await weatherModel.getSettings(userId);
       const hourly = await weatherModel.fetchHourlyForDate(lat, lon, date, settings.temperatureUnit);
       logger.debug({ lat, lon, date }, 'Fetched hourly forecast for date');
       res.json(hourly);
@@ -44,7 +46,8 @@ export const weatherController = {
 
   async getSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const settings = await weatherModel.getSettings();
+      const userId = req.user!.userId;
+      const settings = await weatherModel.getSettings(userId);
       logger.debug('Fetched weather settings');
       res.json(settings);
     } catch (error) {
@@ -55,8 +58,9 @@ export const weatherController = {
 
   async updateSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { latitude, longitude, cityName, temperatureUnit } = req.body;
-      const settings = await weatherModel.updateSettings({ latitude, longitude, cityName, temperatureUnit });
+      const settings = await weatherModel.updateSettings(userId, { latitude, longitude, cityName, temperatureUnit });
       logger.info({ cityName: settings.cityName }, 'Updated weather settings');
       res.json(settings);
     } catch (error) {

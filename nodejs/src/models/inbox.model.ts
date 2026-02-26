@@ -6,6 +6,8 @@ export interface InboxMessage {
   sender: string;
   subject: string;
   preview: string;
+  body: string | null;
+  gmailMessageId: string | null;
   isRead: boolean;
   isStarred: boolean;
   receivedAt: Date;
@@ -18,6 +20,8 @@ export interface InboxMessageRow {
   sender: string;
   subject: string;
   preview: string;
+  body: string | null;
+  gmail_message_id: string | null;
   is_read: boolean;
   is_starred: boolean;
   received_at: Date;
@@ -36,6 +40,8 @@ export interface CreateInboxMessageInput {
   sender: string;
   subject: string;
   preview?: string;
+  body?: string;
+  gmailMessageId?: string;
   isRead?: boolean;
   isStarred?: boolean;
   receivedAt?: string;
@@ -50,6 +56,17 @@ export interface UpdateInboxMessageInput {
   isStarred?: boolean;
 }
 
+export interface UpsertGmailMessageInput {
+  gmailMessageId: string;
+  sender: string;
+  subject: string;
+  preview?: string;
+  body?: string;
+  isRead?: boolean;
+  isStarred?: boolean;
+  receivedAt?: string;
+}
+
 function rowToMessage(row: InboxMessageRow): InboxMessage {
   return {
     id: row.id,
@@ -57,6 +74,8 @@ function rowToMessage(row: InboxMessageRow): InboxMessage {
     sender: row.sender,
     subject: row.subject,
     preview: row.preview,
+    body: row.body,
+    gmailMessageId: row.gmail_message_id,
     isRead: row.is_read,
     isStarred: row.is_starred,
     receivedAt: row.received_at,
@@ -65,11 +84,11 @@ function rowToMessage(row: InboxMessageRow): InboxMessage {
 }
 
 export const inboxModel = {
-  async getMessages(filters?: { service?: string; isRead?: boolean }): Promise<InboxMessage[]> {
-    let query = `SELECT id, service, sender, subject, preview, is_read, is_starred, received_at, created_at
-                 FROM inbox_messages WHERE 1=1`;
-    const values: (string | boolean)[] = [];
-    let paramIndex = 1;
+  async getMessages(userId: string, filters?: { service?: string; isRead?: boolean }): Promise<InboxMessage[]> {
+    let query = `SELECT id, service, sender, subject, preview, body, gmail_message_id, is_read, is_starred, received_at, created_at
+                 FROM inbox_messages WHERE user_id = $1`;
+    const values: (string | boolean)[] = [userId];
+    let paramIndex = 2;
 
     if (filters?.service) {
       query += ` AND service = $${paramIndex++}`;
@@ -86,27 +105,30 @@ export const inboxModel = {
     return result.rows.map(rowToMessage);
   },
 
-  async findById(id: string): Promise<InboxMessage | null> {
+  async findById(userId: string, id: string): Promise<InboxMessage | null> {
     const result = await pool.query<InboxMessageRow>(
-      `SELECT id, service, sender, subject, preview, is_read, is_starred, received_at, created_at
-       FROM inbox_messages WHERE id = $1`,
-      [id]
+      `SELECT id, service, sender, subject, preview, body, gmail_message_id, is_read, is_starred, received_at, created_at
+       FROM inbox_messages WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
 
     if (!result.rows[0]) return null;
     return rowToMessage(result.rows[0]);
   },
 
-  async create(input: CreateInboxMessageInput): Promise<InboxMessage> {
+  async create(userId: string, input: CreateInboxMessageInput): Promise<InboxMessage> {
     const result = await pool.query<InboxMessageRow>(
-      `INSERT INTO inbox_messages (service, sender, subject, preview, is_read, is_starred, received_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, service, sender, subject, preview, is_read, is_starred, received_at, created_at`,
+      `INSERT INTO inbox_messages (user_id, service, sender, subject, preview, body, gmail_message_id, is_read, is_starred, received_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING id, service, sender, subject, preview, body, gmail_message_id, is_read, is_starred, received_at, created_at`,
       [
+        userId,
         input.service || 'General',
         input.sender,
         input.subject,
         input.preview || '',
+        input.body || null,
+        input.gmailMessageId || null,
         input.isRead || false,
         input.isStarred || false,
         input.receivedAt ? new Date(input.receivedAt) : new Date(),
@@ -116,8 +138,8 @@ export const inboxModel = {
     return rowToMessage(result.rows[0]);
   },
 
-  async update(id: string, input: UpdateInboxMessageInput): Promise<InboxMessage | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateInboxMessageInput): Promise<InboxMessage | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const updates: string[] = [];
@@ -152,53 +174,58 @@ export const inboxModel = {
     if (updates.length === 0) return existing;
 
     values.push(id);
+    values.push(userId);
     await pool.query(
-      `UPDATE inbox_messages SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE inbox_messages SET ${updates.join(', ')} WHERE id = $${paramIndex++} AND user_id = $${paramIndex}`,
       values
     );
 
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM inbox_messages WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM inbox_messages WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async markAsRead(id: string): Promise<InboxMessage | null> {
+  async markAsRead(userId: string, id: string): Promise<InboxMessage | null> {
     const result = await pool.query<InboxMessageRow>(
-      `UPDATE inbox_messages SET is_read = TRUE WHERE id = $1
-       RETURNING id, service, sender, subject, preview, is_read, is_starred, received_at, created_at`,
-      [id]
+      `UPDATE inbox_messages SET is_read = TRUE WHERE id = $1 AND user_id = $2
+       RETURNING id, service, sender, subject, preview, body, gmail_message_id, is_read, is_starred, received_at, created_at`,
+      [id, userId]
     );
 
     if (!result.rows[0]) return null;
     return rowToMessage(result.rows[0]);
   },
 
-  async toggleStar(id: string): Promise<InboxMessage | null> {
+  async toggleStar(userId: string, id: string): Promise<InboxMessage | null> {
     const result = await pool.query<InboxMessageRow>(
-      `UPDATE inbox_messages SET is_starred = NOT is_starred WHERE id = $1
-       RETURNING id, service, sender, subject, preview, is_read, is_starred, received_at, created_at`,
-      [id]
+      `UPDATE inbox_messages SET is_starred = NOT is_starred WHERE id = $1 AND user_id = $2
+       RETURNING id, service, sender, subject, preview, body, gmail_message_id, is_read, is_starred, received_at, created_at`,
+      [id, userId]
     );
 
     if (!result.rows[0]) return null;
     return rowToMessage(result.rows[0]);
   },
 
-  async getStats(): Promise<InboxStats> {
+  async getStats(userId: string): Promise<InboxStats> {
     const totalResult = await pool.query<{ count: string }>(
-      'SELECT COUNT(*) as count FROM inbox_messages'
+      'SELECT COUNT(*) as count FROM inbox_messages WHERE user_id = $1',
+      [userId]
     );
     const unreadResult = await pool.query<{ count: string }>(
-      'SELECT COUNT(*) as count FROM inbox_messages WHERE is_read = FALSE'
+      'SELECT COUNT(*) as count FROM inbox_messages WHERE user_id = $1 AND is_read = FALSE',
+      [userId]
     );
     const starredResult = await pool.query<{ count: string }>(
-      'SELECT COUNT(*) as count FROM inbox_messages WHERE is_starred = TRUE'
+      'SELECT COUNT(*) as count FROM inbox_messages WHERE user_id = $1 AND is_starred = TRUE',
+      [userId]
     );
     const servicesResult = await pool.query<{ service: string }>(
-      'SELECT DISTINCT service FROM inbox_messages ORDER BY service'
+      'SELECT DISTINCT service FROM inbox_messages WHERE user_id = $1 ORDER BY service',
+      [userId]
     );
 
     return {
@@ -207,5 +234,45 @@ export const inboxModel = {
       starredCount: parseInt(starredResult.rows[0].count),
       services: servicesResult.rows.map(r => r.service),
     };
+  },
+
+  async upsertGmailMessage(userId: string, data: UpsertGmailMessageInput): Promise<InboxMessage> {
+    const result = await pool.query<InboxMessageRow>(
+      `INSERT INTO inbox_messages (user_id, service, sender, subject, preview, body, gmail_message_id, is_read, is_starred, received_at)
+       VALUES ($1, 'Gmail', $2, $3, $4, $5, $6, $7, $8, $9)
+       ON CONFLICT (gmail_message_id) DO UPDATE SET
+         sender = $2, subject = $3, preview = $4, body = $5,
+         is_read = $7, is_starred = $8
+       RETURNING id, service, sender, subject, preview, body, gmail_message_id, is_read, is_starred, received_at, created_at`,
+      [
+        userId,
+        data.sender,
+        data.subject,
+        data.preview || '',
+        data.body || null,
+        data.gmailMessageId,
+        data.isRead || false,
+        data.isStarred || false,
+        data.receivedAt ? new Date(data.receivedAt) : new Date(),
+      ]
+    );
+
+    return rowToMessage(result.rows[0]);
+  },
+
+  async getBody(userId: string, id: string): Promise<string | null> {
+    const result = await pool.query<{ body: string | null }>(
+      `SELECT body FROM inbox_messages WHERE id = $1 AND user_id = $2`,
+      [id, userId]
+    );
+    if (!result.rows[0]) return null;
+    return result.rows[0].body;
+  },
+
+  async updateBody(userId: string, id: string, body: string): Promise<void> {
+    await pool.query(
+      `UPDATE inbox_messages SET body = $1 WHERE id = $2 AND user_id = $3`,
+      [body, id, userId]
+    );
   },
 };

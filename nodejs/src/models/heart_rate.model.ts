@@ -97,39 +97,39 @@ function rowToGoal(row: HeartRateGoalRow): HeartRateGoal {
 }
 
 export const heartRateModel = {
-  async getRecordsForDate(date?: string): Promise<HeartRateRecord[]> {
+  async getRecordsForDate(userId: string, date?: string): Promise<HeartRateRecord[]> {
     const targetDate = date || new Date().toISOString().split('T')[0];
     const result = await pool.query<HeartRateRecordRow>(`
       SELECT id, bpm, zone, recorded_at, created_at
       FROM heart_rate_records
-      WHERE DATE(recorded_at) = $1
+      WHERE user_id = $1 AND DATE(recorded_at) = $2
       ORDER BY recorded_at DESC
-    `, [targetDate]);
+    `, [userId, targetDate]);
     return result.rows.map(rowToRecord);
   },
 
-  async findById(id: string): Promise<HeartRateRecord | null> {
+  async findById(userId: string, id: string): Promise<HeartRateRecord | null> {
     const result = await pool.query<HeartRateRecordRow>(
-      `SELECT id, bpm, zone, recorded_at, created_at FROM heart_rate_records WHERE id = $1`,
-      [id]
+      `SELECT id, bpm, zone, recorded_at, created_at FROM heart_rate_records WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
     if (!result.rows[0]) return null;
     return rowToRecord(result.rows[0]);
   },
 
-  async create(input: CreateHeartRateInput): Promise<HeartRateRecord> {
+  async create(userId: string, input: CreateHeartRateInput): Promise<HeartRateRecord> {
     const zone = input.zone || calculateZone(input.bpm);
     const result = await pool.query<HeartRateRecordRow>(
-      `INSERT INTO heart_rate_records (bpm, zone, recorded_at)
-       VALUES ($1, $2, $3)
+      `INSERT INTO heart_rate_records (user_id, bpm, zone, recorded_at)
+       VALUES ($1, $2, $3, $4)
        RETURNING id, bpm, zone, recorded_at, created_at`,
-      [input.bpm, zone, input.recordedAt ? new Date(input.recordedAt) : new Date()]
+      [userId, input.bpm, zone, input.recordedAt ? new Date(input.recordedAt) : new Date()]
     );
     return rowToRecord(result.rows[0]);
   },
 
-  async update(id: string, input: UpdateHeartRateInput): Promise<HeartRateRecord | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateHeartRateInput): Promise<HeartRateRecord | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const updates: string[] = [];
@@ -155,36 +155,38 @@ export const heartRateModel = {
     if (updates.length === 0) return existing;
 
     values.push(id);
+    values.push(userId);
     await pool.query(
-      `UPDATE heart_rate_records SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE heart_rate_records SET ${updates.join(', ')} WHERE id = $${paramIndex++} AND user_id = $${paramIndex}`,
       values
     );
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM heart_rate_records WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM heart_rate_records WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async getGoal(): Promise<HeartRateGoal> {
+  async getGoal(userId: string): Promise<HeartRateGoal> {
     const result = await pool.query<HeartRateGoalRow>(`
       SELECT id, target_resting_bpm, max_bpm, created_at, updated_at
-      FROM heart_rate_goals ORDER BY created_at DESC LIMIT 1
-    `);
+      FROM heart_rate_goals WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1
+    `, [userId]);
     if (!result.rows[0]) {
       const insertResult = await pool.query<HeartRateGoalRow>(
-        `INSERT INTO heart_rate_goals (target_resting_bpm, max_bpm)
-         VALUES (65, 180)
-         RETURNING id, target_resting_bpm, max_bpm, created_at, updated_at`
+        `INSERT INTO heart_rate_goals (user_id, target_resting_bpm, max_bpm)
+         VALUES ($1, 65, 180)
+         RETURNING id, target_resting_bpm, max_bpm, created_at, updated_at`,
+        [userId]
       );
       return rowToGoal(insertResult.rows[0]);
     }
     return rowToGoal(result.rows[0]);
   },
 
-  async updateGoal(input: UpdateHeartRateGoalInput): Promise<HeartRateGoal> {
-    const goal = await this.getGoal();
+  async updateGoal(userId: string, input: UpdateHeartRateGoalInput): Promise<HeartRateGoal> {
+    const goal = await this.getGoal(userId);
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
     const values: (number | string)[] = [];
     let paramIndex = 1;
@@ -198,50 +200,51 @@ export const heartRateModel = {
     }
 
     values.push(goal.id);
+    values.push(userId);
     await pool.query(
-      `UPDATE heart_rate_goals SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE heart_rate_goals SET ${updates.join(', ')} WHERE id = $${paramIndex++} AND user_id = $${paramIndex}`,
       values
     );
-    return this.getGoal();
+    return this.getGoal(userId);
   },
 
-  async getStats(): Promise<HeartRateStats> {
+  async getStats(userId: string): Promise<HeartRateStats> {
     const today = new Date().toISOString().split('T')[0];
 
     // Get resting average (bpm < 100)
     const restingResult = await pool.query<{ avg: string }>(`
       SELECT COALESCE(AVG(bpm), 0) as avg FROM heart_rate_records
-      WHERE bpm < 100 AND recorded_at >= CURRENT_DATE - INTERVAL '7 days'
-    `);
+      WHERE user_id = $1 AND bpm < 100 AND recorded_at >= CURRENT_DATE - INTERVAL '7 days'
+    `, [userId]);
     const averageRestingBpm = Math.round(parseFloat(restingResult.rows[0].avg) * 10) / 10;
 
     // Get active average (bpm >= 100)
     const activeResult = await pool.query<{ avg: string }>(`
       SELECT COALESCE(AVG(bpm), 0) as avg FROM heart_rate_records
-      WHERE bpm >= 100 AND recorded_at >= CURRENT_DATE - INTERVAL '7 days'
-    `);
+      WHERE user_id = $1 AND bpm >= 100 AND recorded_at >= CURRENT_DATE - INTERVAL '7 days'
+    `, [userId]);
     const averageActiveBpm = Math.round(parseFloat(activeResult.rows[0].avg) * 10) / 10;
 
     // Get min/max
     const minMaxResult = await pool.query<{ min_bpm: number; max_bpm: number; total: string }>(`
       SELECT COALESCE(MIN(bpm), 0) as min_bpm, COALESCE(MAX(bpm), 0) as max_bpm, COUNT(*) as total
       FROM heart_rate_records
-      WHERE recorded_at >= CURRENT_DATE - INTERVAL '7 days'
-    `);
+      WHERE user_id = $1 AND recorded_at >= CURRENT_DATE - INTERVAL '7 days'
+    `, [userId]);
 
     // Get zone distribution
     const zoneResult = await pool.query<{ zone: string; count: string }>(`
       SELECT zone, COUNT(*) as count FROM heart_rate_records
-      WHERE recorded_at >= CURRENT_DATE - INTERVAL '7 days'
+      WHERE user_id = $1 AND recorded_at >= CURRENT_DATE - INTERVAL '7 days'
       GROUP BY zone
-    `);
+    `, [userId]);
     const zoneDistribution: Record<string, number> = {};
     for (const row of zoneResult.rows) {
       zoneDistribution[row.zone] = parseInt(row.count);
     }
 
     // Calculate streaks (days with at least one reading)
-    const { currentStreak, bestStreak } = await this.calculateStreaks();
+    const { currentStreak, bestStreak } = await this.calculateStreaks(userId);
 
     return {
       averageRestingBpm,
@@ -255,12 +258,13 @@ export const heartRateModel = {
     };
   },
 
-  async calculateStreaks(): Promise<{ currentStreak: number; bestStreak: number }> {
+  async calculateStreaks(userId: string): Promise<{ currentStreak: number; bestStreak: number }> {
     const result = await pool.query<{ log_date: Date }>(`
       SELECT DISTINCT DATE(recorded_at) as log_date
       FROM heart_rate_records
+      WHERE user_id = $1
       ORDER BY log_date DESC
-    `);
+    `, [userId]);
 
     if (result.rows.length === 0) return { currentStreak: 0, bestStreak: 0 };
 
@@ -331,7 +335,7 @@ export const heartRateModel = {
     return { currentStreak, bestStreak };
   },
 
-  async getLast7Days(): Promise<HeartRateDailySummary[]> {
+  async getLast7Days(userId: string): Promise<HeartRateDailySummary[]> {
     const summaries: HeartRateDailySummary[] = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
@@ -341,8 +345,8 @@ export const heartRateModel = {
       const result = await pool.query<{ avg_bpm: string; min_bpm: string; max_bpm: string; count: string }>(
         `SELECT COALESCE(AVG(bpm), 0) as avg_bpm, COALESCE(MIN(bpm), 0) as min_bpm,
                 COALESCE(MAX(bpm), 0) as max_bpm, COUNT(*) as count
-         FROM heart_rate_records WHERE DATE(recorded_at) = $1`,
-        [dateStr]
+         FROM heart_rate_records WHERE user_id = $1 AND DATE(recorded_at) = $2`,
+        [userId, dateStr]
       );
 
       summaries.push({

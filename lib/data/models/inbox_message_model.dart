@@ -5,6 +5,8 @@ class InboxMessage {
   final String sender;
   final String subject;
   final String preview;
+  final String? body;
+  final String? gmailMessageId;
   final bool isRead;
   final bool isStarred;
   final DateTime receivedAt;
@@ -16,6 +18,8 @@ class InboxMessage {
     required this.sender,
     required this.subject,
     this.preview = '',
+    this.body,
+    this.gmailMessageId,
     this.isRead = false,
     this.isStarred = false,
     required this.receivedAt,
@@ -28,6 +32,8 @@ class InboxMessage {
     String? sender,
     String? subject,
     String? preview,
+    String? body,
+    String? gmailMessageId,
     bool? isRead,
     bool? isStarred,
     DateTime? receivedAt,
@@ -39,6 +45,8 @@ class InboxMessage {
       sender: sender ?? this.sender,
       subject: subject ?? this.subject,
       preview: preview ?? this.preview,
+      body: body ?? this.body,
+      gmailMessageId: gmailMessageId ?? this.gmailMessageId,
       isRead: isRead ?? this.isRead,
       isStarred: isStarred ?? this.isStarred,
       receivedAt: receivedAt ?? this.receivedAt,
@@ -53,6 +61,8 @@ class InboxMessage {
       sender: json['sender'] as String,
       subject: json['subject'] as String,
       preview: json['preview'] as String? ?? '',
+      body: json['body'] as String?,
+      gmailMessageId: json['gmailMessageId'] as String?,
       isRead: json['isRead'] as bool? ?? false,
       isStarred: json['isStarred'] as bool? ?? false,
       receivedAt: DateTime.parse(json['receivedAt'] as String),
@@ -69,6 +79,8 @@ class InboxMessage {
       'sender': sender,
       'subject': subject,
       'preview': preview,
+      'body': body,
+      'gmailMessageId': gmailMessageId,
       'isRead': isRead,
       'isStarred': isStarred,
       'receivedAt': receivedAt.toIso8601String(),

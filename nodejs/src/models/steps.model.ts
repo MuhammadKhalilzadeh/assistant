@@ -98,67 +98,67 @@ function rowToGoal(row: StepsGoalRow): StepsGoal {
 }
 
 export const stepsModel = {
-  async getRecordForDate(date?: string): Promise<StepRecord | null> {
+  async getRecordForDate(userId: string, date?: string): Promise<StepRecord | null> {
     const targetDate = date || new Date().toISOString().split('T')[0];
     const result = await pool.query<StepRecordRow>(
       `SELECT id, date, steps, goal, distance_km, calories_burned, created_at, updated_at
-       FROM step_records WHERE date = $1`,
-      [targetDate]
+       FROM step_records WHERE user_id = $1 AND date = $2`,
+      [userId, targetDate]
     );
     if (!result.rows[0]) return null;
     return rowToRecord(result.rows[0]);
   },
 
-  async findById(id: string): Promise<StepRecord | null> {
+  async findById(userId: string, id: string): Promise<StepRecord | null> {
     const result = await pool.query<StepRecordRow>(
       `SELECT id, date, steps, goal, distance_km, calories_burned, created_at, updated_at
-       FROM step_records WHERE id = $1`,
-      [id]
+       FROM step_records WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
     if (!result.rows[0]) return null;
     return rowToRecord(result.rows[0]);
   },
 
-  async create(input: CreateStepRecordInput): Promise<StepRecord> {
-    const goal = input.goal || (await this.getGoal()).dailyGoal;
+  async create(userId: string, input: CreateStepRecordInput): Promise<StepRecord> {
+    const goal = input.goal || (await this.getGoal(userId)).dailyGoal;
     const distanceKm = input.distanceKm ?? (input.steps * 0.0008);
     const caloriesBurned = input.caloriesBurned ?? Math.round(input.steps * 0.04);
 
-    // Upsert: insert or update if date already exists
+    // Upsert: insert or update if date already exists for this user
     const result = await pool.query<StepRecordRow>(
-      `INSERT INTO step_records (date, steps, goal, distance_km, calories_burned)
-       VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (date) DO UPDATE SET
-         steps = $2, goal = $3, distance_km = $4, calories_burned = $5,
+      `INSERT INTO step_records (user_id, date, steps, goal, distance_km, calories_burned)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (user_id, date) DO UPDATE SET
+         steps = $3, goal = $4, distance_km = $5, calories_burned = $6,
          updated_at = CURRENT_TIMESTAMP
        RETURNING id, date, steps, goal, distance_km, calories_burned, created_at, updated_at`,
-      [input.date, input.steps, goal, distanceKm, caloriesBurned]
+      [userId, input.date, input.steps, goal, distanceKm, caloriesBurned]
     );
     return rowToRecord(result.rows[0]);
   },
 
-  async addSteps(stepsToAdd: number): Promise<StepRecord> {
+  async addSteps(userId: string, stepsToAdd: number): Promise<StepRecord> {
     const today = new Date().toISOString().split('T')[0];
-    const goal = (await this.getGoal()).dailyGoal;
-    const existing = await this.getRecordForDate(today);
+    const goal = (await this.getGoal(userId)).dailyGoal;
+    const existing = await this.getRecordForDate(userId, today);
     const newSteps = (existing?.steps || 0) + stepsToAdd;
     const distanceKm = newSteps * 0.0008;
     const caloriesBurned = Math.round(newSteps * 0.04);
 
     const result = await pool.query<StepRecordRow>(
-      `INSERT INTO step_records (date, steps, goal, distance_km, calories_burned)
-       VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (date) DO UPDATE SET
-         steps = $2, goal = $3, distance_km = $4, calories_burned = $5,
+      `INSERT INTO step_records (user_id, date, steps, goal, distance_km, calories_burned)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (user_id, date) DO UPDATE SET
+         steps = $3, goal = $4, distance_km = $5, calories_burned = $6,
          updated_at = CURRENT_TIMESTAMP
        RETURNING id, date, steps, goal, distance_km, calories_burned, created_at, updated_at`,
-      [today, newSteps, goal, distanceKm, caloriesBurned]
+      [userId, today, newSteps, goal, distanceKm, caloriesBurned]
     );
     return rowToRecord(result.rows[0]);
   },
 
-  async update(id: string, input: UpdateStepRecordInput): Promise<StepRecord | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateStepRecordInput): Promise<StepRecord | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
@@ -183,62 +183,64 @@ export const stepsModel = {
     }
 
     values.push(id);
+    values.push(userId);
     await pool.query(
-      `UPDATE step_records SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE step_records SET ${updates.join(', ')} WHERE id = $${paramIndex++} AND user_id = $${paramIndex}`,
       values
     );
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM step_records WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM step_records WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async getGoal(): Promise<StepsGoal> {
+  async getGoal(userId: string): Promise<StepsGoal> {
     const result = await pool.query<StepsGoalRow>(`
       SELECT id, daily_goal, created_at, updated_at
-      FROM steps_goals ORDER BY created_at DESC LIMIT 1
-    `);
+      FROM steps_goals WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1
+    `, [userId]);
     if (!result.rows[0]) {
       const insertResult = await pool.query<StepsGoalRow>(
-        `INSERT INTO steps_goals (daily_goal) VALUES (10000)
-         RETURNING id, daily_goal, created_at, updated_at`
+        `INSERT INTO steps_goals (user_id, daily_goal) VALUES ($1, 10000)
+         RETURNING id, daily_goal, created_at, updated_at`,
+        [userId]
       );
       return rowToGoal(insertResult.rows[0]);
     }
     return rowToGoal(result.rows[0]);
   },
 
-  async updateGoal(input: UpdateStepsGoalInput): Promise<StepsGoal> {
-    const goal = await this.getGoal();
+  async updateGoal(userId: string, input: UpdateStepsGoalInput): Promise<StepsGoal> {
+    const goal = await this.getGoal(userId);
     await pool.query(
-      `UPDATE steps_goals SET daily_goal = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-      [input.dailyGoal, goal.id]
+      `UPDATE steps_goals SET daily_goal = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3`,
+      [input.dailyGoal, goal.id, userId]
     );
-    return this.getGoal();
+    return this.getGoal(userId);
   },
 
-  async getStats(): Promise<StepsStats> {
-    const goal = await this.getGoal();
+  async getStats(userId: string): Promise<StepsStats> {
+    const goal = await this.getGoal(userId);
     const today = new Date().toISOString().split('T')[0];
 
-    const todayRecord = await this.getRecordForDate(today);
+    const todayRecord = await this.getRecordForDate(userId, today);
     const todaySteps = todayRecord?.steps || 0;
 
     const weeklyResult = await pool.query<{ avg: string; total_dist: string; total_cal: string }>(`
       SELECT COALESCE(AVG(steps), 0) as avg,
              COALESCE(SUM(distance_km), 0) as total_dist,
              COALESCE(SUM(calories_burned), 0) as total_cal
-      FROM step_records WHERE date >= CURRENT_DATE - INTERVAL '7 days'
-    `);
+      FROM step_records WHERE user_id = $1 AND date >= CURRENT_DATE - INTERVAL '7 days'
+    `, [userId]);
 
-    const { currentStreak, bestStreak } = await this.calculateStreaks(goal.dailyGoal);
+    const { currentStreak, bestStreak } = await this.calculateStreaks(userId, goal.dailyGoal);
 
     const completionResult = await pool.query<{ days_met: string; total_days: string }>(`
       SELECT COUNT(*) FILTER (WHERE steps >= goal) as days_met, COUNT(*) as total_days
-      FROM step_records WHERE date >= CURRENT_DATE - INTERVAL '30 days'
-    `);
+      FROM step_records WHERE user_id = $1 AND date >= CURRENT_DATE - INTERVAL '30 days'
+    `, [userId]);
     const daysMet = parseInt(completionResult.rows[0].days_met);
     const totalDays = parseInt(completionResult.rows[0].total_days);
     const goalCompletionRate = totalDays > 0 ? Math.round((daysMet / totalDays) * 100) / 100 : 0;
@@ -255,10 +257,10 @@ export const stepsModel = {
     };
   },
 
-  async calculateStreaks(dailyGoal: number): Promise<{ currentStreak: number; bestStreak: number }> {
+  async calculateStreaks(userId: string, dailyGoal: number): Promise<{ currentStreak: number; bestStreak: number }> {
     const result = await pool.query<{ date: Date; steps: number }>(`
-      SELECT date, steps FROM step_records ORDER BY date DESC
-    `);
+      SELECT date, steps FROM step_records WHERE user_id = $1 ORDER BY date DESC
+    `, [userId]);
     if (result.rows.length === 0) return { currentStreak: 0, bestStreak: 0 };
 
     let currentStreak = 0;
@@ -300,15 +302,15 @@ export const stepsModel = {
     return { currentStreak, bestStreak };
   },
 
-  async getLast7Days(): Promise<StepsDailySummary[]> {
-    const goal = await this.getGoal();
+  async getLast7Days(userId: string): Promise<StepsDailySummary[]> {
+    const goal = await this.getGoal(userId);
     const summaries: StepsDailySummary[] = [];
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
-      const record = await this.getRecordForDate(dateStr);
+      const record = await this.getRecordForDate(userId, dateStr);
 
       summaries.push({
         date: dateStr,

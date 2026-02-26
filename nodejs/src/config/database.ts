@@ -85,6 +85,52 @@ async function ensureDatabaseExists(): Promise<void> {
   }
 }
 
+// Run pending migrations from sql/migrations/ directory
+async function runMigrations(client: PoolClient): Promise<void> {
+  // Create migrations tracking table if it doesn't exist
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      name VARCHAR(255) PRIMARY KEY,
+      applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Read all migration files
+  const migrationsDir = join(__dirname, '../../sql/migrations');
+  let migrationFiles: string[];
+  try {
+    const { readdirSync } = require('fs');
+    migrationFiles = (readdirSync(migrationsDir) as string[])
+      .filter((f: string) => f.endsWith('.sql'))
+      .sort();
+  } catch {
+    logger.debug('No migrations directory found, skipping migrations');
+    return;
+  }
+
+  // Check which migrations have already been applied
+  const applied = await client.query<{ name: string }>(
+    'SELECT name FROM schema_migrations'
+  );
+  const appliedSet = new Set(applied.rows.map(r => r.name));
+
+  for (const file of migrationFiles) {
+    if (appliedSet.has(file)) {
+      logger.debug({ migration: file }, 'Migration already applied, skipping');
+      continue;
+    }
+
+    logger.info({ migration: file }, 'Running migration...');
+    const sql = readFileSync(join(migrationsDir, file), 'utf-8');
+    await client.query(sql);
+    await client.query(
+      'INSERT INTO schema_migrations (name) VALUES ($1)',
+      [file]
+    );
+    logger.info({ migration: file }, 'Migration applied successfully');
+  }
+}
+
 // Initialize database schema from init.sql
 export async function initializeDatabase(): Promise<void> {
   let client: PoolClient | null = null;
@@ -95,12 +141,14 @@ export async function initializeDatabase(): Promise<void> {
 
     logger.info('Initializing database schema...');
 
-    // Read the init.sql file
+    client = await pool.connect();
+
+    // Run pending migrations first (handles existing databases)
+    await runMigrations(client);
+
+    // Read and execute init.sql (idempotent CREATE TABLE IF NOT EXISTS)
     const sqlPath = join(__dirname, '../../sql/init.sql');
     const initSql = readFileSync(sqlPath, 'utf-8');
-
-    // Execute the SQL
-    client = await pool.connect();
     await client.query(initSql);
 
     logger.info('Database schema initialized successfully');

@@ -15,17 +15,18 @@ export interface CategoryRow {
 }
 
 export const categoryModel = {
-  async findAll(): Promise<Category[]> {
+  async findAll(userId: string): Promise<Category[]> {
     const result = await pool.query<CategoryRow>(
-      'SELECT id, name, color, icon FROM categories ORDER BY name'
+      'SELECT id, name, color, icon FROM categories WHERE user_id = $1 ORDER BY name',
+      [userId]
     );
     return result.rows;
   },
 
-  async findById(id: string): Promise<Category | null> {
+  async findById(userId: string, id: string): Promise<Category | null> {
     const result = await pool.query<CategoryRow>(
-      'SELECT id, name, color, icon FROM categories WHERE id = $1',
-      [id]
+      'SELECT id, name, color, icon FROM categories WHERE id = $1 AND user_id = $2',
+      [id, userId]
     );
     return result.rows[0] || null;
   },

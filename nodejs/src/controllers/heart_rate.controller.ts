@@ -6,8 +6,9 @@ import { logger } from '../config/logger';
 export const heartRateController = {
   async getRecordsForDate(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { date } = req.query;
-      const records = await heartRateModel.getRecordsForDate(date as string | undefined);
+      const records = await heartRateModel.getRecordsForDate(userId, date as string | undefined);
       logger.debug({ count: records.length, date }, 'Fetched heart rate records for date');
       res.json(records);
     } catch (error) {
@@ -18,8 +19,9 @@ export const heartRateController = {
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const record = await heartRateModel.findById(id);
+      const record = await heartRateModel.findById(userId, id);
       if (!record) return next(new NotFoundError('Heart rate record'));
       logger.debug({ recordId: id }, 'Fetched heart rate record by ID');
       res.json(record);
@@ -31,8 +33,9 @@ export const heartRateController = {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { bpm, zone, recordedAt } = req.body;
-      const record = await heartRateModel.create({ bpm, zone, recordedAt });
+      const record = await heartRateModel.create(userId, { bpm, zone, recordedAt });
       logger.info({ recordId: record.id, bpm: record.bpm }, 'Created new heart rate record');
       res.status(201).json(record);
     } catch (error) {
@@ -43,13 +46,14 @@ export const heartRateController = {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
       const { bpm, zone, recordedAt } = req.body;
       const updateData: Record<string, unknown> = {};
       if (bpm !== undefined) updateData.bpm = bpm;
       if (zone !== undefined) updateData.zone = zone;
       if (recordedAt !== undefined) updateData.recordedAt = recordedAt;
-      const record = await heartRateModel.update(id, updateData);
+      const record = await heartRateModel.update(userId, id, updateData);
       if (!record) return next(new NotFoundError('Heart rate record'));
       logger.info({ recordId: id }, 'Updated heart rate record');
       res.json(record);
@@ -61,8 +65,9 @@ export const heartRateController = {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const deleted = await heartRateModel.delete(id);
+      const deleted = await heartRateModel.delete(userId, id);
       if (!deleted) return next(new NotFoundError('Heart rate record'));
       logger.info({ recordId: id }, 'Deleted heart rate record');
       res.status(204).send();
@@ -74,7 +79,8 @@ export const heartRateController = {
 
   async getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const stats = await heartRateModel.getStats();
+      const userId = req.user!.userId;
+      const stats = await heartRateModel.getStats(userId);
       logger.debug('Fetched heart rate stats');
       res.json(stats);
     } catch (error) {
@@ -85,7 +91,8 @@ export const heartRateController = {
 
   async getHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const history = await heartRateModel.getLast7Days();
+      const userId = req.user!.userId;
+      const history = await heartRateModel.getLast7Days(userId);
       logger.debug('Fetched heart rate history');
       res.json(history);
     } catch (error) {
@@ -96,7 +103,8 @@ export const heartRateController = {
 
   async getGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const goal = await heartRateModel.getGoal();
+      const userId = req.user!.userId;
+      const goal = await heartRateModel.getGoal(userId);
       logger.debug('Fetched heart rate goal');
       res.json(goal);
     } catch (error) {
@@ -107,8 +115,9 @@ export const heartRateController = {
 
   async updateGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { targetRestingBpm, maxBpm } = req.body;
-      const goal = await heartRateModel.updateGoal({ targetRestingBpm, maxBpm });
+      const goal = await heartRateModel.updateGoal(userId, { targetRestingBpm, maxBpm });
       logger.info({ targetRestingBpm: goal.targetRestingBpm }, 'Updated heart rate goal');
       res.json(goal);
     } catch (error) {

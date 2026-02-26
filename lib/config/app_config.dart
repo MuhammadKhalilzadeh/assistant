@@ -7,14 +7,14 @@ class AppConfig {
   static late AppConfig _instance;
 
   final String apiBaseUrl;
-  final String? apiKey;
+  final String googleServerClientId;
   final Duration requestTimeout;
   final int maxRetries;
   final Duration cacheTtl;
 
   AppConfig._({
     required this.apiBaseUrl,
-    this.apiKey,
+    required this.googleServerClientId,
     this.requestTimeout = const Duration(seconds: 30),
     this.maxRetries = 3,
     this.cacheTtl = const Duration(minutes: 15),
@@ -27,10 +27,6 @@ class AppConfig {
 
   /// Development configuration
   factory AppConfig._dev() {
-    // Configure based on platform:
-    // - Physical Android device: use _devServerIp (your computer's local IP)
-    // - Android emulator: 10.0.2.2
-    // - iOS simulator / Web / Desktop: localhost
     final String host;
     if (_devServerIp.isNotEmpty) {
       host = _devServerIp;
@@ -43,7 +39,10 @@ class AppConfig {
 
     return AppConfig._(
       apiBaseUrl: baseUrl,
-      apiKey: null, // No API key required in dev
+      googleServerClientId: const String.fromEnvironment(
+        'GOOGLE_SERVER_CLIENT_ID',
+        defaultValue: '',
+      ),
       requestTimeout: const Duration(seconds: 30),
       maxRetries: 3,
       cacheTtl: const Duration(minutes: 5),
@@ -57,7 +56,10 @@ class AppConfig {
         'API_BASE_URL',
         defaultValue: 'https://api.example.com/api',
       ),
-      apiKey: const String.fromEnvironment('API_KEY'),
+      googleServerClientId: const String.fromEnvironment(
+        'GOOGLE_SERVER_CLIENT_ID',
+        defaultValue: '',
+      ),
       requestTimeout: const Duration(seconds: 30),
       maxRetries: 3,
       cacheTtl: const Duration(minutes: 15),

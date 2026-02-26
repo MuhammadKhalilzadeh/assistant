@@ -6,8 +6,9 @@ import { logger } from '../config/logger';
 export const focusTimerController = {
   async getSessionsForDate(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { date } = req.query;
-      const sessions = await focusTimerModel.getSessionsForDate(date as string | undefined);
+      const sessions = await focusTimerModel.getSessionsForDate(userId, date as string | undefined);
       logger.debug({ count: sessions.length, date }, 'Fetched focus timer sessions for date');
       res.json(sessions);
     } catch (error) {
@@ -18,8 +19,9 @@ export const focusTimerController = {
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const session = await focusTimerModel.findById(id);
+      const session = await focusTimerModel.findById(userId, id);
       if (!session) return next(new NotFoundError('Focus timer session'));
       logger.debug({ sessionId: id }, 'Fetched focus timer session by ID');
       res.json(session);
@@ -31,8 +33,9 @@ export const focusTimerController = {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { type, startTime, endTime, durationMinutes, isCompleted, task } = req.body;
-      const session = await focusTimerModel.create({ type, startTime, endTime, durationMinutes, isCompleted, task });
+      const session = await focusTimerModel.create(userId, { type, startTime, endTime, durationMinutes, isCompleted, task });
       logger.info({ sessionId: session.id, type: session.type }, 'Created new focus timer session');
       res.status(201).json(session);
     } catch (error) {
@@ -43,6 +46,7 @@ export const focusTimerController = {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
       const { type, startTime, endTime, durationMinutes, isCompleted, task } = req.body;
       const updateData: Record<string, unknown> = {};
@@ -52,7 +56,7 @@ export const focusTimerController = {
       if (durationMinutes !== undefined) updateData.durationMinutes = durationMinutes;
       if (isCompleted !== undefined) updateData.isCompleted = isCompleted;
       if (task !== undefined) updateData.task = task;
-      const session = await focusTimerModel.update(id, updateData);
+      const session = await focusTimerModel.update(userId, id, updateData);
       if (!session) return next(new NotFoundError('Focus timer session'));
       logger.info({ sessionId: id }, 'Updated focus timer session');
       res.json(session);
@@ -64,8 +68,9 @@ export const focusTimerController = {
 
   async markComplete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const session = await focusTimerModel.markComplete(id);
+      const session = await focusTimerModel.markComplete(userId, id);
       if (!session) return next(new NotFoundError('Focus timer session'));
       logger.info({ sessionId: id }, 'Marked focus timer session as complete');
       res.json(session);
@@ -77,8 +82,9 @@ export const focusTimerController = {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const deleted = await focusTimerModel.delete(id);
+      const deleted = await focusTimerModel.delete(userId, id);
       if (!deleted) return next(new NotFoundError('Focus timer session'));
       logger.info({ sessionId: id }, 'Deleted focus timer session');
       res.status(204).send();
@@ -90,7 +96,8 @@ export const focusTimerController = {
 
   async getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const stats = await focusTimerModel.getStats();
+      const userId = req.user!.userId;
+      const stats = await focusTimerModel.getStats(userId);
       logger.debug('Fetched focus timer stats');
       res.json(stats);
     } catch (error) {
@@ -101,7 +108,8 @@ export const focusTimerController = {
 
   async getHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const history = await focusTimerModel.getLast7Days();
+      const userId = req.user!.userId;
+      const history = await focusTimerModel.getLast7Days(userId);
       logger.debug('Fetched focus timer history');
       res.json(history);
     } catch (error) {
@@ -112,7 +120,8 @@ export const focusTimerController = {
 
   async getGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const goal = await focusTimerModel.getGoal();
+      const userId = req.user!.userId;
+      const goal = await focusTimerModel.getGoal(userId);
       logger.debug('Fetched focus timer goal');
       res.json(goal);
     } catch (error) {
@@ -123,11 +132,12 @@ export const focusTimerController = {
 
   async updateGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const {
         dailyGoalSessions, focusDuration, shortBreakDuration, longBreakDuration,
         sessionsBeforeLongBreak, autoStartBreaks, autoStartFocus, soundEnabled, vibrationEnabled,
       } = req.body;
-      const goal = await focusTimerModel.updateGoal({
+      const goal = await focusTimerModel.updateGoal(userId, {
         dailyGoalSessions, focusDuration, shortBreakDuration, longBreakDuration,
         sessionsBeforeLongBreak, autoStartBreaks, autoStartFocus, soundEnabled, vibrationEnabled,
       });

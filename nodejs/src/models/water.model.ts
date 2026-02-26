@@ -96,36 +96,37 @@ function rowToGoal(row: HydrationGoalRow): HydrationGoal {
 }
 
 export const waterModel = {
-  async getLogsForDate(date?: string): Promise<WaterLog[]> {
+  async getLogsForDate(userId: string, date?: string): Promise<WaterLog[]> {
     const targetDate = date || new Date().toISOString().split('T')[0];
 
     const result = await pool.query<WaterLogRow>(`
       SELECT id, amount_ml, beverage_type, note, logged_at, created_at
       FROM water_logs
-      WHERE DATE(logged_at) = $1
+      WHERE DATE(logged_at) = $1 AND user_id = $2
       ORDER BY logged_at DESC
-    `, [targetDate]);
+    `, [targetDate, userId]);
 
     return result.rows.map(rowToWaterLog);
   },
 
-  async findById(id: string): Promise<WaterLog | null> {
+  async findById(userId: string, id: string): Promise<WaterLog | null> {
     const result = await pool.query<WaterLogRow>(
       `SELECT id, amount_ml, beverage_type, note, logged_at, created_at
-       FROM water_logs WHERE id = $1`,
-      [id]
+       FROM water_logs WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
 
     if (!result.rows[0]) return null;
     return rowToWaterLog(result.rows[0]);
   },
 
-  async create(input: CreateWaterLogInput): Promise<WaterLog> {
+  async create(userId: string, input: CreateWaterLogInput): Promise<WaterLog> {
     const result = await pool.query<WaterLogRow>(
-      `INSERT INTO water_logs (amount_ml, beverage_type, note, logged_at)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO water_logs (user_id, amount_ml, beverage_type, note, logged_at)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id, amount_ml, beverage_type, note, logged_at, created_at`,
       [
+        userId,
         input.amountMl,
         input.beverageType || 'water',
         input.note || null,
@@ -136,8 +137,8 @@ export const waterModel = {
     return rowToWaterLog(result.rows[0]);
   },
 
-  async update(id: string, input: UpdateWaterLogInput): Promise<WaterLog | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateWaterLogInput): Promise<WaterLog | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const updates: string[] = [];
@@ -164,33 +165,38 @@ export const waterModel = {
     if (updates.length === 0) return existing;
 
     values.push(id);
+    const idParam = paramIndex++;
+    values.push(userId);
+    const userIdParam = paramIndex;
     await pool.query(
-      `UPDATE water_logs SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE water_logs SET ${updates.join(', ')} WHERE id = $${idParam} AND user_id = $${userIdParam}`,
       values
     );
 
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM water_logs WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM water_logs WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async getGoal(): Promise<HydrationGoal> {
+  async getGoal(userId: string): Promise<HydrationGoal> {
     const result = await pool.query<HydrationGoalRow>(`
       SELECT id, daily_goal_ml, reminder_interval_minutes, reminders_enabled, created_at, updated_at
       FROM hydration_goals
+      WHERE user_id = $1
       ORDER BY created_at DESC
       LIMIT 1
-    `);
+    `, [userId]);
 
     if (!result.rows[0]) {
       // Create default goal if none exists
       const insertResult = await pool.query<HydrationGoalRow>(
-        `INSERT INTO hydration_goals (daily_goal_ml, reminder_interval_minutes, reminders_enabled)
-         VALUES (3000, 60, TRUE)
-         RETURNING id, daily_goal_ml, reminder_interval_minutes, reminders_enabled, created_at, updated_at`
+        `INSERT INTO hydration_goals (user_id, daily_goal_ml, reminder_interval_minutes, reminders_enabled)
+         VALUES ($1, 3000, 60, TRUE)
+         RETURNING id, daily_goal_ml, reminder_interval_minutes, reminders_enabled, created_at, updated_at`,
+        [userId]
       );
       return rowToGoal(insertResult.rows[0]);
     }
@@ -198,11 +204,11 @@ export const waterModel = {
     return rowToGoal(result.rows[0]);
   },
 
-  async updateGoal(input: UpdateGoalInput): Promise<HydrationGoal> {
-    const goal = await this.getGoal();
+  async updateGoal(userId: string, input: UpdateGoalInput): Promise<HydrationGoal> {
+    const goal = await this.getGoal(userId);
 
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
-    const values: (number | boolean)[] = [];
+    const values: (number | boolean | string)[] = [];
     let paramIndex = 1;
 
     updates.push(`daily_goal_ml = $${paramIndex++}`);
@@ -217,23 +223,26 @@ export const waterModel = {
       values.push(input.remindersEnabled);
     }
 
-    values.push(goal.id as unknown as number); // Type workaround for UUID
+    values.push(goal.id);
+    const idParam = paramIndex++;
+    values.push(userId);
+    const userIdParam = paramIndex;
     await pool.query(
-      `UPDATE hydration_goals SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE hydration_goals SET ${updates.join(', ')} WHERE id = $${idParam} AND user_id = $${userIdParam}`,
       values
     );
 
-    return this.getGoal();
+    return this.getGoal(userId);
   },
 
-  async getStats(): Promise<WaterStats> {
-    const goal = await this.getGoal();
+  async getStats(userId: string): Promise<WaterStats> {
+    const goal = await this.getGoal(userId);
     const today = new Date().toISOString().split('T')[0];
 
     // Get today's intake
     const todayResult = await pool.query<{ total: string }>(
-      `SELECT COALESCE(SUM(amount_ml), 0) as total FROM water_logs WHERE DATE(logged_at) = $1`,
-      [today]
+      `SELECT COALESCE(SUM(amount_ml), 0) as total FROM water_logs WHERE DATE(logged_at) = $1 AND user_id = $2`,
+      [today, userId]
     );
     const todayIntakeMl = parseInt(todayResult.rows[0].total);
 
@@ -243,14 +252,14 @@ export const waterModel = {
       FROM (
         SELECT DATE(logged_at) as log_date, SUM(amount_ml) as daily_total
         FROM water_logs
-        WHERE logged_at >= CURRENT_DATE - INTERVAL '7 days'
+        WHERE logged_at >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1
         GROUP BY DATE(logged_at)
       ) daily_totals
-    `);
+    `, [userId]);
     const weeklyAverageMl = Math.round(parseFloat(weeklyResult.rows[0].avg));
 
     // Calculate streaks
-    const { currentStreak, bestStreak } = await this.calculateStreaks(goal.dailyGoalMl);
+    const { currentStreak, bestStreak } = await this.calculateStreaks(userId, goal.dailyGoalMl);
 
     // Calculate goal completion rate (last 30 days)
     const completionResult = await pool.query<{ days_met: string; total_days: string }>(`
@@ -260,10 +269,10 @@ export const waterModel = {
       FROM (
         SELECT DATE(logged_at) as log_date, SUM(amount_ml) as daily_total
         FROM water_logs
-        WHERE logged_at >= CURRENT_DATE - INTERVAL '30 days'
+        WHERE logged_at >= CURRENT_DATE - INTERVAL '30 days' AND user_id = $2
         GROUP BY DATE(logged_at)
       ) daily_totals
-    `, [goal.dailyGoalMl]);
+    `, [goal.dailyGoalMl, userId]);
 
     const daysMet = parseInt(completionResult.rows[0].days_met);
     const totalDays = parseInt(completionResult.rows[0].total_days);
@@ -279,14 +288,15 @@ export const waterModel = {
     };
   },
 
-  async calculateStreaks(dailyGoalMl: number): Promise<{ currentStreak: number; bestStreak: number }> {
+  async calculateStreaks(userId: string, dailyGoalMl: number): Promise<{ currentStreak: number; bestStreak: number }> {
     // Get daily totals ordered by date descending
     const result = await pool.query<{ log_date: Date; daily_total: string }>(`
       SELECT DATE(logged_at) as log_date, SUM(amount_ml) as daily_total
       FROM water_logs
+      WHERE user_id = $1
       GROUP BY DATE(logged_at)
       ORDER BY log_date DESC
-    `);
+    `, [userId]);
 
     if (result.rows.length === 0) {
       return { currentStreak: 0, bestStreak: 0 };
@@ -356,8 +366,8 @@ export const waterModel = {
     return { currentStreak, bestStreak };
   },
 
-  async getLast7Days(): Promise<DailySummary[]> {
-    const goal = await this.getGoal();
+  async getLast7Days(userId: string): Promise<DailySummary[]> {
+    const goal = await this.getGoal(userId);
     const summaries: DailySummary[] = [];
 
     for (let i = 6; i >= 0; i--) {
@@ -367,8 +377,8 @@ export const waterModel = {
 
       const result = await pool.query<{ total: string; count: string }>(
         `SELECT COALESCE(SUM(amount_ml), 0) as total, COUNT(*) as count
-         FROM water_logs WHERE DATE(logged_at) = $1`,
-        [dateStr]
+         FROM water_logs WHERE DATE(logged_at) = $1 AND user_id = $2`,
+        [dateStr, userId]
       );
 
       const totalMl = parseInt(result.rows[0].total);

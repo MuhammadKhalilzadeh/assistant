@@ -98,32 +98,33 @@ function rowToGoal(row: MeditationGoalRow): MeditationGoal {
 }
 
 export const meditationModel = {
-  async getSessionsForDate(date?: string): Promise<MeditationSession[]> {
+  async getSessionsForDate(userId: string, date?: string): Promise<MeditationSession[]> {
     const targetDate = date || new Date().toISOString().split('T')[0];
     const result = await pool.query<MeditationSessionRow>(`
       SELECT id, type, start_time, duration_minutes, is_completed, notes, created_at
-      FROM meditation_sessions WHERE DATE(start_time) = $1
+      FROM meditation_sessions WHERE DATE(start_time) = $1 AND user_id = $2
       ORDER BY start_time DESC
-    `, [targetDate]);
+    `, [targetDate, userId]);
     return result.rows.map(rowToSession);
   },
 
-  async findById(id: string): Promise<MeditationSession | null> {
+  async findById(userId: string, id: string): Promise<MeditationSession | null> {
     const result = await pool.query<MeditationSessionRow>(
       `SELECT id, type, start_time, duration_minutes, is_completed, notes, created_at
-       FROM meditation_sessions WHERE id = $1`,
-      [id]
+       FROM meditation_sessions WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
     if (!result.rows[0]) return null;
     return rowToSession(result.rows[0]);
   },
 
-  async create(input: CreateMeditationSessionInput): Promise<MeditationSession> {
+  async create(userId: string, input: CreateMeditationSessionInput): Promise<MeditationSession> {
     const result = await pool.query<MeditationSessionRow>(
-      `INSERT INTO meditation_sessions (type, start_time, duration_minutes, is_completed, notes)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO meditation_sessions (user_id, type, start_time, duration_minutes, is_completed, notes)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, type, start_time, duration_minutes, is_completed, notes, created_at`,
       [
+        userId,
         input.type,
         input.startTime ? new Date(input.startTime) : new Date(),
         input.durationMinutes,
@@ -134,8 +135,8 @@ export const meditationModel = {
     return rowToSession(result.rows[0]);
   },
 
-  async update(id: string, input: UpdateMeditationSessionInput): Promise<MeditationSession | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateMeditationSessionInput): Promise<MeditationSession | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const updates: string[] = [];
@@ -166,45 +167,48 @@ export const meditationModel = {
     if (updates.length === 0) return existing;
 
     values.push(id);
+    const idParam = paramIndex++;
+    values.push(userId);
     await pool.query(
-      `UPDATE meditation_sessions SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE meditation_sessions SET ${updates.join(', ')} WHERE id = $${idParam} AND user_id = $${paramIndex}`,
       values
     );
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async markComplete(id: string): Promise<MeditationSession | null> {
-    const existing = await this.findById(id);
+  async markComplete(userId: string, id: string): Promise<MeditationSession | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
     await pool.query(
-      `UPDATE meditation_sessions SET is_completed = TRUE WHERE id = $1`,
-      [id]
+      `UPDATE meditation_sessions SET is_completed = TRUE WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM meditation_sessions WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM meditation_sessions WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async getGoal(): Promise<MeditationGoal> {
+  async getGoal(userId: string): Promise<MeditationGoal> {
     const result = await pool.query<MeditationGoalRow>(`
       SELECT id, daily_minutes_goal, weekly_sessions_goal, created_at, updated_at
-      FROM meditation_goals ORDER BY created_at DESC LIMIT 1
-    `);
+      FROM meditation_goals WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1
+    `, [userId]);
     if (!result.rows[0]) {
       const insertResult = await pool.query<MeditationGoalRow>(
-        `INSERT INTO meditation_goals (daily_minutes_goal, weekly_sessions_goal) VALUES (10, 7)
-         RETURNING id, daily_minutes_goal, weekly_sessions_goal, created_at, updated_at`
+        `INSERT INTO meditation_goals (user_id, daily_minutes_goal, weekly_sessions_goal) VALUES ($1, 10, 7)
+         RETURNING id, daily_minutes_goal, weekly_sessions_goal, created_at, updated_at`,
+        [userId]
       );
       return rowToGoal(insertResult.rows[0]);
     }
     return rowToGoal(result.rows[0]);
   },
 
-  async updateGoal(input: UpdateMeditationGoalInput): Promise<MeditationGoal> {
-    const goal = await this.getGoal();
+  async updateGoal(userId: string, input: UpdateMeditationGoalInput): Promise<MeditationGoal> {
+    const goal = await this.getGoal(userId);
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
     const values: (number | string)[] = [];
     let paramIndex = 1;
@@ -218,42 +222,44 @@ export const meditationModel = {
     }
 
     values.push(goal.id);
+    const idParam = paramIndex++;
+    values.push(userId);
     await pool.query(
-      `UPDATE meditation_goals SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE meditation_goals SET ${updates.join(', ')} WHERE id = $${idParam} AND user_id = $${paramIndex}`,
       values
     );
-    return this.getGoal();
+    return this.getGoal(userId);
   },
 
-  async getStats(): Promise<MeditationStats> {
-    const goal = await this.getGoal();
+  async getStats(userId: string): Promise<MeditationStats> {
+    const goal = await this.getGoal(userId);
 
     // Weekly totals
     const weeklyResult = await pool.query<{ total_min: string; total_sessions: string }>(`
       SELECT COALESCE(SUM(duration_minutes), 0) as total_min, COUNT(*) as total_sessions
       FROM meditation_sessions
-      WHERE start_time >= CURRENT_DATE - INTERVAL '7 days' AND is_completed = TRUE
-    `);
+      WHERE start_time >= CURRENT_DATE - INTERVAL '7 days' AND is_completed = TRUE AND user_id = $1
+    `, [userId]);
 
     // Today minutes
     const todayResult = await pool.query<{ total: string }>(`
       SELECT COALESCE(SUM(duration_minutes), 0) as total
       FROM meditation_sessions
-      WHERE DATE(start_time) = CURRENT_DATE AND is_completed = TRUE
-    `);
+      WHERE DATE(start_time) = CURRENT_DATE AND is_completed = TRUE AND user_id = $1
+    `, [userId]);
 
     // Sessions by type
     const typeResult = await pool.query<{ type: string; count: string }>(`
       SELECT type, COUNT(*) as count FROM meditation_sessions
-      WHERE start_time >= CURRENT_DATE - INTERVAL '7 days'
+      WHERE start_time >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1
       GROUP BY type
-    `);
+    `, [userId]);
     const sessionsByType: Record<string, number> = {};
     for (const row of typeResult.rows) {
       sessionsByType[row.type] = parseInt(row.count);
     }
 
-    const { currentStreak, bestStreak } = await this.calculateStreaks(goal.dailyMinutesGoal);
+    const { currentStreak, bestStreak } = await this.calculateStreaks(userId, goal.dailyMinutesGoal);
 
     // Goal completion rate
     const completionResult = await pool.query<{ days_met: string; total_days: string }>(`
@@ -263,10 +269,10 @@ export const meditationModel = {
       FROM (
         SELECT DATE(start_time) as session_date, SUM(duration_minutes) as daily_total
         FROM meditation_sessions
-        WHERE start_time >= CURRENT_DATE - INTERVAL '30 days' AND is_completed = TRUE
+        WHERE start_time >= CURRENT_DATE - INTERVAL '30 days' AND is_completed = TRUE AND user_id = $2
         GROUP BY DATE(start_time)
       ) daily_totals
-    `, [goal.dailyMinutesGoal]);
+    `, [goal.dailyMinutesGoal, userId]);
     const daysMet = parseInt(completionResult.rows[0].days_met);
     const totalDays = parseInt(completionResult.rows[0].total_days);
     const goalCompletionRate = totalDays > 0 ? Math.round((daysMet / totalDays) * 100) / 100 : 0;
@@ -282,12 +288,12 @@ export const meditationModel = {
     };
   },
 
-  async calculateStreaks(dailyMinutesGoal: number): Promise<{ currentStreak: number; bestStreak: number }> {
+  async calculateStreaks(userId: string, dailyMinutesGoal: number): Promise<{ currentStreak: number; bestStreak: number }> {
     const result = await pool.query<{ session_date: Date; daily_total: string }>(`
       SELECT DATE(start_time) as session_date, SUM(duration_minutes) as daily_total
-      FROM meditation_sessions WHERE is_completed = TRUE
+      FROM meditation_sessions WHERE is_completed = TRUE AND user_id = $1
       GROUP BY DATE(start_time) ORDER BY session_date DESC
-    `);
+    `, [userId]);
     if (result.rows.length === 0) return { currentStreak: 0, bestStreak: 0 };
 
     const dateMap = new Map<string, number>();
@@ -330,8 +336,8 @@ export const meditationModel = {
     return { currentStreak, bestStreak };
   },
 
-  async getLast7Days(): Promise<MeditationDailySummary[]> {
-    const goal = await this.getGoal();
+  async getLast7Days(userId: string): Promise<MeditationDailySummary[]> {
+    const goal = await this.getGoal(userId);
     const summaries: MeditationDailySummary[] = [];
 
     for (let i = 6; i >= 0; i--) {
@@ -341,8 +347,8 @@ export const meditationModel = {
 
       const result = await pool.query<{ total_min: string; count: string }>(
         `SELECT COALESCE(SUM(duration_minutes), 0) as total_min, COUNT(*) as count
-         FROM meditation_sessions WHERE DATE(start_time) = $1 AND is_completed = TRUE`,
-        [dateStr]
+         FROM meditation_sessions WHERE DATE(start_time) = $1 AND is_completed = TRUE AND user_id = $2`,
+        [dateStr, userId]
       );
 
       const totalMinutes = parseInt(result.rows[0].total_min);

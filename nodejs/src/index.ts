@@ -20,6 +20,7 @@ import focusTimerRoutes from './routes/focus-timer.routes';
 import weatherRoutes from './routes/weather.routes';
 import screenTimeRoutes from './routes/screen-time.routes';
 import inboxRoutes from './routes/inbox.routes';
+import authRoutes from './routes/auth.routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authMiddleware } from './middleware/auth.middleware';
 import { securityHeaders, rateLimiter } from './middleware/security.middleware';
@@ -45,6 +46,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use(authMiddleware);
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/todos', todoRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/habits', habitRoutes);

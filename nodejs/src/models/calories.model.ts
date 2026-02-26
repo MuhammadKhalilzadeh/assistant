@@ -143,32 +143,33 @@ function rowToGoal(row: NutritionGoalRow): NutritionGoal {
 }
 
 export const caloriesModel = {
-  async getEntriesForDate(date?: string): Promise<CalorieEntry[]> {
+  async getEntriesForDate(userId: string, date?: string): Promise<CalorieEntry[]> {
     const targetDate = date || new Date().toISOString().split('T')[0];
     const result = await pool.query<CalorieEntryRow>(`
       SELECT id, food_name, calories, meal_type, protein, carbs, fat, food_category, serving_size, note, logged_at, created_at
-      FROM calorie_entries WHERE DATE(logged_at) = $1
+      FROM calorie_entries WHERE DATE(logged_at) = $1 AND user_id = $2
       ORDER BY logged_at DESC
-    `, [targetDate]);
+    `, [targetDate, userId]);
     return result.rows.map(rowToEntry);
   },
 
-  async findById(id: string): Promise<CalorieEntry | null> {
+  async findById(userId: string, id: string): Promise<CalorieEntry | null> {
     const result = await pool.query<CalorieEntryRow>(
       `SELECT id, food_name, calories, meal_type, protein, carbs, fat, food_category, serving_size, note, logged_at, created_at
-       FROM calorie_entries WHERE id = $1`,
-      [id]
+       FROM calorie_entries WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
     if (!result.rows[0]) return null;
     return rowToEntry(result.rows[0]);
   },
 
-  async create(input: CreateCalorieEntryInput): Promise<CalorieEntry> {
+  async create(userId: string, input: CreateCalorieEntryInput): Promise<CalorieEntry> {
     const result = await pool.query<CalorieEntryRow>(
-      `INSERT INTO calorie_entries (food_name, calories, meal_type, protein, carbs, fat, food_category, serving_size, note, logged_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `INSERT INTO calorie_entries (user_id, food_name, calories, meal_type, protein, carbs, fat, food_category, serving_size, note, logged_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING id, food_name, calories, meal_type, protein, carbs, fat, food_category, serving_size, note, logged_at, created_at`,
       [
+        userId,
         input.foodName,
         input.calories,
         input.mealType,
@@ -184,8 +185,8 @@ export const caloriesModel = {
     return rowToEntry(result.rows[0]);
   },
 
-  async update(id: string, input: UpdateCalorieEntryInput): Promise<CalorieEntry | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateCalorieEntryInput): Promise<CalorieEntry | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const updates: string[] = [];
@@ -236,36 +237,38 @@ export const caloriesModel = {
     if (updates.length === 0) return existing;
 
     values.push(id);
+    values.push(userId);
     await pool.query(
-      `UPDATE calorie_entries SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE calorie_entries SET ${updates.join(', ')} WHERE id = $${paramIndex} AND user_id = $${paramIndex + 1}`,
       values
     );
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM calorie_entries WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM calorie_entries WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async getGoal(): Promise<NutritionGoal> {
+  async getGoal(userId: string): Promise<NutritionGoal> {
     const result = await pool.query<NutritionGoalRow>(`
       SELECT id, daily_calorie_goal, protein_goal_grams, carbs_goal_grams, fat_goal_grams, reminders_enabled, created_at, updated_at
-      FROM nutrition_goals ORDER BY created_at DESC LIMIT 1
-    `);
+      FROM nutrition_goals WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1
+    `, [userId]);
     if (!result.rows[0]) {
       const insertResult = await pool.query<NutritionGoalRow>(
-        `INSERT INTO nutrition_goals (daily_calorie_goal, protein_goal_grams, carbs_goal_grams, fat_goal_grams)
-         VALUES (2000, 50, 250, 65)
-         RETURNING id, daily_calorie_goal, protein_goal_grams, carbs_goal_grams, fat_goal_grams, reminders_enabled, created_at, updated_at`
+        `INSERT INTO nutrition_goals (user_id, daily_calorie_goal, protein_goal_grams, carbs_goal_grams, fat_goal_grams)
+         VALUES ($1, 2000, 50, 250, 65)
+         RETURNING id, daily_calorie_goal, protein_goal_grams, carbs_goal_grams, fat_goal_grams, reminders_enabled, created_at, updated_at`,
+        [userId]
       );
       return rowToGoal(insertResult.rows[0]);
     }
     return rowToGoal(result.rows[0]);
   },
 
-  async updateGoal(input: UpdateNutritionGoalInput): Promise<NutritionGoal> {
-    const goal = await this.getGoal();
+  async updateGoal(userId: string, input: UpdateNutritionGoalInput): Promise<NutritionGoal> {
+    const goal = await this.getGoal(userId);
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
     const values: (number | boolean | string)[] = [];
     let paramIndex = 1;
@@ -290,16 +293,17 @@ export const caloriesModel = {
       values.push(input.remindersEnabled);
     }
 
-    values.push(goal.id as unknown as number);
+    values.push(goal.id);
+    values.push(userId);
     await pool.query(
-      `UPDATE nutrition_goals SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE nutrition_goals SET ${updates.join(', ')} WHERE id = $${paramIndex} AND user_id = $${paramIndex + 1}`,
       values
     );
-    return this.getGoal();
+    return this.getGoal(userId);
   },
 
-  async getStats(): Promise<NutritionStats> {
-    const goal = await this.getGoal();
+  async getStats(userId: string): Promise<NutritionStats> {
+    const goal = await this.getGoal(userId);
     const today = new Date().toISOString().split('T')[0];
 
     // Today's totals
@@ -308,8 +312,8 @@ export const caloriesModel = {
               COALESCE(SUM(protein), 0) as total_protein,
               COALESCE(SUM(carbs), 0) as total_carbs,
               COALESCE(SUM(fat), 0) as total_fat
-       FROM calorie_entries WHERE DATE(logged_at) = $1`,
-      [today]
+       FROM calorie_entries WHERE DATE(logged_at) = $1 AND user_id = $2`,
+      [today, userId]
     );
 
     // Weekly averages
@@ -325,12 +329,12 @@ export const caloriesModel = {
                SUM(carbs) as daily_carbs,
                SUM(fat) as daily_fat
         FROM calorie_entries
-        WHERE logged_at >= CURRENT_DATE - INTERVAL '7 days'
+        WHERE logged_at >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1
         GROUP BY DATE(logged_at)
       ) daily_totals
-    `);
+    `, [userId]);
 
-    const { currentStreak, bestStreak } = await this.calculateStreaks(goal.dailyCalorieGoal);
+    const { currentStreak, bestStreak } = await this.calculateStreaks(userId, goal.dailyCalorieGoal);
 
     // Goal completion rate (within 80-120% of goal)
     const completionResult = await pool.query<{ days_met: string; total_days: string }>(`
@@ -340,10 +344,10 @@ export const caloriesModel = {
       FROM (
         SELECT DATE(logged_at) as log_date, SUM(calories) as daily_cal
         FROM calorie_entries
-        WHERE logged_at >= CURRENT_DATE - INTERVAL '30 days'
+        WHERE logged_at >= CURRENT_DATE - INTERVAL '30 days' AND user_id = $2
         GROUP BY DATE(logged_at)
       ) daily_totals
-    `, [goal.dailyCalorieGoal]);
+    `, [goal.dailyCalorieGoal, userId]);
     const daysMet = parseInt(completionResult.rows[0].days_met);
     const totalDays = parseInt(completionResult.rows[0].total_days);
     const goalCompletionRate = totalDays > 0 ? Math.round((daysMet / totalDays) * 100) / 100 : 0;
@@ -364,11 +368,11 @@ export const caloriesModel = {
     };
   },
 
-  async calculateStreaks(dailyCalorieGoal: number): Promise<{ currentStreak: number; bestStreak: number }> {
+  async calculateStreaks(userId: string, dailyCalorieGoal: number): Promise<{ currentStreak: number; bestStreak: number }> {
     const result = await pool.query<{ log_date: Date; daily_cal: string }>(`
       SELECT DATE(logged_at) as log_date, SUM(calories) as daily_cal
-      FROM calorie_entries GROUP BY DATE(logged_at) ORDER BY log_date DESC
-    `);
+      FROM calorie_entries WHERE user_id = $1 GROUP BY DATE(logged_at) ORDER BY log_date DESC
+    `, [userId]);
     if (result.rows.length === 0) return { currentStreak: 0, bestStreak: 0 };
 
     const dateMap = new Map<string, number>();
@@ -417,8 +421,8 @@ export const caloriesModel = {
     return { currentStreak, bestStreak };
   },
 
-  async getLast7Days(): Promise<DailyNutritionSummary[]> {
-    const goal = await this.getGoal();
+  async getLast7Days(userId: string): Promise<DailyNutritionSummary[]> {
+    const goal = await this.getGoal(userId);
     const summaries: DailyNutritionSummary[] = [];
 
     for (let i = 6; i >= 0; i--) {
@@ -432,8 +436,8 @@ export const caloriesModel = {
                 COALESCE(SUM(carbs), 0) as total_carbs,
                 COALESCE(SUM(fat), 0) as total_fat,
                 COUNT(*) as count
-         FROM calorie_entries WHERE DATE(logged_at) = $1`,
-        [dateStr]
+         FROM calorie_entries WHERE DATE(logged_at) = $1 AND user_id = $2`,
+        [dateStr, userId]
       );
 
       const totalCalories = parseInt(result.rows[0].total_cal);

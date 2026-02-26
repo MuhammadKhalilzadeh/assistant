@@ -12,7 +12,9 @@ const router = Router();
 
 router.get('/', validateQuery(inboxQuerySchema), inboxController.getMessages);
 router.get('/stats', inboxController.getStats);
+router.post('/sync', inboxController.sync);
 router.get('/:id', validateParams(inboxMessageIdSchema), inboxController.getById);
+router.get('/:id/body', validateParams(inboxMessageIdSchema), inboxController.getBody);
 router.post('/', validateBody(createInboxMessageSchema), inboxController.create);
 router.put('/:id', validateParams(inboxMessageIdSchema), validateBody(updateInboxMessageSchema), inboxController.update);
 router.delete('/:id', validateParams(inboxMessageIdSchema), inboxController.delete);

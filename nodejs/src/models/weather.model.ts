@@ -118,41 +118,43 @@ function mapWindDirection(degrees: number): string {
 // ---- Model ----
 
 export const weatherModel = {
-  async getSettings(): Promise<WeatherSettings> {
+  async getSettings(userId: string): Promise<WeatherSettings> {
     const result = await pool.query<WeatherSettingsRow>(
       `SELECT id, latitude, longitude, city_name, temperature_unit, created_at, updated_at
-       FROM weather_settings ORDER BY created_at LIMIT 1`
+       FROM weather_settings WHERE user_id = $1 ORDER BY created_at LIMIT 1`,
+      [userId]
     );
     if (!result.rows[0]) {
       const insertResult = await pool.query<WeatherSettingsRow>(
-        `INSERT INTO weather_settings (latitude, longitude, city_name, temperature_unit)
-         VALUES (40.71280, -74.00600, 'New York', 'celsius')
-         RETURNING id, latitude, longitude, city_name, temperature_unit, created_at, updated_at`
+        `INSERT INTO weather_settings (user_id, latitude, longitude, city_name, temperature_unit)
+         VALUES ($1, 40.71280, -74.00600, 'New York', 'celsius')
+         RETURNING id, latitude, longitude, city_name, temperature_unit, created_at, updated_at`,
+        [userId]
       );
       return rowToSettings(insertResult.rows[0]);
     }
     return rowToSettings(result.rows[0]);
   },
 
-  async updateSettings(input: {
+  async updateSettings(userId: string, input: {
     latitude: number;
     longitude: number;
     cityName: string;
     temperatureUnit?: string;
   }): Promise<WeatherSettings> {
-    const settings = await this.getSettings();
+    const settings = await this.getSettings(userId);
     const unit = input.temperatureUnit ?? settings.temperatureUnit;
 
     await pool.query(
       `UPDATE weather_settings
        SET latitude = $1, longitude = $2, city_name = $3, temperature_unit = $4, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5`,
-      [input.latitude, input.longitude, input.cityName, unit, settings.id]
+       WHERE id = $5 AND user_id = $6`,
+      [input.latitude, input.longitude, input.cityName, unit, settings.id, userId]
     );
-    return this.getSettings();
+    return this.getSettings(userId);
   },
 
-  async fetchWeather(lat: number, lon: number, unit: string = 'celsius'): Promise<WeatherResponse> {
+  async fetchWeather(userId: string, lat: number, lon: number, unit: string = 'celsius'): Promise<WeatherResponse> {
     const tempUnit = unit === 'fahrenheit' ? 'fahrenheit' : 'celsius';
     const windUnit = 'kmh';
 
@@ -238,7 +240,7 @@ export const weatherModel = {
     // Get settings for location name
     let locationName: string;
     try {
-      const settings = await this.getSettings();
+      const settings = await this.getSettings(userId);
       // Check if the coordinates match saved settings (within 0.01 degrees)
       if (Math.abs(settings.latitude - lat) < 0.01 && Math.abs(settings.longitude - lon) < 0.01) {
         locationName = settings.cityName;

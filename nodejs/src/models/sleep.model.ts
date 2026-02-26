@@ -95,32 +95,33 @@ function rowToGoal(row: SleepGoalRow): SleepGoal {
 }
 
 export const sleepModel = {
-  async getRecordsForDate(date?: string): Promise<SleepRecord[]> {
+  async getRecordsForDate(userId: string, date?: string): Promise<SleepRecord[]> {
     const targetDate = date || new Date().toISOString().split('T')[0];
     // Sleep records: match by wake_time date (the day you woke up)
     const result = await pool.query<SleepRecordRow>(`
       SELECT id, bed_time, wake_time, quality, notes, created_at
-      FROM sleep_records WHERE DATE(wake_time) = $1
+      FROM sleep_records WHERE DATE(wake_time) = $1 AND user_id = $2
       ORDER BY bed_time DESC
-    `, [targetDate]);
+    `, [targetDate, userId]);
     return result.rows.map(rowToRecord);
   },
 
-  async findById(id: string): Promise<SleepRecord | null> {
+  async findById(userId: string, id: string): Promise<SleepRecord | null> {
     const result = await pool.query<SleepRecordRow>(
-      `SELECT id, bed_time, wake_time, quality, notes, created_at FROM sleep_records WHERE id = $1`,
-      [id]
+      `SELECT id, bed_time, wake_time, quality, notes, created_at FROM sleep_records WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
     if (!result.rows[0]) return null;
     return rowToRecord(result.rows[0]);
   },
 
-  async create(input: CreateSleepRecordInput): Promise<SleepRecord> {
+  async create(userId: string, input: CreateSleepRecordInput): Promise<SleepRecord> {
     const result = await pool.query<SleepRecordRow>(
-      `INSERT INTO sleep_records (bed_time, wake_time, quality, notes)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO sleep_records (user_id, bed_time, wake_time, quality, notes)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id, bed_time, wake_time, quality, notes, created_at`,
       [
+        userId,
         new Date(input.bedTime),
         new Date(input.wakeTime),
         input.quality || 'good',
@@ -130,8 +131,8 @@ export const sleepModel = {
     return rowToRecord(result.rows[0]);
   },
 
-  async update(id: string, input: UpdateSleepRecordInput): Promise<SleepRecord | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateSleepRecordInput): Promise<SleepRecord | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const updates: string[] = [];
@@ -158,57 +159,60 @@ export const sleepModel = {
     if (updates.length === 0) return existing;
 
     values.push(id);
+    const idParam = paramIndex++;
+    values.push(userId);
     await pool.query(
-      `UPDATE sleep_records SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE sleep_records SET ${updates.join(', ')} WHERE id = $${idParam} AND user_id = $${paramIndex}`,
       values
     );
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM sleep_records WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM sleep_records WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async getGoal(): Promise<SleepGoal> {
+  async getGoal(userId: string): Promise<SleepGoal> {
     const result = await pool.query<SleepGoalRow>(`
       SELECT id, goal_minutes, created_at, updated_at
-      FROM sleep_goals ORDER BY created_at DESC LIMIT 1
-    `);
+      FROM sleep_goals WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1
+    `, [userId]);
     if (!result.rows[0]) {
       const insertResult = await pool.query<SleepGoalRow>(
-        `INSERT INTO sleep_goals (goal_minutes) VALUES (480)
-         RETURNING id, goal_minutes, created_at, updated_at`
+        `INSERT INTO sleep_goals (user_id, goal_minutes) VALUES ($1, 480)
+         RETURNING id, goal_minutes, created_at, updated_at`,
+        [userId]
       );
       return rowToGoal(insertResult.rows[0]);
     }
     return rowToGoal(result.rows[0]);
   },
 
-  async updateGoal(input: UpdateSleepGoalInput): Promise<SleepGoal> {
-    const goal = await this.getGoal();
+  async updateGoal(userId: string, input: UpdateSleepGoalInput): Promise<SleepGoal> {
+    const goal = await this.getGoal(userId);
     await pool.query(
-      `UPDATE sleep_goals SET goal_minutes = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-      [input.goalMinutes, goal.id]
+      `UPDATE sleep_goals SET goal_minutes = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3`,
+      [input.goalMinutes, goal.id, userId]
     );
-    return this.getGoal();
+    return this.getGoal(userId);
   },
 
-  async getStats(): Promise<SleepStats> {
-    const goal = await this.getGoal();
+  async getStats(userId: string): Promise<SleepStats> {
+    const goal = await this.getGoal(userId);
 
     // Weekly average hours
     const avgResult = await pool.query<{ avg_minutes: string }>(`
       SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (wake_time - bed_time)) / 60), 0) as avg_minutes
-      FROM sleep_records WHERE wake_time >= CURRENT_DATE - INTERVAL '7 days'
-    `);
+      FROM sleep_records WHERE wake_time >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1
+    `, [userId]);
     const weeklyAverageHours = Math.round(parseFloat(avgResult.rows[0].avg_minutes) / 60 * 10) / 10;
 
     // Quality distribution
     const qualityResult = await pool.query<{ quality: string; count: string }>(`
       SELECT quality, COUNT(*) as count FROM sleep_records
-      WHERE wake_time >= CURRENT_DATE - INTERVAL '7 days' GROUP BY quality
-    `);
+      WHERE wake_time >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1 GROUP BY quality
+    `, [userId]);
     const qualityDistribution: Record<string, number> = {};
     for (const row of qualityResult.rows) {
       qualityDistribution[row.quality] = parseInt(row.count);
@@ -219,23 +223,23 @@ export const sleepModel = {
       SELECT
         COALESCE(AVG(EXTRACT(HOUR FROM bed_time) + EXTRACT(MINUTE FROM bed_time) / 60.0), 0) as avg_bed_hour,
         COALESCE(AVG(EXTRACT(HOUR FROM wake_time) + EXTRACT(MINUTE FROM wake_time) / 60.0), 0) as avg_wake_hour
-      FROM sleep_records WHERE wake_time >= CURRENT_DATE - INTERVAL '7 days'
-    `);
+      FROM sleep_records WHERE wake_time >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1
+    `, [userId]);
 
     const avgBedHour = parseFloat(timeResult.rows[0].avg_bed_hour);
     const avgWakeHour = parseFloat(timeResult.rows[0].avg_wake_hour);
     const averageBedTime = avgBedHour > 0 ? `${Math.floor(avgBedHour)}:${String(Math.round((avgBedHour % 1) * 60)).padStart(2, '0')}` : null;
     const averageWakeTime = avgWakeHour > 0 ? `${Math.floor(avgWakeHour)}:${String(Math.round((avgWakeHour % 1) * 60)).padStart(2, '0')}` : null;
 
-    const { currentStreak, bestStreak } = await this.calculateStreaks(goal.goalMinutes);
+    const { currentStreak, bestStreak } = await this.calculateStreaks(userId, goal.goalMinutes);
 
     // Goal completion rate
     const completionResult = await pool.query<{ days_met: string; total_days: string }>(`
       SELECT
         COUNT(*) FILTER (WHERE EXTRACT(EPOCH FROM (wake_time - bed_time)) / 60 >= $1) as days_met,
         COUNT(*) as total_days
-      FROM sleep_records WHERE wake_time >= CURRENT_DATE - INTERVAL '30 days'
-    `, [goal.goalMinutes]);
+      FROM sleep_records WHERE wake_time >= CURRENT_DATE - INTERVAL '30 days' AND user_id = $2
+    `, [goal.goalMinutes, userId]);
     const daysMet = parseInt(completionResult.rows[0].days_met);
     const totalDays = parseInt(completionResult.rows[0].total_days);
     const goalCompletionRate = totalDays > 0 ? Math.round((daysMet / totalDays) * 100) / 100 : 0;
@@ -251,12 +255,12 @@ export const sleepModel = {
     };
   },
 
-  async calculateStreaks(goalMinutes: number): Promise<{ currentStreak: number; bestStreak: number }> {
+  async calculateStreaks(userId: string, goalMinutes: number): Promise<{ currentStreak: number; bestStreak: number }> {
     const result = await pool.query<{ wake_date: Date; duration_min: string }>(`
       SELECT DATE(wake_time) as wake_date,
              EXTRACT(EPOCH FROM (wake_time - bed_time)) / 60 as duration_min
-      FROM sleep_records ORDER BY wake_date DESC
-    `);
+      FROM sleep_records WHERE user_id = $1 ORDER BY wake_date DESC
+    `, [userId]);
     if (result.rows.length === 0) return { currentStreak: 0, bestStreak: 0 };
 
     const dateMap = new Map<string, number>();
@@ -300,8 +304,8 @@ export const sleepModel = {
     return { currentStreak, bestStreak };
   },
 
-  async getLast7Days(): Promise<SleepDailySummary[]> {
-    const goal = await this.getGoal();
+  async getLast7Days(userId: string): Promise<SleepDailySummary[]> {
+    const goal = await this.getGoal(userId);
     const summaries: SleepDailySummary[] = [];
 
     for (let i = 6; i >= 0; i--) {
@@ -311,8 +315,8 @@ export const sleepModel = {
 
       const result = await pool.query<{ duration_min: string; quality: string }>(
         `SELECT EXTRACT(EPOCH FROM (wake_time - bed_time)) / 60 as duration_min, quality
-         FROM sleep_records WHERE DATE(wake_time) = $1 LIMIT 1`,
-        [dateStr]
+         FROM sleep_records WHERE DATE(wake_time) = $1 AND user_id = $2 LIMIT 1`,
+        [dateStr, userId]
       );
 
       const row = result.rows[0];

@@ -126,6 +126,30 @@ class InboxMessagesNotifier extends AsyncNotifier<List<InboxMessage>> {
     ref.invalidate(inboxStatsProvider);
   }
 
+  Future<void> syncGmail() async {
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      throw OfflineError('Cannot sync Gmail while offline');
+    }
+
+    final api = ref.read(inboxApiServiceProvider);
+    await api.syncGmail();
+
+    // Refresh messages and stats after sync
+    await refresh();
+    ref.invalidate(inboxStatsProvider);
+  }
+
+  Future<String> getMessageBody(String id) async {
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      throw OfflineError('Cannot fetch message body while offline');
+    }
+
+    final api = ref.read(inboxApiServiceProvider);
+    return await api.getMessageBody(id);
+  }
+
   Future<void> deleteMessage(String id) async {
     final isOffline = ref.read(isOfflineProvider);
     if (isOffline) {

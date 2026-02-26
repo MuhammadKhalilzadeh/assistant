@@ -115,32 +115,33 @@ function rowToGoal(row: WorkoutGoalRow): WorkoutGoal {
 }
 
 export const workoutModel = {
-  async getSessionsForDate(date?: string): Promise<WorkoutSession[]> {
+  async getSessionsForDate(userId: string, date?: string): Promise<WorkoutSession[]> {
     const targetDate = date || new Date().toISOString().split('T')[0];
     const result = await pool.query<WorkoutSessionRow>(`
       SELECT id, type, start_time, end_time, duration_minutes, calories_burned, exercises, notes, created_at
-      FROM workout_sessions WHERE DATE(start_time) = $1
+      FROM workout_sessions WHERE DATE(start_time) = $1 AND user_id = $2
       ORDER BY start_time DESC
-    `, [targetDate]);
+    `, [targetDate, userId]);
     return result.rows.map(rowToSession);
   },
 
-  async findById(id: string): Promise<WorkoutSession | null> {
+  async findById(userId: string, id: string): Promise<WorkoutSession | null> {
     const result = await pool.query<WorkoutSessionRow>(
       `SELECT id, type, start_time, end_time, duration_minutes, calories_burned, exercises, notes, created_at
-       FROM workout_sessions WHERE id = $1`,
-      [id]
+       FROM workout_sessions WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
     if (!result.rows[0]) return null;
     return rowToSession(result.rows[0]);
   },
 
-  async create(input: CreateWorkoutSessionInput): Promise<WorkoutSession> {
+  async create(userId: string, input: CreateWorkoutSessionInput): Promise<WorkoutSession> {
     const result = await pool.query<WorkoutSessionRow>(
-      `INSERT INTO workout_sessions (type, start_time, end_time, duration_minutes, calories_burned, exercises, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO workout_sessions (user_id, type, start_time, end_time, duration_minutes, calories_burned, exercises, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id, type, start_time, end_time, duration_minutes, calories_burned, exercises, notes, created_at`,
       [
+        userId,
         input.type,
         input.startTime ? new Date(input.startTime) : new Date(),
         input.endTime ? new Date(input.endTime) : null,
@@ -153,8 +154,8 @@ export const workoutModel = {
     return rowToSession(result.rows[0]);
   },
 
-  async update(id: string, input: UpdateWorkoutSessionInput): Promise<WorkoutSession | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateWorkoutSessionInput): Promise<WorkoutSession | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const updates: string[] = [];
@@ -193,35 +194,37 @@ export const workoutModel = {
     if (updates.length === 0) return existing;
 
     values.push(id);
+    values.push(userId);
     await pool.query(
-      `UPDATE workout_sessions SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE workout_sessions SET ${updates.join(', ')} WHERE id = $${paramIndex} AND user_id = $${paramIndex + 1}`,
       values
     );
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM workout_sessions WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM workout_sessions WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async getGoal(): Promise<WorkoutGoal> {
+  async getGoal(userId: string): Promise<WorkoutGoal> {
     const result = await pool.query<WorkoutGoalRow>(`
       SELECT id, weekly_minutes_goal, weekly_sessions_goal, created_at, updated_at
-      FROM workout_goals ORDER BY created_at DESC LIMIT 1
-    `);
+      FROM workout_goals WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1
+    `, [userId]);
     if (!result.rows[0]) {
       const insertResult = await pool.query<WorkoutGoalRow>(
-        `INSERT INTO workout_goals (weekly_minutes_goal, weekly_sessions_goal) VALUES (150, 5)
-         RETURNING id, weekly_minutes_goal, weekly_sessions_goal, created_at, updated_at`
+        `INSERT INTO workout_goals (user_id, weekly_minutes_goal, weekly_sessions_goal) VALUES ($1, 150, 5)
+         RETURNING id, weekly_minutes_goal, weekly_sessions_goal, created_at, updated_at`,
+        [userId]
       );
       return rowToGoal(insertResult.rows[0]);
     }
     return rowToGoal(result.rows[0]);
   },
 
-  async updateGoal(input: UpdateWorkoutGoalInput): Promise<WorkoutGoal> {
-    const goal = await this.getGoal();
+  async updateGoal(userId: string, input: UpdateWorkoutGoalInput): Promise<WorkoutGoal> {
+    const goal = await this.getGoal(userId);
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
     const values: (number | string)[] = [];
     let paramIndex = 1;
@@ -235,33 +238,34 @@ export const workoutModel = {
     }
 
     values.push(goal.id);
+    values.push(userId);
     await pool.query(
-      `UPDATE workout_goals SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE workout_goals SET ${updates.join(', ')} WHERE id = $${paramIndex} AND user_id = $${paramIndex + 1}`,
       values
     );
-    return this.getGoal();
+    return this.getGoal(userId);
   },
 
-  async getStats(): Promise<WorkoutStats> {
-    const goal = await this.getGoal();
+  async getStats(userId: string): Promise<WorkoutStats> {
+    const goal = await this.getGoal(userId);
 
     const weeklyResult = await pool.query<{ total_min: string; total_sessions: string; total_cal: string }>(`
       SELECT COALESCE(SUM(duration_minutes), 0) as total_min,
              COUNT(*) as total_sessions,
              COALESCE(SUM(calories_burned), 0) as total_cal
-      FROM workout_sessions WHERE start_time >= CURRENT_DATE - INTERVAL '7 days'
-    `);
+      FROM workout_sessions WHERE start_time >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1
+    `, [userId]);
 
     const typeResult = await pool.query<{ type: string; count: string }>(`
       SELECT type, COUNT(*) as count FROM workout_sessions
-      WHERE start_time >= CURRENT_DATE - INTERVAL '7 days' GROUP BY type
-    `);
+      WHERE start_time >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1 GROUP BY type
+    `, [userId]);
     const workoutsByType: Record<string, number> = {};
     for (const row of typeResult.rows) {
       workoutsByType[row.type] = parseInt(row.count);
     }
 
-    const { currentStreak, bestStreak } = await this.calculateStreaks();
+    const { currentStreak, bestStreak } = await this.calculateStreaks(userId);
 
     const weeklyMinutes = parseInt(weeklyResult.rows[0].total_min);
     const goalCompletionRate = goal.weeklyMinutesGoal > 0
@@ -279,11 +283,11 @@ export const workoutModel = {
     };
   },
 
-  async calculateStreaks(): Promise<{ currentStreak: number; bestStreak: number }> {
+  async calculateStreaks(userId: string): Promise<{ currentStreak: number; bestStreak: number }> {
     const result = await pool.query<{ workout_date: Date }>(`
       SELECT DISTINCT DATE(start_time) as workout_date
-      FROM workout_sessions ORDER BY workout_date DESC
-    `);
+      FROM workout_sessions WHERE user_id = $1 ORDER BY workout_date DESC
+    `, [userId]);
     if (result.rows.length === 0) return { currentStreak: 0, bestStreak: 0 };
 
     const dates = result.rows.map(r => new Date(r.workout_date).toISOString().split('T')[0]);
@@ -337,8 +341,8 @@ export const workoutModel = {
     return { currentStreak, bestStreak };
   },
 
-  async getLast7Days(): Promise<WorkoutDailySummary[]> {
-    const goal = await this.getGoal();
+  async getLast7Days(userId: string): Promise<WorkoutDailySummary[]> {
+    const goal = await this.getGoal(userId);
     const dailyGoalMinutes = Math.round(goal.weeklyMinutesGoal / 7);
     const summaries: WorkoutDailySummary[] = [];
 
@@ -351,8 +355,8 @@ export const workoutModel = {
         `SELECT COALESCE(SUM(duration_minutes), 0) as total_min,
                 COALESCE(SUM(calories_burned), 0) as total_cal,
                 COUNT(*) as count
-         FROM workout_sessions WHERE DATE(start_time) = $1`,
-        [dateStr]
+         FROM workout_sessions WHERE DATE(start_time) = $1 AND user_id = $2`,
+        [dateStr, userId]
       );
 
       const totalMinutes = parseInt(result.rows[0].total_min);

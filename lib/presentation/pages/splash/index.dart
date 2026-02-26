@@ -1,15 +1,18 @@
 import 'package:assistant/presentation/constants/app_theme.dart';
-import 'package:assistant/presentation/pages/introduction/index.dart';
+import 'package:assistant/presentation/pages/welcome_sign_in/index.dart';
+import 'package:assistant/presentation/pages/dashboard/index.dart';
+import 'package:assistant/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
+class _SplashPageState extends ConsumerState<SplashPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -18,7 +21,7 @@ class _SplashPageState extends State<SplashPage>
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -42,25 +45,41 @@ class _SplashPageState extends State<SplashPage>
 
     _animationController.forward();
 
-    // Navigate to Introduction after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const RegisterPage(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
-            transitionDuration: const Duration(milliseconds: 500),
-          ),
-        );
-      }
-    });
+    // Check auth state and navigate after splash animation
+    _checkAuthAndNavigate();
+  }
+
+  Future<void> _checkAuthAndNavigate() async {
+    // Run auth check in parallel with splash animation
+    final authCheck = ref.read(authProvider.notifier).checkAuthState();
+
+    // Wait at least 2.5 seconds for splash animation
+    await Future.wait([
+      authCheck,
+      Future.delayed(const Duration(milliseconds: 2500)),
+    ]);
+
+    if (!mounted) return;
+
+    final authState = ref.read(authProvider);
+    final Widget destination;
+
+    if (authState.isSignedIn) {
+      destination = const Dashboard();
+    } else {
+      destination = const WelcomeSignInPage();
+    }
+
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => destination,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
+    );
   }
 
   @override
@@ -91,7 +110,6 @@ class _SplashPageState extends State<SplashPage>
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Icon or logo placeholder
                             Container(
                               width: 100,
                               height: 100,

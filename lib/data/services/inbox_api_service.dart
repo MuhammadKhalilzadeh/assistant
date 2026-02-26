@@ -102,6 +102,29 @@ class InboxApiService {
     }
   }
 
+  /// Sync Gmail inbox
+  Future<Map<String, dynamic>> syncGmail() async {
+    final response = await _client.post(Uri.parse('$_baseUrl/inbox/sync'));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw parseErrorResponse(response);
+    }
+  }
+
+  /// Get full message body by ID
+  Future<String> getMessageBody(String id) async {
+    final response = await _client.get(Uri.parse('$_baseUrl/inbox/$id/body'));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['body'] as String;
+    } else {
+      throw parseErrorResponse(response);
+    }
+  }
+
   /// Get inbox statistics
   Future<InboxStats> getStats() async {
     final response = await _client.get(Uri.parse('$_baseUrl/inbox/stats'));

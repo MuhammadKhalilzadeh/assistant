@@ -99,31 +99,32 @@ function rowToGoal(row: MoodGoalRow): MoodGoal {
 }
 
 export const moodModel = {
-  async getEntriesForDate(date?: string): Promise<MoodEntry[]> {
+  async getEntriesForDate(userId: string, date?: string): Promise<MoodEntry[]> {
     const targetDate = date || new Date().toISOString().split('T')[0];
     const result = await pool.query<MoodEntryRow>(`
       SELECT id, mood, notes, activities, recorded_at, created_at
-      FROM mood_entries WHERE DATE(recorded_at) = $1
+      FROM mood_entries WHERE DATE(recorded_at) = $1 AND user_id = $2
       ORDER BY recorded_at DESC
-    `, [targetDate]);
+    `, [targetDate, userId]);
     return result.rows.map(rowToEntry);
   },
 
-  async findById(id: string): Promise<MoodEntry | null> {
+  async findById(userId: string, id: string): Promise<MoodEntry | null> {
     const result = await pool.query<MoodEntryRow>(
-      `SELECT id, mood, notes, activities, recorded_at, created_at FROM mood_entries WHERE id = $1`,
-      [id]
+      `SELECT id, mood, notes, activities, recorded_at, created_at FROM mood_entries WHERE id = $1 AND user_id = $2`,
+      [id, userId]
     );
     if (!result.rows[0]) return null;
     return rowToEntry(result.rows[0]);
   },
 
-  async create(input: CreateMoodEntryInput): Promise<MoodEntry> {
+  async create(userId: string, input: CreateMoodEntryInput): Promise<MoodEntry> {
     const result = await pool.query<MoodEntryRow>(
-      `INSERT INTO mood_entries (mood, notes, activities, recorded_at)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO mood_entries (user_id, mood, notes, activities, recorded_at)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id, mood, notes, activities, recorded_at, created_at`,
       [
+        userId,
         input.mood,
         input.notes || null,
         input.activities || [],
@@ -133,8 +134,8 @@ export const moodModel = {
     return rowToEntry(result.rows[0]);
   },
 
-  async update(id: string, input: UpdateMoodEntryInput): Promise<MoodEntry | null> {
-    const existing = await this.findById(id);
+  async update(userId: string, id: string, input: UpdateMoodEntryInput): Promise<MoodEntry | null> {
+    const existing = await this.findById(userId, id);
     if (!existing) return null;
 
     const updates: string[] = [];
@@ -161,35 +162,38 @@ export const moodModel = {
     if (updates.length === 0) return existing;
 
     values.push(id);
+    const idParam = paramIndex++;
+    values.push(userId);
     await pool.query(
-      `UPDATE mood_entries SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE mood_entries SET ${updates.join(', ')} WHERE id = $${idParam} AND user_id = $${paramIndex}`,
       values
     );
-    return this.findById(id);
+    return this.findById(userId, id);
   },
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query('DELETE FROM mood_entries WHERE id = $1', [id]);
+  async delete(userId: string, id: string): Promise<boolean> {
+    const result = await pool.query('DELETE FROM mood_entries WHERE id = $1 AND user_id = $2', [id, userId]);
     return (result.rowCount ?? 0) > 0;
   },
 
-  async getGoal(): Promise<MoodGoal> {
+  async getGoal(userId: string): Promise<MoodGoal> {
     const result = await pool.query<MoodGoalRow>(`
       SELECT id, daily_entries_goal, target_mood, created_at, updated_at
-      FROM mood_goals ORDER BY created_at DESC LIMIT 1
-    `);
+      FROM mood_goals WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1
+    `, [userId]);
     if (!result.rows[0]) {
       const insertResult = await pool.query<MoodGoalRow>(
-        `INSERT INTO mood_goals (daily_entries_goal, target_mood) VALUES (1, 'good')
-         RETURNING id, daily_entries_goal, target_mood, created_at, updated_at`
+        `INSERT INTO mood_goals (user_id, daily_entries_goal, target_mood) VALUES ($1, 1, 'good')
+         RETURNING id, daily_entries_goal, target_mood, created_at, updated_at`,
+        [userId]
       );
       return rowToGoal(insertResult.rows[0]);
     }
     return rowToGoal(result.rows[0]);
   },
 
-  async updateGoal(input: UpdateMoodGoalInput): Promise<MoodGoal> {
-    const goal = await this.getGoal();
+  async updateGoal(userId: string, input: UpdateMoodGoalInput): Promise<MoodGoal> {
+    const goal = await this.getGoal(userId);
     const updates: string[] = ['updated_at = CURRENT_TIMESTAMP'];
     const values: (number | string)[] = [];
     let paramIndex = 1;
@@ -203,20 +207,22 @@ export const moodModel = {
     }
 
     values.push(goal.id);
+    const idParam = paramIndex++;
+    values.push(userId);
     await pool.query(
-      `UPDATE mood_goals SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      `UPDATE mood_goals SET ${updates.join(', ')} WHERE id = $${idParam} AND user_id = $${paramIndex}`,
       values
     );
-    return this.getGoal();
+    return this.getGoal(userId);
   },
 
-  async getStats(): Promise<MoodStats> {
+  async getStats(userId: string): Promise<MoodStats> {
     // Weekly average mood
     const avgResult = await pool.query<{ mood: string; count: string }>(`
       SELECT mood, COUNT(*) as count FROM mood_entries
-      WHERE recorded_at >= CURRENT_DATE - INTERVAL '7 days'
+      WHERE recorded_at >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1
       GROUP BY mood
-    `);
+    `, [userId]);
 
     let totalValue = 0;
     let totalCount = 0;
@@ -232,22 +238,22 @@ export const moodModel = {
     // Total entries
     const totalResult = await pool.query<{ total: string }>(`
       SELECT COUNT(*) as total FROM mood_entries
-      WHERE recorded_at >= CURRENT_DATE - INTERVAL '7 days'
-    `);
+      WHERE recorded_at >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1
+    `, [userId]);
 
     // Common activities
     const activitiesResult = await pool.query<{ activity: string; count: string }>(`
       SELECT unnest(activities) as activity, COUNT(*) as count
       FROM mood_entries
-      WHERE recorded_at >= CURRENT_DATE - INTERVAL '7 days'
+      WHERE recorded_at >= CURRENT_DATE - INTERVAL '7 days' AND user_id = $1
       GROUP BY activity ORDER BY count DESC LIMIT 10
-    `);
+    `, [userId]);
     const commonActivities: Record<string, number> = {};
     for (const row of activitiesResult.rows) {
       commonActivities[row.activity] = parseInt(row.count);
     }
 
-    const { currentStreak, bestStreak } = await this.calculateStreaks();
+    const { currentStreak, bestStreak } = await this.calculateStreaks(userId);
 
     return {
       weeklyAverageMood,
@@ -259,10 +265,10 @@ export const moodModel = {
     };
   },
 
-  async calculateStreaks(): Promise<{ currentStreak: number; bestStreak: number }> {
+  async calculateStreaks(userId: string): Promise<{ currentStreak: number; bestStreak: number }> {
     const result = await pool.query<{ log_date: Date }>(`
-      SELECT DISTINCT DATE(recorded_at) as log_date FROM mood_entries ORDER BY log_date DESC
-    `);
+      SELECT DISTINCT DATE(recorded_at) as log_date FROM mood_entries WHERE user_id = $1 ORDER BY log_date DESC
+    `, [userId]);
     if (result.rows.length === 0) return { currentStreak: 0, bestStreak: 0 };
 
     const dates = result.rows.map(r => new Date(r.log_date).toISOString().split('T')[0]);
@@ -318,7 +324,7 @@ export const moodModel = {
     return { currentStreak, bestStreak };
   },
 
-  async getLast7Days(): Promise<MoodDailySummary[]> {
+  async getLast7Days(userId: string): Promise<MoodDailySummary[]> {
     const summaries: MoodDailySummary[] = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
@@ -327,9 +333,9 @@ export const moodModel = {
 
       const result = await pool.query<{ count: string; dominant: string }>(
         `SELECT COUNT(*) as count,
-                (SELECT mood FROM mood_entries WHERE DATE(recorded_at) = $1 GROUP BY mood ORDER BY COUNT(*) DESC LIMIT 1) as dominant
-         FROM mood_entries WHERE DATE(recorded_at) = $1`,
-        [dateStr]
+                (SELECT mood FROM mood_entries WHERE DATE(recorded_at) = $1 AND user_id = $2 GROUP BY mood ORDER BY COUNT(*) DESC LIMIT 1) as dominant
+         FROM mood_entries WHERE DATE(recorded_at) = $1 AND user_id = $2`,
+        [dateStr, userId]
       );
 
       const count = parseInt(result.rows[0].count);

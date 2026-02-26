@@ -39,7 +39,17 @@
       "Bash(npx tsc:*)",
       "Bash(ipconfig:*)",
       "Bash(dart analyze:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git remote get-url:*)",
+      "Bash(npm install:*)",
+      "Bash(timeout 15 npx ts-node-dev:*)",
+      "Bash(keytool -list -v -keystore:*)",
+      "Bash(timeout 10 npx ts-node-dev:*)",
+      "Bash(dart:*)"
     ]
   }
 }

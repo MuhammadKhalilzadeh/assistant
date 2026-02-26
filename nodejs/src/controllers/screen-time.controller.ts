@@ -6,8 +6,9 @@ import { logger } from '../config/logger';
 export const screenTimeController = {
   async getByDate(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { date } = req.query;
-      const record = await screenTimeModel.getByDate(date as string | undefined);
+      const record = await screenTimeModel.getByDate(userId, date as string | undefined);
       logger.debug({ date }, 'Fetched screen time record for date');
       res.json(record);
     } catch (error) {
@@ -18,8 +19,9 @@ export const screenTimeController = {
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const record = await screenTimeModel.findById(id);
+      const record = await screenTimeModel.findById(userId, id);
 
       if (!record) {
         return next(new NotFoundError('Screen time record'));
@@ -35,9 +37,10 @@ export const screenTimeController = {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { date, totalMinutes, pickups, note, appUsage } = req.body;
 
-      const record = await screenTimeModel.create({
+      const record = await screenTimeModel.create(userId, {
         date,
         totalMinutes,
         pickups: pickups || 0,
@@ -55,6 +58,7 @@ export const screenTimeController = {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
       const { totalMinutes, pickups, note, appUsage } = req.body;
 
@@ -64,7 +68,7 @@ export const screenTimeController = {
       if (note !== undefined) updateData.note = note;
       if (appUsage !== undefined) updateData.appUsage = appUsage;
 
-      const record = await screenTimeModel.update(id, updateData);
+      const record = await screenTimeModel.update(userId, id, updateData);
 
       if (!record) {
         return next(new NotFoundError('Screen time record'));
@@ -80,8 +84,9 @@ export const screenTimeController = {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const deleted = await screenTimeModel.delete(id);
+      const deleted = await screenTimeModel.delete(userId, id);
 
       if (!deleted) {
         return next(new NotFoundError('Screen time record'));
@@ -97,7 +102,8 @@ export const screenTimeController = {
 
   async getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const stats = await screenTimeModel.getStats();
+      const userId = req.user!.userId;
+      const stats = await screenTimeModel.getStats(userId);
       logger.debug('Fetched screen time stats');
       res.json(stats);
     } catch (error) {
@@ -108,7 +114,8 @@ export const screenTimeController = {
 
   async getHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const history = await screenTimeModel.getHistory();
+      const userId = req.user!.userId;
+      const history = await screenTimeModel.getHistory(userId);
       logger.debug('Fetched screen time history');
       res.json(history);
     } catch (error) {
@@ -119,7 +126,8 @@ export const screenTimeController = {
 
   async getGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const goal = await screenTimeModel.getGoal();
+      const userId = req.user!.userId;
+      const goal = await screenTimeModel.getGoal(userId);
       logger.debug('Fetched screen time goal');
       res.json(goal);
     } catch (error) {
@@ -130,9 +138,10 @@ export const screenTimeController = {
 
   async updateGoal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { dailyLimitMinutes } = req.body;
 
-      const goal = await screenTimeModel.updateGoal({ dailyLimitMinutes });
+      const goal = await screenTimeModel.updateGoal(userId, { dailyLimitMinutes });
 
       logger.info({ dailyLimitMinutes: goal.dailyLimitMinutes }, 'Updated screen time goal');
       res.json(goal);

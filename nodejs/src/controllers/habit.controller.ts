@@ -6,7 +6,8 @@ import { logger } from '../config/logger';
 export const habitController = {
   async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const habits = await habitModel.findAll();
+      const userId = req.user!.userId;
+      const habits = await habitModel.findAll(userId);
       logger.debug({ count: habits.length }, 'Fetched all habits');
       res.json(habits);
     } catch (error) {
@@ -17,8 +18,9 @@ export const habitController = {
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const habit = await habitModel.findById(id);
+      const habit = await habitModel.findById(userId, id);
 
       if (!habit) {
         return next(new NotFoundError('Habit'));
@@ -34,9 +36,10 @@ export const habitController = {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { name, description, icon, category, frequency, targetDays } = req.body;
 
-      const habit = await habitModel.create({
+      const habit = await habitModel.create(userId, {
         name,
         description: description || undefined,
         icon: icon || 'check_circle',
@@ -55,6 +58,7 @@ export const habitController = {
 
   async update(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
       const { name, description, icon, category, frequency, targetDays } = req.body;
 
@@ -67,7 +71,7 @@ export const habitController = {
       if (frequency !== undefined) updateData.frequency = frequency;
       if (targetDays !== undefined) updateData.targetDays = targetDays;
 
-      const habit = await habitModel.update(id, updateData);
+      const habit = await habitModel.update(userId, id, updateData);
 
       if (!habit) {
         return next(new NotFoundError('Habit'));
@@ -83,8 +87,9 @@ export const habitController = {
 
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const deleted = await habitModel.delete(id);
+      const deleted = await habitModel.delete(userId, id);
 
       if (!deleted) {
         return next(new NotFoundError('Habit'));
@@ -100,8 +105,9 @@ export const habitController = {
 
   async toggleComplete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.userId;
       const { id } = req.params;
-      const habit = await habitModel.toggleComplete(id);
+      const habit = await habitModel.toggleComplete(userId, id);
 
       if (!habit) {
         return next(new NotFoundError('Habit'));
@@ -117,7 +123,8 @@ export const habitController = {
 
   async getStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const stats = await habitModel.getStats();
+      const userId = req.user!.userId;
+      const stats = await habitModel.getStats(userId);
       logger.debug('Fetched habit stats');
       res.json(stats);
     } catch (error) {
