@@ -12,6 +12,28 @@ class InboxPage extends ConsumerStatefulWidget {
 }
 
 class _InboxPageState extends ConsumerState<InboxPage> {
+  bool _isSyncing = false;
+
+  Future<void> _syncGmail() async {
+    setState(() => _isSyncing = true);
+    try {
+      await ref.read(inboxMessagesProvider.notifier).syncGmail();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gmail synced successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sync failed: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSyncing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -141,14 +163,27 @@ class _InboxPageState extends ConsumerState<InboxPage> {
             icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           ),
           const SizedBox(width: 8),
-          const Text(
-            'Inbox',
-            style: TextStyle(
-              color: AppTheme.textPrimary,
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.3,
+          const Expanded(
+            child: Text(
+              'Inbox',
+              style: TextStyle(
+                color: AppTheme.textPrimary,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.3,
+              ),
             ),
+          ),
+          IconButton(
+            onPressed: _isSyncing ? null : _syncGmail,
+            icon: _isSyncing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.sync, color: AppTheme.primaryColor),
+            tooltip: 'Sync Gmail',
           ),
         ],
       ),

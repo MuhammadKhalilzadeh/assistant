@@ -3,6 +3,7 @@ import { logger } from '../config/logger';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+const GOOGLE_ANDROID_CLIENT_ID = process.env.GOOGLE_ANDROID_CLIENT_ID || '';
 
 const oauth2Client = new OAuth2Client(
   GOOGLE_CLIENT_ID,
@@ -26,9 +27,10 @@ export interface GmailTokensResult {
 export const googleAuthService = {
   async verifyIdToken(idToken: string): Promise<GoogleUserInfo | null> {
     try {
+      const audience = [GOOGLE_CLIENT_ID, GOOGLE_ANDROID_CLIENT_ID].filter(Boolean);
       const ticket = await oauth2Client.verifyIdToken({
         idToken,
-        audience: GOOGLE_CLIENT_ID,
+        audience,
       });
       const payload = ticket.getPayload();
       if (!payload) return null;

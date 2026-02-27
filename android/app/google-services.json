@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "307839777710",
+    "project_id": "jarvis-assistant-488707",
+    "storage_bucket": "jarvis-assistant-488707.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307839777710:android:0715214eb199b765fa263f",
+        "android_client_info": {
+          "package_name": "com.example.assistant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "307839777710-t0mbr03bib896k02rt1qddq548e8dphp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.assistant",
+            "certificate_hash": "9319b18454eed8cfebd5663b39723b5f86f77358"
+          }
+        },
+        {
+          "client_id": "307839777710-c2qs2uptl9tof0hc5bllg5kn82b52oil.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyVbRbb8TTffNZcu65GKiqCoNm_ugZ37M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "307839777710-c2qs2uptl9tof0hc5bllg5kn82b52oil.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

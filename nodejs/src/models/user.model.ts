@@ -67,9 +67,9 @@ export const userModel = {
   async create(input: CreateUserInput): Promise<User> {
     const result = await pool.query<UserRow>(
       `INSERT INTO users (google_id, email, display_name, photo_url, nickname)
-       VALUES ($1, $2, $3, $4, $3)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [input.googleId, input.email, input.displayName || null, input.photoUrl || null]
+      [input.googleId, input.email, input.displayName || null, input.photoUrl || null, input.nickname || null]
     );
     return rowToUser(result.rows[0]);
   },

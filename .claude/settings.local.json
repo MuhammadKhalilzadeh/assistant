@@ -49,7 +49,10 @@
       "Bash(timeout 15 npx ts-node-dev:*)",
       "Bash(keytool -list -v -keystore:*)",
       "Bash(timeout 10 npx ts-node-dev:*)",
-      "Bash(dart:*)"
+      "Bash(dart:*)",
+      "Bash(openssl rand:*)",
+      "Bash(flutter run:*)",
+      "Bash(done)"
     ]
   }
 }
