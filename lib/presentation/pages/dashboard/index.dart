@@ -63,6 +63,8 @@ import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/data/models/weather_forecast_model.dart';
 import 'package:assistant/providers/auth_provider.dart';
 import 'package:assistant/presentation/widgets/sheets/account_sheet.dart';
+import 'package:assistant/presentation/pages/jarvis/index.dart';
+import 'package:assistant/presentation/pages/settings/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -331,6 +333,17 @@ class _HomeTab extends ConsumerWidget {
           ),
           GestureDetector(
             onTap: () {
+              NavigationUtils.navigateWithFade(context, const SettingsPage());
+            },
+            child: const Icon(
+              Icons.settings_outlined,
+              color: AppTheme.textSecondary,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: AppTheme.spacingSM),
+          GestureDetector(
+            onTap: () {
               showModalBottomSheet(
                 context: context,
                 backgroundColor: Colors.transparent,
@@ -399,43 +412,6 @@ class _JarvisTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppTheme.backgroundColor,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                gradient: AppTheme.primaryGradient,
-                shape: BoxShape.circle,
-                boxShadow: AppTheme.elevatedShadow,
-              ),
-              child: const Icon(
-                Icons.auto_awesome,
-                size: 50,
-                color: AppTheme.textOnPrimary,
-              ),
-            ),
-            const SizedBox(height: AppTheme.spacingLG),
-            Text(
-              'Jarvis Assistant',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: AppTheme.spacingSM),
-            Text(
-              'Your AI assistant is ready to help',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return const JarvisChatPage();
   }
 }

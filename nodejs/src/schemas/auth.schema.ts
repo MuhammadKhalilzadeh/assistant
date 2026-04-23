@@ -9,12 +9,20 @@ export const refreshTokenSchema = z.object({
   refreshToken: z.string({ required_error: 'Refresh token is required' }).min(1),
 });
 
+export const apiKeysSchema = z.object({
+  openai: z.string().optional(),
+  anthropic: z.string().optional(),
+  googleai: z.string().optional(),
+}).optional();
+
 export const updateProfileSchema = z.object({
   nickname: z
     .string()
     .min(1, 'Nickname cannot be empty')
     .max(100, 'Nickname must be 100 characters or less')
-    .transform((val) => val.trim()),
+    .transform((val) => val.trim())
+    .optional(),
+  apiKeys: apiKeysSchema,
 });
 
 export const gmailConnectSchema = z.object({

@@ -103,12 +103,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage>
     final monthEnd = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
 
     if (monthStart.isBefore(current.start) || monthEnd.isAfter(current.end)) {
-      // Extend range by 6 months in the direction needed
+      // Extend range by 2 months in the direction needed
       final newStart = monthStart.isBefore(current.start)
-          ? DateTime(month.year, month.month - 6, 1)
+          ? DateTime(month.year, month.month - 2, 1)
           : current.start;
       final newEnd = monthEnd.isAfter(current.end)
-          ? DateTime(month.year, month.month + 7, 0, 23, 59, 59)
+          ? DateTime(month.year, month.month + 3, 0, 23, 59, 59)
           : current.end;
 
       ref.read(calendarDateRangeProvider.notifier).state = DateTimeRange(

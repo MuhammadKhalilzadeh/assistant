@@ -159,7 +159,7 @@ class WeatherDetailsCard extends StatelessWidget {
             child: Text(
               '$uvIndex',
               style: TextStyle(
-                color: uvIndex <= 5 ? Colors.black87 : Colors.white,
+                color: uvIndex <= 5 ? AppTheme.textPrimary : Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),

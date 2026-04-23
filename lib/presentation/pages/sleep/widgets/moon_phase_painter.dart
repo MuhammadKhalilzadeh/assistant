@@ -23,8 +23,8 @@ class MoonPhasePainter extends CustomPainter {
     final backgroundPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          const Color(0xFF1E293B).withValues(alpha: 0.3),
-          const Color(0xFF0F172A).withValues(alpha: 0.5),
+          AppTheme.surfaceColor.withValues(alpha: 0.3),
+          AppTheme.backgroundColor.withValues(alpha: 0.5),
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, backgroundPaint);
@@ -163,7 +163,7 @@ class MoonPhasePainter extends CustomPainter {
 
     // Combine paths
     final shadowPaint = Paint()
-      ..color = const Color(0xFF1E293B).withValues(alpha: 0.15);
+      ..color = AppTheme.surfaceColor.withValues(alpha: 0.15);
 
     canvas.save();
     canvas.clipPath(shadowPath);

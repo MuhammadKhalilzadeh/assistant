@@ -4,6 +4,7 @@ class TokenStorageService {
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
   static const _userKey = 'user_json';
+  static const _apiKeyPrefix = 'api_key_';
 
   final FlutterSecureStorage _storage;
 
@@ -50,5 +51,32 @@ class TokenStorageService {
   Future<bool> hasTokens() async {
     final token = await _storage.read(key: _accessTokenKey);
     return token != null && token.isNotEmpty;
+  }
+
+  // API Key storage
+
+  Future<void> saveApiKey(String provider, String apiKey) async {
+    await _storage.write(key: '$_apiKeyPrefix$provider', value: apiKey);
+  }
+
+  Future<String?> getApiKey(String provider) async {
+    return _storage.read(key: '$_apiKeyPrefix$provider');
+  }
+
+  Future<void> deleteApiKey(String provider) async {
+    await _storage.delete(key: '$_apiKeyPrefix$provider');
+  }
+
+  Future<List<String>> getStoredApiKeyProviders() async {
+    final all = await _storage.readAll();
+    return all.keys
+        .where((key) => key.startsWith(_apiKeyPrefix))
+        .map((key) => key.substring(_apiKeyPrefix.length))
+        .toList();
+  }
+
+  Future<bool> hasApiKey(String provider) async {
+    final key = await _storage.read(key: '$_apiKeyPrefix$provider');
+    return key != null && key.isNotEmpty;
   }
 }

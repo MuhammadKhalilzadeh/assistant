@@ -13,8 +13,8 @@ class CalendarCache {
   static const _statsKey = 'stats';
   static const _statsTimestampKey = 'stats_timestamp';
 
-  // Short TTL since device calendars can change externally
-  static const Duration _cacheTtl = Duration(minutes: 5);
+  // Moderate TTL to reduce unnecessary re-fetches
+  static const Duration _cacheTtl = Duration(minutes: 30);
 
   Box? _eventsBox;
   Box? _calendarsBox;

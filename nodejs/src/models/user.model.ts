@@ -1,5 +1,11 @@
 import pool from '../config/database';
 
+export interface ApiKeys {
+  openai?: string;
+  anthropic?: string;
+  googleai?: string;
+}
+
 export interface User {
   id: string;
   googleId: string;
@@ -7,6 +13,7 @@ export interface User {
   displayName: string | null;
   photoUrl: string | null;
   nickname: string | null;
+  apiKeys: ApiKeys;
   gmailConnected: boolean;
   gmailTokenExpiry: Date | null;
   lastLoginAt: Date;
@@ -21,6 +28,9 @@ interface UserRow {
   display_name: string | null;
   photo_url: string | null;
   nickname: string | null;
+  api_key_openai: string | null;
+  api_key_anthropic: string | null;
+  api_key_googleai: string | null;
   gmail_connected: boolean;
   gmail_token_expiry: Date | null;
   last_login_at: Date;
@@ -33,6 +43,7 @@ export interface CreateUserInput {
   email: string;
   displayName?: string | null;
   photoUrl?: string | null;
+  nickname?: string | null;
 }
 
 export interface GmailTokens {
@@ -49,6 +60,11 @@ function rowToUser(row: UserRow): User {
     displayName: row.display_name,
     photoUrl: row.photo_url,
     nickname: row.nickname,
+    apiKeys: {
+      openai: row.api_key_openai || undefined,
+      anthropic: row.api_key_anthropic || undefined,
+      googleai: row.api_key_googleai || undefined,
+    },
     gmailConnected: row.gmail_connected,
     gmailTokenExpiry: row.gmail_token_expiry,
     lastLoginAt: row.last_login_at,
@@ -59,6 +75,7 @@ function rowToUser(row: UserRow): User {
 
 const SELECT_USER = `
   SELECT id, google_id, email, display_name, photo_url, nickname,
+         api_key_openai, api_key_anthropic, api_key_googleai,
          gmail_connected, gmail_token_expiry, last_login_at, created_at, updated_at
   FROM users
 `;
@@ -179,6 +196,51 @@ export const userModel = {
       refreshToken: row.gmail_refresh_token,
       expiry: row.gmail_token_expiry!,
     };
+  },
+
+  async updateApiKeys(id: string, apiKeys: ApiKeys): Promise<void> {
+    const updates: string[] = [];
+    const values: (string | null)[] = [];
+    let paramIndex = 1;
+
+    if (apiKeys.openai !== undefined) {
+      updates.push(`api_key_openai = $${paramIndex++}`);
+      values.push(apiKeys.openai || null);
+    }
+    if (apiKeys.anthropic !== undefined) {
+      updates.push(`api_key_anthropic = $${paramIndex++}`);
+      values.push(apiKeys.anthropic || null);
+    }
+    if (apiKeys.googleai !== undefined) {
+      updates.push(`api_key_googleai = $${paramIndex++}`);
+      values.push(apiKeys.googleai || null);
+    }
+
+    if (updates.length === 0) return;
+
+    updates.push(`updated_at = CURRENT_TIMESTAMP`);
+    values.push(id);
+
+    await pool.query(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
+      values
+    );
+  },
+
+  async getApiKey(id: string, provider: string): Promise<string | null> {
+    const columnMap: Record<string, string> = {
+      openai: 'api_key_openai',
+      anthropic: 'api_key_anthropic',
+      googleai: 'api_key_googleai',
+    };
+    const column = columnMap[provider];
+    if (!column) return null;
+
+    const result = await pool.query<{ key: string | null }>(
+      `SELECT ${column} AS key FROM users WHERE id = $1`,
+      [id]
+    );
+    return result.rows[0]?.key ?? null;
   },
 
   async disconnectGmail(id: string): Promise<void> {

@@ -151,6 +151,11 @@ export const authController = {
         photoUrl: user.photoUrl,
         nickname: user.nickname,
         gmailConnected: user.gmailConnected,
+        hasApiKeys: {
+          openai: !!user.apiKeys.openai,
+          anthropic: !!user.apiKeys.anthropic,
+          googleai: !!user.apiKeys.googleai,
+        },
       });
     } catch (error) {
       logger.error({ err: error }, 'Failed to get user profile');
@@ -161,21 +166,49 @@ export const authController = {
   async updateMe(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.userId;
-      const { nickname } = req.body;
+      const { nickname, apiKeys } = req.body;
 
-      const user = await userModel.update(userId, { nickname });
+      // Update nickname if provided
+      if (nickname !== undefined) {
+        const user = await userModel.update(userId, { nickname });
+        if (!user) {
+          return next(new UnauthorizedError('User not found'));
+        }
+      }
 
-      if (!user) {
+      // Update API keys if provided (encrypt each key before storing)
+      if (apiKeys) {
+        const encryptedKeys: { openai?: string; anthropic?: string; googleai?: string } = {};
+        if (apiKeys.openai !== undefined) {
+          encryptedKeys.openai = apiKeys.openai ? cryptoService.encrypt(apiKeys.openai) : '';
+        }
+        if (apiKeys.anthropic !== undefined) {
+          encryptedKeys.anthropic = apiKeys.anthropic ? cryptoService.encrypt(apiKeys.anthropic) : '';
+        }
+        if (apiKeys.googleai !== undefined) {
+          encryptedKeys.googleai = apiKeys.googleai ? cryptoService.encrypt(apiKeys.googleai) : '';
+        }
+        await userModel.updateApiKeys(userId, encryptedKeys);
+      }
+
+      // Fetch updated user
+      const updatedUser = await userModel.findById(userId);
+      if (!updatedUser) {
         return next(new UnauthorizedError('User not found'));
       }
 
       res.json({
-        id: user.id,
-        email: user.email,
-        displayName: user.displayName,
-        photoUrl: user.photoUrl,
-        nickname: user.nickname,
-        gmailConnected: user.gmailConnected,
+        id: updatedUser.id,
+        email: updatedUser.email,
+        displayName: updatedUser.displayName,
+        photoUrl: updatedUser.photoUrl,
+        nickname: updatedUser.nickname,
+        gmailConnected: updatedUser.gmailConnected,
+        hasApiKeys: {
+          openai: !!updatedUser.apiKeys.openai,
+          anthropic: !!updatedUser.apiKeys.anthropic,
+          googleai: !!updatedUser.apiKeys.googleai,
+        },
       });
     } catch (error) {
       logger.error({ err: error }, 'Failed to update profile');

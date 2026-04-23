@@ -21,6 +21,7 @@ import weatherRoutes from './routes/weather.routes';
 import screenTimeRoutes from './routes/screen-time.routes';
 import inboxRoutes from './routes/inbox.routes';
 import authRoutes from './routes/auth.routes';
+import jarvisRoutes from './routes/jarvis.routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authMiddleware } from './middleware/auth.middleware';
 import { securityHeaders, rateLimiter } from './middleware/security.middleware';
@@ -62,6 +63,7 @@ app.use('/api/focus-timer', focusTimerRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/screen-time', screenTimeRoutes);
 app.use('/api/inbox', inboxRoutes);
+app.use('/api/jarvis', jarvisRoutes);
 
 // Enhanced health check with database status
 app.get('/api/health', async (_req, res) => {
@@ -189,6 +191,11 @@ async function startServer(): Promise<void> {
       logger.info('  GET    /api/inbox/stats');
       logger.info('  PATCH  /api/inbox/:id/read');
       logger.info('  PATCH  /api/inbox/:id/star');
+      logger.info('  POST   /api/jarvis/chat');
+      logger.info('  POST   /api/jarvis/conversations');
+      logger.info('  GET    /api/jarvis/conversations');
+      logger.info('  GET    /api/jarvis/conversations/:id');
+      logger.info('  DELETE /api/jarvis/conversations/:id');
     });
   } catch (err) {
     logger.fatal({ err }, 'Failed to start server');

@@ -382,7 +382,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
             decoration: BoxDecoration(
               color: _selectedCategoryId == null
                   ? AppTheme.textTertiary.withValues(alpha: 0.15)
-                  : Colors.white,
+                  : AppTheme.surfaceColor,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: _selectedCategoryId == null
@@ -429,7 +429,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
               decoration: BoxDecoration(
                 color: isSelected
                     ? category.colorValue.withValues(alpha: 0.15)
-                    : Colors.white,
+                    : AppTheme.surfaceColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isSelected ? category.colorValue : AppTheme.cardBorderColor,
@@ -497,7 +497,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
               fontSize: 14,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppTheme.surfaceColor,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
@@ -540,7 +540,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
           decoration: BoxDecoration(
             color: isSelected
                 ? color.withValues(alpha: 0.15)
-                : Colors.white,
+                : AppTheme.surfaceColor,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isSelected ? color : AppTheme.cardBorderColor,

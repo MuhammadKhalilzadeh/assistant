@@ -63,25 +63,25 @@ class DeviceCalendarService {
         }
       }
 
-      final allEvents = <CalendarEvent>[];
-
-      for (final calendarId in calendarIds) {
-        final calendar = calendarMap[calendarId];
-        if (calendar == null) continue;
-
+      // Query all calendars in parallel for better performance
+      final futures = calendarIds.where((id) => calendarMap.containsKey(id)).map((calendarId) async {
+        final calendar = calendarMap[calendarId]!;
         final params = RetrieveEventsParams(
           startDate: start,
           endDate: end,
         );
 
         final eventsResult = await _plugin.retrieveEvents(calendarId, params);
-        if (!eventsResult.isSuccess || eventsResult.data == null) continue;
+        if (!eventsResult.isSuccess || eventsResult.data == null) return <CalendarEvent>[];
 
-        for (final event in eventsResult.data!) {
-          if (event.title == null || event.title!.isEmpty) continue;
-          allEvents.add(CalendarEvent.fromDeviceEvent(event, calendar));
-        }
-      }
+        return eventsResult.data!
+            .where((event) => event.title != null && event.title!.isNotEmpty)
+            .map((event) => CalendarEvent.fromDeviceEvent(event, calendar))
+            .toList();
+      });
+
+      final results = await Future.wait(futures);
+      final allEvents = results.expand((events) => events).toList();
 
       allEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
       return allEvents;

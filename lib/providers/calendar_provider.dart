@@ -39,12 +39,12 @@ final deviceCalendarsProvider = FutureProvider<List<DeviceCalendar>>((ref) async
 // User's selected calendar IDs to display (empty = all selected)
 final selectedCalendarIdsProvider = StateProvider<Set<String>>((ref) => {});
 
-// Current view date range — 6 months back + 6 months forward
+// Current view date range — 1 month back + 2 months forward
 final calendarDateRangeProvider = StateProvider<DateTimeRange>((ref) {
   final now = DateTime.now();
   return DateTimeRange(
-    start: DateTime(now.year, now.month - 6, 1),
-    end: DateTime(now.year, now.month + 6 + 1, 0, 23, 59, 59),
+    start: DateTime(now.year, now.month - 1, 1),
+    end: DateTime(now.year, now.month + 2, 0, 23, 59, 59),
   );
 });
 
