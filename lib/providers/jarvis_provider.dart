@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:assistant/data/models/chat_message_model.dart';
 import 'package:assistant/data/services/jarvis_api_service.dart';
+import 'package:assistant/data/services/jarvis_data_service.dart';
 import 'package:assistant/services/token_storage_service.dart';
 import 'package:assistant/providers/auth_provider.dart';
 
@@ -29,6 +30,7 @@ class JarvisState {
   final String? error;
   final String? activeProvider; // 'openai' or 'anthropic'
   final List<JarvisAction> pendingActions;
+  final String? briefingData; // Raw briefing data for the daily card
 
   const JarvisState({
     this.messages = const [],
@@ -36,6 +38,7 @@ class JarvisState {
     this.error,
     this.activeProvider,
     this.pendingActions = const [],
+    this.briefingData,
   });
 
   JarvisState copyWith({
@@ -44,6 +47,7 @@ class JarvisState {
     String? error,
     String? activeProvider,
     List<JarvisAction>? pendingActions,
+    String? briefingData,
   }) {
     return JarvisState(
       messages: messages ?? this.messages,
@@ -51,6 +55,7 @@ class JarvisState {
       error: error,
       activeProvider: activeProvider ?? this.activeProvider,
       pendingActions: pendingActions ?? this.pendingActions,
+      briefingData: briefingData ?? this.briefingData,
     );
   }
 }
@@ -62,12 +67,15 @@ final _actionPattern = RegExp(r'\[ACTION:(\w+):(\{[^[\]]*?\})\]');
 class JarvisNotifier extends StateNotifier<JarvisState> {
   final JarvisApiService _apiService;
   final TokenStorageService _tokenStorage;
+  final JarvisDataService _dataService;
 
   JarvisNotifier({
     required JarvisApiService apiService,
     required TokenStorageService tokenStorage,
+    required JarvisDataService dataService,
   })  : _apiService = apiService,
         _tokenStorage = tokenStorage,
+        _dataService = dataService,
         super(const JarvisState()) {
     _initialize();
   }
@@ -75,6 +83,15 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
   /// Initialize with a welcome message and detect available provider
   Future<void> _initialize() async {
     final provider = await checkApiKeyAvailability();
+
+    // Gather briefing data in the background
+    String? briefingData;
+    try {
+      briefingData = await _dataService.gatherDailyBriefing();
+    } catch (e) {
+      debugPrint('[JarvisProvider] Failed to gather briefing: $e');
+    }
+
     state = JarvisState(
       messages: [
         ChatMessage.assistant(
@@ -84,7 +101,18 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
         ),
       ],
       activeProvider: provider,
+      briefingData: briefingData,
     );
+  }
+
+  /// Refresh the daily briefing data
+  Future<void> refreshBriefing() async {
+    try {
+      final briefingData = await _dataService.gatherDailyBriefing();
+      state = state.copyWith(briefingData: briefingData);
+    } catch (e) {
+      debugPrint('[JarvisProvider] Failed to refresh briefing: $e');
+    }
   }
 
   /// Check which API key is available and return the provider name.
@@ -143,13 +171,23 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
       final aiProvider =
           provider == 'openai' ? AiProvider.openai : AiProvider.anthropic;
 
-      // Send to API (pass conversation history, excluding system/error messages)
+      // Gather relevant data context based on the user's message
+      String? dataContext;
+      try {
+        dataContext =
+            await _dataService.gatherQueryContext(content.trim());
+      } catch (e) {
+        debugPrint('[JarvisProvider] Failed to gather context: $e');
+      }
+
+      // Send to API with data context
       final responseContent = await _apiService.sendMessage(
         messages: state.messages
             .where((m) => !m.isError && m.role != MessageRole.system)
             .toList(),
         apiKey: apiKey,
         provider: aiProvider,
+        dataContext: dataContext,
       );
 
       // Parse actions from response
@@ -212,6 +250,7 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
         ),
       ],
       activeProvider: state.activeProvider,
+      briefingData: state.briefingData,
     );
   }
 
@@ -235,5 +274,6 @@ final jarvisProvider =
   return JarvisNotifier(
     apiService: ref.read(jarvisApiServiceProvider),
     tokenStorage: ref.read(tokenStorageProvider),
+    dataService: ref.read(jarvisDataServiceProvider),
   );
 });

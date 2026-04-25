@@ -1,18 +1,39 @@
+import 'package:assistant/data/mock/models/habit_model.dart';
 import 'package:assistant/data/mock/models/todo_model.dart';
+import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/data/models/calorie_entry_model.dart';
+import 'package:assistant/data/models/focus_session_model.dart';
+import 'package:assistant/data/models/heart_rate_model.dart';
+import 'package:assistant/data/models/meditation_session_model.dart';
 import 'package:assistant/data/models/mood_entry_model.dart';
+import 'package:assistant/data/models/screen_time_model.dart';
+import 'package:assistant/data/models/sleep_record_model.dart';
 import 'package:assistant/data/models/water_log_model.dart';
+import 'package:assistant/data/models/workout_session_model.dart';
 import 'package:assistant/presentation/constants/app_theme.dart';
 import 'package:assistant/presentation/pages/jarvis/widgets/chat_bubble.dart';
 import 'package:assistant/presentation/pages/jarvis/widgets/chat_input.dart';
+import 'package:assistant/presentation/pages/jarvis/widgets/daily_briefing.dart';
 import 'package:assistant/presentation/pages/jarvis/widgets/typing_indicator.dart';
 import 'package:assistant/presentation/pages/settings/settings_page.dart';
 import 'package:assistant/presentation/utils/navigation_utils.dart';
+import 'package:assistant/providers/calendar_provider.dart';
 import 'package:assistant/providers/calories_provider.dart';
+import 'package:assistant/providers/focus_timer_provider.dart';
+import 'package:assistant/providers/habit_provider.dart';
+import 'package:assistant/providers/heart_rate_provider.dart';
+import 'package:assistant/providers/inbox_provider.dart';
 import 'package:assistant/providers/jarvis_provider.dart';
+import 'package:assistant/providers/meditation_provider.dart';
 import 'package:assistant/providers/mood_provider.dart';
+import 'package:assistant/providers/screen_time_provider.dart';
+import 'package:assistant/providers/sleep_provider.dart';
+import 'package:assistant/providers/steps_provider.dart';
 import 'package:assistant/providers/todo_provider.dart';
+import 'package:assistant/providers/insights_provider.dart';
 import 'package:assistant/providers/water_provider.dart';
+import 'package:assistant/providers/workout_provider.dart';
+import 'package:assistant/presentation/pages/jarvis/widgets/nudge_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,13 +44,29 @@ class JarvisChatPage extends ConsumerStatefulWidget {
   ConsumerState<JarvisChatPage> createState() => _JarvisChatPageState();
 }
 
-class _JarvisChatPageState extends ConsumerState<JarvisChatPage> {
+class _JarvisChatPageState extends ConsumerState<JarvisChatPage>
+    with WidgetsBindingObserver {
   final _scrollController = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh briefing when app returns to foreground
+    if (state == AppLifecycleState.resumed) {
+      ref.read(jarvisProvider.notifier).refreshBriefing();
+    }
   }
 
   void _scrollToBottom() {
@@ -62,6 +99,26 @@ class _JarvisChatPageState extends ConsumerState<JarvisChatPage> {
             await _executeMoodAction(action.data);
           case 'calories':
             await _executeCaloriesAction(action.data);
+          case 'sleep':
+            await _executeSleepAction(action.data);
+          case 'steps':
+            await _executeStepsAction(action.data);
+          case 'workout':
+            await _executeWorkoutAction(action.data);
+          case 'heart_rate':
+            await _executeHeartRateAction(action.data);
+          case 'meditation':
+            await _executeMeditationAction(action.data);
+          case 'habit':
+            await _executeHabitAction(action.data);
+          case 'screen_time':
+            await _executeScreenTimeAction(action.data);
+          case 'focus':
+            await _executeFocusAction(action.data);
+          case 'calendar':
+            await _executeCalendarAction(action.data);
+          case 'inbox':
+            await _executeInboxAction(action.data);
           default:
             debugPrint('[Jarvis] Unknown action type: ${action.type}');
         }
@@ -139,6 +196,183 @@ class _JarvisChatPageState extends ConsumerState<JarvisChatPage> {
     await ref.read(calorieEntriesProvider.notifier).addEntry(entry);
   }
 
+  Future<void> _executeSleepAction(Map<String, dynamic> data) async {
+    final bedTimeStr = data['bed_time'] as String? ?? '23:00';
+    final wakeTimeStr = data['wake_time'] as String? ?? '07:00';
+    final qualityStr = data['quality'] as String? ?? 'good';
+
+    final now = DateTime.now();
+    final bedParts = bedTimeStr.split(':');
+    final wakeParts = wakeTimeStr.split(':');
+    final bedHour = int.tryParse(bedParts[0]) ?? 23;
+    final bedMinute = bedParts.length > 1 ? int.tryParse(bedParts[1]) ?? 0 : 0;
+    final wakeHour = int.tryParse(wakeParts[0]) ?? 7;
+    final wakeMinute = wakeParts.length > 1 ? int.tryParse(wakeParts[1]) ?? 0 : 0;
+
+    // Bed time is yesterday if hour >= 12, wake time is today
+    var bedTime = DateTime(now.year, now.month, now.day, bedHour, bedMinute);
+    if (bedHour >= 12) bedTime = bedTime.subtract(const Duration(days: 1));
+    final wakeTime = DateTime(now.year, now.month, now.day, wakeHour, wakeMinute);
+
+    final quality = switch (qualityStr) {
+      'poor' => SleepQuality.poor,
+      'fair' => SleepQuality.fair,
+      'excellent' => SleepQuality.excellent,
+      _ => SleepQuality.good,
+    };
+
+    final record = SleepRecordModel(
+      id: '',
+      bedTime: bedTime,
+      wakeTime: wakeTime,
+      quality: quality,
+    );
+    await ref.read(sleepRecordsProvider.notifier).addRecord(record);
+  }
+
+  Future<void> _executeStepsAction(Map<String, dynamic> data) async {
+    final steps = data['steps'] as int? ?? 0;
+    await ref.read(stepRecordsProvider.notifier).addSteps(steps);
+  }
+
+  Future<void> _executeWorkoutAction(Map<String, dynamic> data) async {
+    final typeStr = data['type'] as String? ?? 'other';
+    final durationMinutes = data['duration_minutes'] as int? ?? 30;
+    final calories = data['calories'] as int? ?? 0;
+
+    final type = switch (typeStr) {
+      'running' => WorkoutType.running,
+      'cycling' => WorkoutType.cycling,
+      'strength' => WorkoutType.strength,
+      'yoga' => WorkoutType.yoga,
+      'swimming' => WorkoutType.swimming,
+      'walking' => WorkoutType.walking,
+      'hiit' => WorkoutType.hiit,
+      _ => WorkoutType.other,
+    };
+
+    final session = WorkoutSessionModel(
+      id: '',
+      type: type,
+      startTime: DateTime.now().subtract(Duration(minutes: durationMinutes)),
+      endTime: DateTime.now(),
+      durationMinutes: durationMinutes,
+      caloriesBurned: calories,
+    );
+    await ref.read(workoutSessionsProvider.notifier).addSession(session);
+  }
+
+  Future<void> _executeHeartRateAction(Map<String, dynamic> data) async {
+    final bpm = data['bpm'] as int? ?? 72;
+    final record = HeartRateRecordModel(
+      id: '',
+      bpm: bpm,
+      recordedAt: DateTime.now(),
+    );
+    await ref.read(heartRateRecordsProvider.notifier).addRecord(record);
+  }
+
+  Future<void> _executeMeditationAction(Map<String, dynamic> data) async {
+    final typeStr = data['type'] as String? ?? 'breathing';
+    final durationMinutes = data['duration_minutes'] as int? ?? 10;
+
+    final type = switch (typeStr) {
+      'guided' => MeditationType.guided,
+      'unguided' => MeditationType.unguided,
+      'sleep' => MeditationType.sleep,
+      'focus' => MeditationType.focus,
+      _ => MeditationType.breathing,
+    };
+
+    final session = MeditationSessionModel(
+      id: '',
+      type: type,
+      startTime: DateTime.now(),
+      durationMinutes: durationMinutes,
+      isCompleted: true,
+    );
+    await ref.read(meditationSessionsProvider.notifier).addSession(session);
+  }
+
+  Future<void> _executeHabitAction(Map<String, dynamic> data) async {
+    final name = data['name'] as String? ?? 'Habit';
+    final action = data['action'] as String? ?? 'complete';
+
+    if (action == 'add') {
+      final habit = HabitModel(
+        id: '',
+        name: name,
+        category: HabitCategory.other,
+      );
+      await ref.read(habitListProvider.notifier).addHabit(habit);
+    } else {
+      // Toggle complete — find by name
+      final habits = ref.read(habitListProvider).valueOrNull ?? [];
+      final match = habits.where(
+        (h) => h.name.toLowerCase() == name.toLowerCase(),
+      );
+      if (match.isNotEmpty) {
+        await ref.read(habitListProvider.notifier).toggleComplete(match.first.id);
+      }
+    }
+  }
+
+  Future<void> _executeScreenTimeAction(Map<String, dynamic> data) async {
+    final totalMinutes = data['total_minutes'] as int? ?? 0;
+    final pickups = data['pickups'] as int? ?? 0;
+
+    final record = ScreenTimeRecord(
+      id: '',
+      date: DateTime.now(),
+      totalMinutes: totalMinutes,
+      pickups: pickups,
+    );
+    await ref.read(screenTimeRecordProvider.notifier).syncRecord(record);
+  }
+
+  Future<void> _executeFocusAction(Map<String, dynamic> data) async {
+    final durationMinutes = data['duration_minutes'] as int? ?? 25;
+    final task = data['task'] as String?;
+
+    final session = FocusSessionModel(
+      id: '',
+      type: FocusSessionType.focus,
+      startTime: DateTime.now(),
+      durationMinutes: durationMinutes,
+      task: task,
+    );
+    await ref.read(focusTimerSessionsProvider.notifier).addSession(session);
+  }
+
+  Future<void> _executeCalendarAction(Map<String, dynamic> data) async {
+    final title = data['title'] as String? ?? 'Event';
+    final startStr = data['start'] as String?;
+    final endStr = data['end'] as String?;
+
+    final start = startStr != null
+        ? DateTime.tryParse(startStr) ?? DateTime.now()
+        : DateTime.now();
+    final end = endStr != null
+        ? DateTime.tryParse(endStr) ?? start.add(const Duration(hours: 1))
+        : start.add(const Duration(hours: 1));
+
+    final event = CalendarEvent(
+      title: title,
+      startTime: start,
+      endTime: end,
+    );
+    await ref.read(calendarEventsProvider.notifier).addEvent(event);
+  }
+
+  Future<void> _executeInboxAction(Map<String, dynamic> data) async {
+    final action = data['action'] as String? ?? 'mark_read';
+    final id = data['id'] as String?;
+
+    if (action == 'mark_read' && id != null) {
+      await ref.read(inboxMessagesProvider.notifier).markAsRead(id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(jarvisProvider);
@@ -155,6 +389,9 @@ class _JarvisChatPageState extends ConsumerState<JarvisChatPage> {
       }
     });
 
+    final hasBriefing =
+        state.briefingData != null && state.briefingData!.isNotEmpty;
+
     return Container(
       color: AppTheme.backgroundColor,
       child: SafeArea(
@@ -163,6 +400,13 @@ class _JarvisChatPageState extends ConsumerState<JarvisChatPage> {
           children: [
             _buildHeader(context),
             if (hasNoApiKey) _buildNoApiKeyBanner(context),
+            if (hasBriefing && isOnlyWelcome)
+              DailyBriefing(
+                briefingData: state.briefingData!,
+                onRefresh: () =>
+                    ref.read(jarvisProvider.notifier).refreshBriefing(),
+              ),
+            if (isOnlyWelcome) _buildNudges(),
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
@@ -330,6 +574,28 @@ class _JarvisChatPageState extends ConsumerState<JarvisChatPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNudges() {
+    final insightsState = ref.watch(insightsProvider);
+    final nudges = insightsState.activeNudges;
+    if (nudges.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Column(
+        children: nudges.map((nudge) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: NudgeCard(
+              nudge: nudge,
+              onDismiss: () =>
+                  ref.read(insightsProvider.notifier).dismissNudge(nudge.id),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

@@ -62,6 +62,10 @@ import 'package:assistant/data/models/focus_session_model.dart';
 import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/data/models/weather_forecast_model.dart';
 import 'package:assistant/providers/auth_provider.dart';
+import 'package:assistant/providers/insights_provider.dart';
+import 'package:assistant/presentation/pages/jarvis/widgets/weekly_report_card.dart';
+import 'package:assistant/presentation/pages/jarvis/widgets/nudge_card.dart';
+import 'package:assistant/presentation/pages/jarvis/widgets/insight_card.dart';
 import 'package:assistant/presentation/widgets/sheets/account_sheet.dart';
 import 'package:assistant/presentation/pages/jarvis/index.dart';
 import 'package:assistant/presentation/pages/settings/index.dart';
@@ -167,6 +171,17 @@ class _HomeTab extends ConsumerWidget {
               children: [
               // Greeting Header
               _buildGreetingHeader(context, ref, user, paddingValue),
+
+              // Nudges
+              ..._buildNudges(ref, paddingValue),
+
+              // Weekly Report Card
+              const WeeklyReportCard(),
+              SizedBox(height: paddingValue),
+
+              // Smart Insights
+              ..._buildInsights(ref, paddingValue),
+
               // Productivity Section
               CustomTodosCard(
                 totalTodos: todoStats.total,
@@ -285,6 +300,58 @@ class _HomeTab extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  List<Widget> _buildNudges(WidgetRef ref, double paddingValue) {
+    final state = ref.watch(insightsProvider);
+    final nudges = state.activeNudges;
+    if (nudges.isEmpty) return [];
+
+    return nudges.map((nudge) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: paddingValue * 0.5),
+        child: NudgeCard(
+          nudge: nudge,
+          onDismiss: () =>
+              ref.read(insightsProvider.notifier).dismissNudge(nudge.id),
+        ),
+      );
+    }).toList();
+  }
+
+  List<Widget> _buildInsights(WidgetRef ref, double paddingValue) {
+    final state = ref.watch(insightsProvider);
+    final insights = state.insights;
+    if (insights.isEmpty) return [];
+
+    return [
+      Padding(
+        padding: EdgeInsets.only(bottom: paddingValue * 0.5),
+        child: Row(
+          children: [
+            const Icon(Icons.insights_outlined,
+                size: 14, color: AppTheme.primaryColor),
+            const SizedBox(width: 6),
+            const Text(
+              'Smart Insights',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+                letterSpacing: -0.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+      ...insights.map((insight) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: paddingValue * 0.5),
+          child: InsightCard(insight: insight),
+        );
+      }),
+      SizedBox(height: paddingValue * 0.5),
+    ];
   }
 
   Widget _buildGreetingHeader(BuildContext context, WidgetRef ref, dynamic user, double paddingValue) {

@@ -26,7 +26,20 @@ Available actions and their JSON formats:
   (score: 1=awful, 2=bad, 3=okay, 4=good, 5=great)
 - Log calories: [ACTION:calories:{"name":"Banana","calories":105,"meal_type":"snack"}]
   (meal_type: breakfast, lunch, dinner, snack)
+- Log sleep: [ACTION:sleep:{"bed_time":"23:00","wake_time":"07:00","quality":"good"}]
+  (quality: poor, fair, good, excellent)
+- Log steps: [ACTION:steps:{"steps":5000}]
+- Log workout: [ACTION:workout:{"type":"running","duration_minutes":30,"calories":300}]
+  (type: running, cycling, strength, yoga, swimming, walking, hiit, other)
+- Log heart rate: [ACTION:heart_rate:{"bpm":72}]
+- Log meditation: [ACTION:meditation:{"type":"breathing","duration_minutes":10}]
+  (type: breathing, guided, unguided, sleep, focus)
+- Complete/add habit: [ACTION:habit:{"name":"Read","action":"complete"}]
+  (action: "complete" toggles today's completion, "add" creates a new habit)
+- Log screen time: [ACTION:screen_time:{"total_minutes":180,"pickups":45}]
 - Start focus timer: [ACTION:focus:{"duration_minutes":25,"task":"Deep work"}]
+- Add calendar event: [ACTION:calendar:{"title":"Meeting","start":"2026-04-25T14:00","end":"2026-04-25T15:00"}]
+- Mark inbox as read: [ACTION:inbox:{"action":"mark_read","id":"message-id"}]
 
 Rules for actions:
 - Only include an ACTION tag when the user clearly wants to perform one of these actions.
@@ -54,23 +67,37 @@ Rules for actions:
   /// [messages] is the full conversation history.
   /// [apiKey] is the user's API key for the selected provider.
   /// [provider] determines which API to call.
+  /// [dataContext] is optional user data injected into the system prompt.
   Future<String> sendMessage({
     required List<ChatMessage> messages,
     required String apiKey,
     required AiProvider provider,
+    String? dataContext,
   }) async {
     switch (provider) {
       case AiProvider.openai:
-        return _sendOpenAi(messages, apiKey);
+        return _sendOpenAi(messages, apiKey, dataContext);
       case AiProvider.anthropic:
-        return _sendAnthropic(messages, apiKey);
+        return _sendAnthropic(messages, apiKey, dataContext);
     }
   }
 
+  /// Build the full system prompt with optional data context
+  String _buildSystemPrompt(String? dataContext) {
+    if (dataContext == null || dataContext.isEmpty) return _systemPrompt;
+    return '$_systemPrompt\n\n'
+        '[USER_DATA — Real-time data from the user\'s app. Use this to answer questions accurately.]\n'
+        '$dataContext\n'
+        '[/USER_DATA]\n\n'
+        'When answering questions about the user\'s data, ALWAYS reference the real numbers from USER_DATA above. '
+        'Never guess or make up values. If data for a domain is not provided, say you don\'t have that information.';
+  }
+
   /// Send messages to OpenAI Chat Completions API
-  Future<String> _sendOpenAi(List<ChatMessage> messages, String apiKey) async {
+  Future<String> _sendOpenAi(List<ChatMessage> messages, String apiKey, String? dataContext) async {
+    final systemPrompt = _buildSystemPrompt(dataContext);
     final requestMessages = <Map<String, String>>[
-      {'role': 'system', 'content': _systemPrompt},
+      {'role': 'system', 'content': systemPrompt},
       ...messages
           .where((m) => m.role != MessageRole.system && !m.isError)
           .map((m) => {
@@ -122,7 +149,7 @@ Rules for actions:
 
   /// Send messages to Anthropic Messages API
   Future<String> _sendAnthropic(
-      List<ChatMessage> messages, String apiKey) async {
+      List<ChatMessage> messages, String apiKey, String? dataContext) async {
     final requestMessages = messages
         .where((m) => m.role != MessageRole.system && !m.isError)
         .map((m) => {
@@ -131,10 +158,11 @@ Rules for actions:
             })
         .toList();
 
+    final systemPrompt = _buildSystemPrompt(dataContext);
     final body = jsonEncode({
       'model': _anthropicModel,
       'max_tokens': 1024,
-      'system': _systemPrompt,
+      'system': systemPrompt,
       'messages': requestMessages,
     });
 
