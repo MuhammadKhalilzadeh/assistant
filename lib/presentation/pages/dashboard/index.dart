@@ -381,6 +381,8 @@ class _HomeTab extends ConsumerWidget {
               children: [
                 Text(
                   '$greeting, $nickname',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -390,6 +392,8 @@ class _HomeTab extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text(
                   dateStr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 14,
                     color: AppTheme.textSecondary,

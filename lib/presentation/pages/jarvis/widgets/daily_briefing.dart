@@ -83,12 +83,15 @@ class DailyBriefing extends StatelessWidget {
           const SizedBox(height: 6),
 
           // Data rows — compact, scrollable if many
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-            child: Wrap(
-              spacing: 0,
-              runSpacing: 2,
-              children: lines.map((line) => _buildDataRow(line)).toList(),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+              child: Wrap(
+                spacing: 0,
+                runSpacing: 2,
+                children: lines.map((line) => _buildDataRow(line)).toList(),
+              ),
             ),
           ),
         ],
@@ -104,6 +107,8 @@ class DailyBriefing extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 1),
         child: Text(
           line,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             fontSize: 12,
             color: AppTheme.textSecondary,

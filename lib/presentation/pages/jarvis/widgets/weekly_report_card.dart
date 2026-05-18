@@ -109,10 +109,19 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
             // Metrics grid
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 8, 14, 12),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: report.metrics.map(_buildMetricTile).toList(),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  const spacing = 8.0;
+                  final tileWidth =
+                      ((constraints.maxWidth - spacing * 2) / 3).clamp(90.0, double.infinity);
+                  return Wrap(
+                    spacing: spacing,
+                    runSpacing: spacing,
+                    children: report.metrics
+                        .map((m) => _buildMetricTile(m, tileWidth))
+                        .toList(),
+                  );
+                },
               ),
             ),
           ],
@@ -130,6 +139,8 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
       ),
       child: Text(
         text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
       ),
     );
@@ -171,66 +182,76 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
     );
   }
 
-  Widget _buildMetricTile(WeeklyMetric metric) {
+  Widget _buildMetricTile(WeeklyMetric metric, double tileWidth) {
     final pctOfGoal = metric.progress;
     final color = pctOfGoal >= 0.8
         ? AppTheme.successColor
         : (pctOfGoal >= 0.5 ? AppTheme.warningColor : AppTheme.textTertiary);
 
-    return Container(
-      width: 100,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            metric.label,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textTertiary,
+    return SizedBox(
+      width: tileWidth,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              metric.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textTertiary,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            _formatValue(metric.value, metric.unit),
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
+            const SizedBox(height: 2),
+            Text(
+              _formatValue(metric.value, metric.unit),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          Row(
-            children: [
-              if (metric.streak > 0) ...[
-                Icon(Icons.local_fire_department, size: 10, color: color),
-                const SizedBox(width: 2),
+            const SizedBox(height: 2),
+            Row(
+              children: [
+                if (metric.streak > 0) ...[
+                  Icon(Icons.local_fire_department, size: 10, color: color),
+                  const SizedBox(width: 2),
+                  Flexible(
+                    child: Text(
+                      '${metric.streak}d',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                ],
                 Text(
-                  '${metric.streak}d',
+                  '${(pctOfGoal * 100).round()}%',
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w600,
                     color: color,
                   ),
                 ),
-                const SizedBox(width: 4),
               ],
-              Text(
-                '${(pctOfGoal * 100).round()}%',
-                style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

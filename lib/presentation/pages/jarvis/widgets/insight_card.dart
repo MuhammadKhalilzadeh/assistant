@@ -45,12 +45,16 @@ class InsightCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      insight.title,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary,
+                    Flexible(
+                      child: Text(
+                        insight.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -75,6 +79,8 @@ class InsightCard extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   insight.description,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 11,
                     color: AppTheme.textSecondary,

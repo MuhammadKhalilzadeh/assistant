@@ -401,12 +401,19 @@ class _JarvisChatPageState extends ConsumerState<JarvisChatPage>
             _buildHeader(context),
             if (hasNoApiKey) _buildNoApiKeyBanner(context),
             if (hasBriefing && isOnlyWelcome)
-              DailyBriefing(
-                briefingData: state.briefingData!,
-                onRefresh: () =>
-                    ref.read(jarvisProvider.notifier).refreshBriefing(),
+              Flexible(
+                flex: 0,
+                child: DailyBriefing(
+                  briefingData: state.briefingData!,
+                  onRefresh: () =>
+                      ref.read(jarvisProvider.notifier).refreshBriefing(),
+                ),
               ),
-            if (isOnlyWelcome) _buildNudges(),
+            if (isOnlyWelcome)
+              Flexible(
+                flex: 0,
+                child: _buildNudges(),
+              ),
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
