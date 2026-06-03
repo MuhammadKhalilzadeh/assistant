@@ -1,0 +1,1 @@
+{"nodes": [{"id": "inbox_schema", "label": "inbox.schema.ts", "file_type": "code", "source_file": "nodejs\\src\\schemas\\inbox.schema.ts", "source_location": "L1"}], "edges": [{"source": "inbox_schema", "target": "zod", "relation": "imports_from", "confidence": "EXTRACTED", "source_file": "nodejs\\src\\schemas\\inbox.schema.ts", "source_location": "L1", "weight": 1.0}]}

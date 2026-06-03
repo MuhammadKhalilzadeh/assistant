@@ -1,0 +1,1 @@
+{"nodes": [{"id": "habit_schema", "label": "habit.schema.ts", "file_type": "code", "source_file": "nodejs\\src\\schemas\\habit.schema.ts", "source_location": "L1"}], "edges": [{"source": "habit_schema", "target": "zod", "relation": "imports_from", "confidence": "EXTRACTED", "source_file": "nodejs\\src\\schemas\\habit.schema.ts", "source_location": "L1", "weight": 1.0}]}

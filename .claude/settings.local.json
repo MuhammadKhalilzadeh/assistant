@@ -52,7 +52,11 @@
       "Bash(dart:*)",
       "Bash(openssl rand:*)",
       "Bash(flutter run:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(py -c:*)",
+      "Bash(py -m pip install:*)",
+      "Bash(py -c \"import sys; open\\(''.graphify_python'', ''w''\\).write\\(''py''\\)\")",
+      "Bash(PYTHONIOENCODING=utf-8 py:*)"
     ]
   }
 }

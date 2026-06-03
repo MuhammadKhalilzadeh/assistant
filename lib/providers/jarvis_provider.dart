@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:assistant/data/models/chat_message_model.dart';
 import 'package:assistant/data/services/jarvis_api_service.dart';
 import 'package:assistant/data/services/jarvis_data_service.dart';
+import 'package:assistant/data/services/http_client.dart';
+import 'package:assistant/config/app_config.dart';
 import 'package:assistant/services/token_storage_service.dart';
 import 'package:assistant/providers/auth_provider.dart';
 
@@ -63,19 +65,58 @@ class JarvisState {
 // Action parsing regex — matches flat JSON objects in ACTION tags
 final _actionPattern = RegExp(r'\[ACTION:(\w+):(\{[^[\]]*?\})\]');
 
+/// Keywords that indicate a query needs server-side deep analysis.
+const _deepAnalysisKeywords = [
+  'trend', 'pattern', 'correlat', 'why', 'compare', 'recommend',
+  'analyze', 'analysis', 'weekly', 'report', 'this week', 'last week',
+  'this month', 'over time', 'improve', 'suggest', 'plan', 'schedule',
+  'how did i', 'how have i', 'how am i doing', 'what should',
+  'insights', 'progress', 'history', 'average',
+];
+
+/// Keywords that indicate a simple query handled client-side.
+const _simpleKeywords = [
+  'hello', 'hi', 'hey', 'thanks', 'thank you', 'bye', 'good morning',
+  'good night', 'joke', 'help', 'what can you do',
+];
+
+/// Determine if a message should be routed to the server for deep analysis.
+bool _needsServerRouting(String message) {
+  final lower = message.toLowerCase();
+
+  // Simple queries stay client-side
+  for (final kw in _simpleKeywords) {
+    if (lower == kw || lower == '$kw.' || lower == '$kw!') return false;
+  }
+
+  // Deep analysis queries go to server
+  for (final kw in _deepAnalysisKeywords) {
+    if (lower.contains(kw)) return true;
+  }
+
+  return false;
+}
+
 // Notifier
 class JarvisNotifier extends StateNotifier<JarvisState> {
   final JarvisApiService _apiService;
   final TokenStorageService _tokenStorage;
   final JarvisDataService _dataService;
+  final AppHttpClient _httpClient;
 
   JarvisNotifier({
     required JarvisApiService apiService,
     required TokenStorageService tokenStorage,
     required JarvisDataService dataService,
+    AppHttpClient? httpClient,
   })  : _apiService = apiService,
         _tokenStorage = tokenStorage,
         _dataService = dataService,
+        _httpClient = httpClient ??
+            AppHttpClient(
+              timeout: AppConfig.instance.requestTimeout,
+              maxRetries: AppConfig.instance.maxRetries,
+            ),
         super(const JarvisState()) {
     _initialize();
   }
@@ -168,27 +209,37 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
         return;
       }
 
-      final aiProvider =
-          provider == 'openai' ? AiProvider.openai : AiProvider.anthropic;
+      String responseContent;
 
-      // Gather relevant data context based on the user's message
-      String? dataContext;
-      try {
-        dataContext =
-            await _dataService.gatherQueryContext(content.trim());
-      } catch (e) {
-        debugPrint('[JarvisProvider] Failed to gather context: $e');
+      // Hybrid routing: complex queries go to server, simple ones stay client-side
+      if (_needsServerRouting(content.trim())) {
+        // Route to server — it has the data-aware AI brain with full DB access
+        responseContent = await _sendToServer(
+          message: content.trim(),
+          provider: provider,
+        );
+      } else {
+        // Client-side: gather local context and call LLM directly
+        final aiProvider =
+            provider == 'openai' ? AiProvider.openai : AiProvider.anthropic;
+
+        String? dataContext;
+        try {
+          dataContext =
+              await _dataService.gatherQueryContext(content.trim());
+        } catch (e) {
+          debugPrint('[JarvisProvider] Failed to gather context: $e');
+        }
+
+        responseContent = await _apiService.sendMessage(
+          messages: state.messages
+              .where((m) => !m.isError && m.role != MessageRole.system)
+              .toList(),
+          apiKey: apiKey,
+          provider: aiProvider,
+          dataContext: dataContext,
+        );
       }
-
-      // Send to API with data context
-      final responseContent = await _apiService.sendMessage(
-        messages: state.messages
-            .where((m) => !m.isError && m.role != MessageRole.system)
-            .toList(),
-        apiKey: apiKey,
-        provider: aiProvider,
-        dataContext: dataContext,
-      );
 
       // Parse actions from response
       final actions = _parseActions(responseContent);
@@ -211,6 +262,57 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
         messages: [...state.messages, errorMsg],
         isLoading: false,
         error: e.toString(),
+      );
+    }
+  }
+
+  /// Send a message to the server-side AI brain for deep analysis.
+  /// The server has full DB access and builds rich data context.
+  Future<String> _sendToServer({
+    required String message,
+    required String provider,
+  }) async {
+    final baseUrl = AppConfig.instance.apiBaseUrl;
+    final history = state.messages
+        .where((m) => !m.isError && m.role != MessageRole.system)
+        .map((m) => {
+              'role': m.role == MessageRole.user ? 'user' : 'assistant',
+              'content': m.content,
+            })
+        .toList();
+
+    final response = await _httpClient.post(
+      Uri.parse('$baseUrl/jarvis/chat'),
+      body: {
+        'message': message,
+        'history': history,
+        'provider': provider,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      return data['response'] as String? ?? '';
+    } else {
+      // Fall back to client-side if server fails
+      debugPrint(
+          '[JarvisProvider] Server routing failed (${response.statusCode}), falling back to client');
+      final aiProvider =
+          provider == 'openai' ? AiProvider.openai : AiProvider.anthropic;
+      final apiKey = await _tokenStorage.getApiKey(provider);
+
+      String? dataContext;
+      try {
+        dataContext = await _dataService.gatherQueryContext(message);
+      } catch (_) {}
+
+      return _apiService.sendMessage(
+        messages: state.messages
+            .where((m) => !m.isError && m.role != MessageRole.system)
+            .toList(),
+        apiKey: apiKey!,
+        provider: aiProvider,
+        dataContext: dataContext,
       );
     }
   }

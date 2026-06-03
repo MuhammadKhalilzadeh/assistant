@@ -440,3 +440,108 @@ CREATE INDEX IF NOT EXISTS idx_inbox_messages_service ON inbox_messages(service)
 CREATE INDEX IF NOT EXISTS idx_inbox_messages_is_read ON inbox_messages(is_read);
 CREATE INDEX IF NOT EXISTS idx_inbox_messages_received_at ON inbox_messages(received_at);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_inbox_user_gmail_msg ON inbox_messages(user_id, gmail_message_id) WHERE gmail_message_id IS NOT NULL;
+
+-- =============================================
+-- INSIGHTS (AI-generated insights)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS insights (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type VARCHAR(20) NOT NULL,
+  domains TEXT[] DEFAULT '{}',
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  confidence DECIMAL(3,2) DEFAULT 0.50,
+  data JSONB DEFAULT '{}',
+  dismissed BOOLEAN DEFAULT FALSE,
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_insights_user_id ON insights(user_id);
+CREATE INDEX IF NOT EXISTS idx_insights_type ON insights(type);
+CREATE INDEX IF NOT EXISTS idx_insights_dismissed ON insights(dismissed);
+
+-- =============================================
+-- NOTIFICATION LOG (Rate limiting + analytics)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS notification_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  category VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  sent_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_notification_log_user ON notification_log(user_id, category, sent_at);
+
+-- =============================================
+-- GOAL SUGGESTIONS (Agent goal advisor)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS goal_suggestions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  domain VARCHAR(50) NOT NULL,
+  current_goal DECIMAL NOT NULL,
+  suggested_goal DECIMAL NOT NULL,
+  direction VARCHAR(10) NOT NULL,
+  reason TEXT NOT NULL,
+  confidence DECIMAL(3,2) DEFAULT 0.50,
+  evidence JSONB DEFAULT '{}',
+  status VARCHAR(20) DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  responded_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_goal_suggestions_user ON goal_suggestions(user_id, status);
+
+-- =============================================
+-- WEEKLY PLANS (Agent weekly planner)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS weekly_plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  week_start DATE NOT NULL,
+  week_end DATE NOT NULL,
+  days JSONB NOT NULL DEFAULT '[]',
+  focus_areas TEXT[] DEFAULT '{}',
+  ai_summary TEXT DEFAULT '',
+  status VARCHAR(20) DEFAULT 'draft',
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_weekly_plans_user ON weekly_plans(user_id, week_start);
+
+-- =============================================
+-- AUTO ACTION LOG (Agent auto-actions)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS auto_action_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  action_type VARCHAR(50) NOT NULL,
+  payload JSONB NOT NULL DEFAULT '{}',
+  reason TEXT NOT NULL,
+  autonomy_level VARCHAR(20) NOT NULL,
+  status VARCHAR(20) DEFAULT 'pending_approval',
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  executed_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_auto_action_log_user ON auto_action_log(user_id, status, created_at);
+
+-- =============================================
+-- USER AGENT SETTINGS (Per-user autonomy config)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS user_agent_settings (
+  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  autonomy_level VARCHAR(20) DEFAULT 'suggest_only',
+  goal_changes VARCHAR(20) DEFAULT 'ask_first',
+  reminders VARCHAR(20) DEFAULT 'auto_with_notify',
+  data_logging VARCHAR(20) DEFAULT 'suggest_only'
+);

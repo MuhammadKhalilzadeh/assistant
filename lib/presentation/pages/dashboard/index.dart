@@ -66,6 +66,8 @@ import 'package:assistant/providers/insights_provider.dart';
 import 'package:assistant/presentation/pages/jarvis/widgets/weekly_report_card.dart';
 import 'package:assistant/presentation/pages/jarvis/widgets/nudge_card.dart';
 import 'package:assistant/presentation/pages/jarvis/widgets/insight_card.dart';
+import 'package:assistant/presentation/widgets/cards/server_insight_card.dart';
+import 'package:assistant/presentation/pages/insights/index.dart';
 import 'package:assistant/presentation/widgets/sheets/account_sheet.dart';
 import 'package:assistant/presentation/pages/jarvis/index.dart';
 import 'package:assistant/presentation/pages/settings/index.dart';
@@ -322,7 +324,8 @@ class _HomeTab extends ConsumerWidget {
   List<Widget> _buildInsights(WidgetRef ref, double paddingValue) {
     final state = ref.watch(insightsProvider);
     final insights = state.insights;
-    if (insights.isEmpty) return [];
+    final serverInsights = state.activeServerInsights;
+    if (insights.isEmpty && serverInsights.isEmpty) return [];
 
     return [
       Padding(
@@ -332,18 +335,45 @@ class _HomeTab extends ConsumerWidget {
             const Icon(Icons.insights_outlined,
                 size: 14, color: AppTheme.primaryColor),
             const SizedBox(width: 6),
-            const Text(
-              'Smart Insights',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
-                letterSpacing: -0.2,
+            const Expanded(
+              child: Text(
+                'Smart Insights',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => NavigationUtils.navigateWithFade(
+                  ref.context, const InsightsPage()),
+              child: Text(
+                'See all',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.primaryColor,
+                ),
               ),
             ),
           ],
         ),
       ),
+      // Server-generated insights (AI brain)
+      ...serverInsights.map((insight) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: paddingValue * 0.5),
+          child: ServerInsightCard(
+            insight: insight,
+            onDismiss: () => ref
+                .read(insightsProvider.notifier)
+                .dismissServerInsight(insight.id),
+          ),
+        );
+      }),
+      // Client-side insights
       ...insights.map((insight) {
         return Padding(
           padding: EdgeInsets.only(bottom: paddingValue * 0.5),

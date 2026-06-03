@@ -22,11 +22,15 @@ import screenTimeRoutes from './routes/screen-time.routes';
 import inboxRoutes from './routes/inbox.routes';
 import authRoutes from './routes/auth.routes';
 import jarvisRoutes from './routes/jarvis.routes';
+import insightsRoutes from './routes/insights.routes';
+import notificationsRoutes from './routes/notifications.routes';
+import agentRoutes from './routes/agent.routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authMiddleware } from './middleware/auth.middleware';
 import { securityHeaders, rateLimiter } from './middleware/security.middleware';
 import { requestLogger } from './middleware/request-logger.middleware';
 import { checkDatabaseHealth, closeDatabasePool, initializeDatabase } from './config/database';
+import { analysisScheduler } from './services/scheduler/analysis-scheduler.service';
 import { logger } from './config/logger';
 
 const app = express();
@@ -64,6 +68,9 @@ app.use('/api/weather', weatherRoutes);
 app.use('/api/screen-time', screenTimeRoutes);
 app.use('/api/inbox', inboxRoutes);
 app.use('/api/jarvis', jarvisRoutes);
+app.use('/api/insights', insightsRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/agent', agentRoutes);
 
 // Enhanced health check with database status
 app.get('/api/health', async (_req, res) => {
@@ -96,6 +103,9 @@ async function startServer(): Promise<void> {
   try {
     // Initialize database schema
     await initializeDatabase();
+
+    // Start scheduled analysis jobs
+    await analysisScheduler.initialize();
 
     // Start HTTP server
     server = app.listen(PORT, () => {
@@ -208,6 +218,9 @@ startServer();
 // Graceful shutdown handling
 const shutdown = async (signal: string) => {
   logger.info({ signal }, 'Received shutdown signal, starting graceful shutdown...');
+
+  // Stop scheduled jobs
+  analysisScheduler.shutdown();
 
   // Stop accepting new connections
   server.close(async (err) => {

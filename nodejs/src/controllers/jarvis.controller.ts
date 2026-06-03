@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { userModel } from '../models/user.model';
 import { conversationModel } from '../models/conversation.model';
 import { cryptoService } from '../services/crypto.service';
+import { systemPromptService } from '../services/brain/system-prompt.service';
+import { queryRouterService } from '../services/brain/query-router.service';
 import { ValidationError, DatabaseError } from '../utils/errors';
 import { logger } from '../config/logger';
 
@@ -127,9 +129,14 @@ export const jarvisController = {
         return next(new ValidationError(`Failed to decrypt API key for provider: ${provider}. Please re-enter your API key in Settings.`));
       }
 
-      // Build messages array
+      // Route the query and build data-aware system prompt
+      const route = queryRouterService.route(message);
+      const systemPrompt = await systemPromptService.buildFromRoute(userId, route);
+      logger.debug({ complexity: route.complexity, domains: route.domains, contextLevel: route.contextLevel }, 'Query routed');
+
+      // Build messages array with data-enriched system prompt
       const messages: ChatMessage[] = [
-        { role: 'system', content: 'You are Jarvis, a helpful AI assistant. Be concise and helpful.' },
+        { role: 'system', content: systemPrompt },
         ...history,
         { role: 'user', content: message },
       ];
