@@ -62,6 +62,7 @@ import 'package:assistant/data/models/focus_session_model.dart';
 import 'package:assistant/data/models/calendar_event.dart';
 import 'package:assistant/data/models/weather_forecast_model.dart';
 import 'package:assistant/providers/auth_provider.dart';
+import 'package:assistant/providers/health_sync_provider.dart';
 import 'package:assistant/providers/insights_provider.dart';
 import 'package:assistant/presentation/pages/jarvis/widgets/weekly_report_card.dart';
 import 'package:assistant/presentation/pages/jarvis/widgets/nudge_card.dart';
@@ -74,15 +75,37 @@ import 'package:assistant/presentation/pages/settings/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Dashboard extends StatefulWidget {
+class Dashboard extends ConsumerStatefulWidget {
   const Dashboard({super.key});
 
   @override
-  State<Dashboard> createState() => _DashboardState();
+  ConsumerState<Dashboard> createState() => _DashboardState();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _DashboardState extends ConsumerState<Dashboard> with WidgetsBindingObserver {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh health data and calendar on app resume
+      ref.invalidate(healthSyncProvider);
+      ref.invalidate(calendarStatsProvider);
+      ref.invalidate(screenTimeSyncProvider);
+    }
+  }
 
   void _onTabTapped(int index) {
     setState(() {
@@ -130,6 +153,11 @@ class _HomeTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double paddingValue = (screenWidth * 0.04).clamp(16.0, 24.0);
+
+    // Eagerly init health sync — starts periodic sync + reads Health Connect
+    ref.watch(healthSyncProvider);
+    // Eagerly init screen time sync — reads device UsageStats on startup
+    ref.watch(screenTimeSyncProvider);
 
     // Watch real providers for all backend-connected features
     final todoStats = ref.watch(todoStatsProvider).valueOrNull ?? TodoStats.empty();

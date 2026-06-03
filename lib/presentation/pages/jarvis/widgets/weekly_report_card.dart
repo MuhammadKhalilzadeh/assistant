@@ -30,18 +30,6 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
       ),
       child: Column(
         children: [
-          // Gradient accent bar
-          Container(
-            height: 3,
-            decoration: BoxDecoration(
-              gradient: AppTheme.accentGradient,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(AppTheme.borderRadiusCard),
-                topRight: Radius.circular(AppTheme.borderRadiusCard),
-              ),
-            ),
-          ),
-
           // Header — tap to expand/collapse
           GestureDetector(
             onTap: () => setState(() => _isExpanded = !_isExpanded),

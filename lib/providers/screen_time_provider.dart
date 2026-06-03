@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:assistant/data/models/screen_time_model.dart';
 import 'package:assistant/data/services/screen_time_api_service.dart';
+import 'package:assistant/data/services/device_screen_time_service.dart';
 import 'package:assistant/data/cache/screen_time_cache.dart';
 import 'package:assistant/data/errors/app_errors.dart';
 import 'package:assistant/providers/connectivity_provider.dart';
@@ -157,6 +158,18 @@ final screenTimeStatsProvider = FutureProvider<ScreenTimeStats>((ref) async {
       return ScreenTimeStats.fromJson(cachedStats);
     }
     rethrow;
+  }
+});
+
+// Startup sync: reads device screen time and pushes to backend once
+final screenTimeSyncProvider = FutureProvider<void>((ref) async {
+  final deviceService = DeviceScreenTimeService();
+  if (!deviceService.isAndroid) return;
+  final hasPermission = await deviceService.hasPermission();
+  if (!hasPermission) return;
+  final record = await deviceService.buildRecordFromDevice();
+  if (record != null) {
+    await ref.read(screenTimeRecordProvider.notifier).syncRecord(record);
   }
 });
 
