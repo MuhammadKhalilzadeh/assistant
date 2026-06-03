@@ -72,21 +72,24 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
     }
 
     if (_error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline, size: 48, color: AppTheme.warningColor),
-              const SizedBox(height: 12),
-              Text(
-                'Failed to load report',
-                style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
-              ),
-              const SizedBox(height: 8),
-              TextButton(onPressed: _loadReport, child: const Text('Retry')),
-            ],
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: AppTheme.warningColor),
+                const SizedBox(height: 12),
+                Text(
+                  'Failed to load report',
+                  style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 8),
+                TextButton(onPressed: _loadReport, child: const Text('Retry')),
+              ],
+            ),
           ),
         ),
       );
@@ -139,6 +142,9 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
               const Color(0xFFF59E0B), report.recommendations),
           const SizedBox(height: 16),
         ],
+
+        // Bottom safe area padding
+        SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
       ],
     );
   }
@@ -146,7 +152,7 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
   Widget _buildSection(
       String title, IconData icon, Color color, List<String> items) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -162,7 +168,7 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
@@ -171,7 +177,7 @@ class _WeeklyReportPageState extends State<WeeklyReportPage> {
           ),
           const SizedBox(height: 10),
           ...items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

@@ -19,7 +19,7 @@ class ServerInsightCard extends StatelessWidget {
     final icon = _iconForType(insight.type);
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -52,7 +52,7 @@ class ServerInsightCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textPrimary,
                         ),
@@ -69,7 +69,7 @@ class ServerInsightCard extends StatelessWidget {
                       child: Text(
                         '${(insight.confidence * 100).round()}%',
                         style: TextStyle(
-                          fontSize: 9,
+                          fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: color,
                         ),
@@ -77,13 +77,13 @@ class ServerInsightCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 6),
                 Text(
                   insight.description,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     color: AppTheme.textSecondary,
                     height: 1.4,
                   ),

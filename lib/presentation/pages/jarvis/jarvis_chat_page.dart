@@ -392,6 +392,17 @@ class _JarvisChatPageState extends ConsumerState<JarvisChatPage>
     final hasBriefing =
         state.briefingData != null && state.briefingData!.isNotEmpty;
 
+    // Count extra items added before messages in the reversed ListView:
+    // typing indicator, suggestion chips, nudges, daily briefing
+    final nudges = isOnlyWelcome
+        ? ref.watch(insightsProvider).activeNudges
+        : <dynamic>[];
+    final showBriefing = hasBriefing && isOnlyWelcome;
+    final extraItems = (state.isLoading ? 1 : 0) +
+        (isOnlyWelcome ? 1 : 0) +
+        (isOnlyWelcome ? nudges.length : 0) +
+        (showBriefing ? 1 : 0);
+
     return Container(
       color: AppTheme.backgroundColor,
       child: SafeArea(
@@ -400,49 +411,61 @@ class _JarvisChatPageState extends ConsumerState<JarvisChatPage>
           children: [
             _buildHeader(context),
             if (hasNoApiKey) _buildNoApiKeyBanner(context),
-            if (hasBriefing && isOnlyWelcome)
-              Flexible(
-                flex: 0,
-                child: DailyBriefing(
-                  briefingData: state.briefingData!,
-                  onRefresh: () =>
-                      ref.read(jarvisProvider.notifier).refreshBriefing(),
-                ),
-              ),
-            if (isOnlyWelcome)
-              Flexible(
-                flex: 0,
-                child: _buildNudges(),
-              ),
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
                 reverse: true,
                 padding: const EdgeInsets.only(top: 8, bottom: 8),
-                itemCount: state.messages.length +
-                    (state.isLoading ? 1 : 0) +
-                    (isOnlyWelcome ? 1 : 0),
+                itemCount: state.messages.length + extraItems,
                 itemBuilder: (context, index) {
+                  // Reversed list: index 0 = bottom-most item
                   if (state.isLoading && index == 0) {
                     return const TypingIndicator();
                   }
 
-                  final adjustedIndex = index - (state.isLoading ? 1 : 0);
+                  int cursor = index - (state.isLoading ? 1 : 0);
 
-                  if (isOnlyWelcome && adjustedIndex == 0) {
+                  // Suggestion chips (just above typing indicator)
+                  if (isOnlyWelcome && cursor == 0) {
                     return _buildSuggestionChips();
                   }
+                  if (isOnlyWelcome) cursor -= 1;
 
-                  final messageIndex = state.messages.length -
-                      1 -
-                      (adjustedIndex - (isOnlyWelcome ? 1 : 0));
-
-                  if (messageIndex < 0 ||
-                      messageIndex >= state.messages.length) {
-                    return const SizedBox.shrink();
+                  // Messages
+                  final messageIndex = state.messages.length - 1 - cursor;
+                  if (messageIndex >= 0 &&
+                      messageIndex < state.messages.length) {
+                    return ChatBubble(message: state.messages[messageIndex]);
                   }
 
-                  return ChatBubble(message: state.messages[messageIndex]);
+                  // Items above messages (top of list, rendered last in reversed list)
+                  final topCursor = cursor - state.messages.length;
+
+                  // Nudges
+                  if (isOnlyWelcome && topCursor < nudges.length) {
+                    final nudge = nudges[topCursor];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 3),
+                      child: NudgeCard(
+                        nudge: nudge,
+                        onDismiss: () => ref
+                            .read(insightsProvider.notifier)
+                            .dismissNudge(nudge.id),
+                      ),
+                    );
+                  }
+
+                  // Daily briefing (very top)
+                  if (showBriefing) {
+                    return DailyBriefing(
+                      briefingData: state.briefingData!,
+                      onRefresh: () =>
+                          ref.read(jarvisProvider.notifier).refreshBriefing(),
+                    );
+                  }
+
+                  return const SizedBox.shrink();
                 },
               ),
             ),
@@ -581,28 +604,6 @@ class _JarvisChatPageState extends ConsumerState<JarvisChatPage>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildNudges() {
-    final insightsState = ref.watch(insightsProvider);
-    final nudges = insightsState.activeNudges;
-    if (nudges.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Column(
-        children: nudges.map((nudge) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: NudgeCard(
-              nudge: nudge,
-              onDismiss: () =>
-                  ref.read(insightsProvider.notifier).dismissNudge(nudge.id),
-            ),
-          );
-        }).toList(),
       ),
     );
   }

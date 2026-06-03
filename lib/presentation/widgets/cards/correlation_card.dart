@@ -18,7 +18,7 @@ class CorrelationCard extends StatelessWidget {
         : Icons.link_outlined;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -45,7 +45,7 @@ class CorrelationCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
                   ),
@@ -61,7 +61,7 @@ class CorrelationCard extends StatelessWidget {
                 child: Text(
                   correlation.strength,
                   style: TextStyle(
-                    fontSize: 9,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
                     color: color,
                   ),
@@ -69,13 +69,13 @@ class CorrelationCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             correlation.humanReadable,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               color: AppTheme.textSecondary,
               height: 1.4,
             ),
@@ -87,7 +87,7 @@ class CorrelationCard extends StatelessWidget {
               Text(
                 'r = ${correlation.coefficient.toStringAsFixed(2)}',
                 style: TextStyle(
-                  fontSize: 9,
+                  fontSize: 10,
                   fontWeight: FontWeight.w600,
                   color: color,
                 ),

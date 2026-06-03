@@ -90,7 +90,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                     _buildSectionHeader(
                         Icons.warning_amber_outlined, 'Anomalies'),
                     ..._anomalies.map((a) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.only(bottom: 12),
                           child: _buildAnomalyCard(a),
                         )),
                     const SizedBox(height: 12),
@@ -101,7 +101,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                     _buildSectionHeader(
                         Icons.insights_outlined, 'AI Insights'),
                     ...serverInsights.map((i) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.only(bottom: 12),
                           child: ServerInsightCard(
                             insight: i,
                             onDismiss: () => ref
@@ -117,7 +117,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                     _buildSectionHeader(
                         Icons.compare_arrows_outlined, 'Correlations'),
                     ..._correlations.map((c) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.only(bottom: 12),
                           child: CorrelationCard(correlation: c),
                         )),
                     const SizedBox(height: 12),
@@ -128,7 +128,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                     _buildSectionHeader(
                         Icons.trending_up_outlined, '7-Day Trends'),
                     ..._trends.map((t) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.only(bottom: 12),
                           child: TrendChartCard(trend: t),
                         )),
                     const SizedBox(height: 12),
@@ -139,34 +139,41 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                       serverInsights.isEmpty &&
                       _correlations.isEmpty &&
                       _trends.isEmpty)
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 48),
-                        child: Column(
-                          children: [
-                            Icon(Icons.insights_outlined,
-                                size: 48, color: AppTheme.textTertiary),
-                            const SizedBox(height: 12),
-                            Text(
-                              'No insights yet',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppTheme.textTertiary,
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.6,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 48),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.insights_outlined,
+                                  size: 48, color: AppTheme.textTertiary),
+                              const SizedBox(height: 12),
+                              Text(
+                                'No insights yet',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppTheme.textTertiary,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Keep tracking your data and insights will appear here',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppTheme.textTertiary,
+                              const SizedBox(height: 4),
+                              Text(
+                                'Keep tracking your data and insights will appear here',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppTheme.textTertiary,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
+
+                  // Bottom safe area padding
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
                 ],
               ),
             ),
@@ -175,15 +182,15 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
 
   Widget _buildSectionHeader(IconData icon, String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: AppTheme.primaryColor),
+          Icon(icon, size: 16, color: AppTheme.primaryColor),
           const SizedBox(width: 6),
           Text(
             title,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
               letterSpacing: -0.2,
@@ -202,7 +209,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
             : AppTheme.textTertiary;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -239,7 +246,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textPrimary,
                         ),
@@ -256,7 +263,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                       child: Text(
                         anomaly.severity,
                         style: TextStyle(
-                          fontSize: 9,
+                          fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: color,
                         ),
@@ -270,7 +277,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     color: AppTheme.textSecondary,
                     height: 1.4,
                   ),

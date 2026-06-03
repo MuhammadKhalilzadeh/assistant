@@ -156,15 +156,62 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
     }
   }
 
+  /// All known provider keys in priority order.
+  static const _allProviderKeys = [
+    'openai', 'anthropic', 'googleai', 'groq', 'deepseek',
+    'openrouter', 'mistral', 'cohere', 'togetherai', 'kimi',
+  ];
+
   /// Check which API key is available and return the provider name.
   Future<String?> checkApiKeyAvailability() async {
-    final hasOpenAi = await _tokenStorage.hasApiKey('openai');
-    if (hasOpenAi) return 'openai';
-
-    final hasAnthropic = await _tokenStorage.hasApiKey('anthropic');
-    if (hasAnthropic) return 'anthropic';
-
+    for (final key in _allProviderKeys) {
+      if (await _tokenStorage.hasApiKey(key)) return key;
+    }
     return null;
+  }
+
+  /// Return all providers that have stored API keys.
+  Future<List<String>> _getAvailableProviders() async {
+    final providers = <String>[];
+    for (final key in _allProviderKeys) {
+      if (await _tokenStorage.hasApiKey(key)) providers.add(key);
+    }
+    return providers;
+  }
+
+  /// Convert a provider string to the AiProvider enum.
+  AiProvider _toAiProvider(String provider) {
+    return switch (provider) {
+      'openai' => AiProvider.openai,
+      'anthropic' => AiProvider.anthropic,
+      'googleai' => AiProvider.googleai,
+      'groq' => AiProvider.groq,
+      'deepseek' => AiProvider.deepseek,
+      'openrouter' => AiProvider.openrouter,
+      'mistral' => AiProvider.mistral,
+      'cohere' => AiProvider.cohere,
+      'togetherai' => AiProvider.togetherai,
+      'kimi' => AiProvider.kimi,
+      _ => AiProvider.openai,
+    };
+  }
+
+  /// Check if an error is a billing, auth, or rate-limit error worth retrying
+  /// with another provider.
+  bool _isBillingOrAuthError(Object error) {
+    final msg = error.toString().toLowerCase();
+    return msg.contains('billing') ||
+        msg.contains('credit') ||
+        msg.contains('insufficient') ||
+        msg.contains('quota') ||
+        msg.contains('rate limit') ||
+        msg.contains('rate_limit') ||
+        msg.contains('429') ||
+        msg.contains('401') ||
+        msg.contains('403') ||
+        msg.contains('invalid') && msg.contains('key') ||
+        msg.contains('authentication') ||
+        msg.contains('unauthorized');
   }
 
   /// Send a user message and get an AI response
@@ -181,12 +228,12 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
     );
 
     try {
-      // Determine provider and get API key
-      final provider = await checkApiKeyAvailability();
-      if (provider == null) {
+      // Get all available providers for fallback
+      final providers = await _getAvailableProviders();
+      if (providers.isEmpty) {
         final errorMsg = ChatMessage.error(
-          'No API key configured. Please add an OpenAI or Anthropic API key '
-          'in Settings to use Jarvis.',
+          'No API key configured. Please add an OpenAI, Anthropic, or Google AI '
+          'key in Settings to use Jarvis.',
         );
         state = state.copyWith(
           messages: [...state.messages, errorMsg],
@@ -196,68 +243,73 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
         return;
       }
 
-      final apiKey = await _tokenStorage.getApiKey(provider);
-      if (apiKey == null || apiKey.isEmpty) {
-        final errorMsg = ChatMessage.error(
-          'API key for $provider is missing. Please re-add it in Settings.',
-        );
-        state = state.copyWith(
-          messages: [...state.messages, errorMsg],
-          isLoading: false,
-          error: 'API key missing',
-        );
-        return;
-      }
-
       String responseContent;
+      String usedProvider = providers.first;
+      Object? lastError;
 
-      // Hybrid routing: complex queries go to server, simple ones stay client-side
-      if (_needsServerRouting(content.trim())) {
-        // Route to server — it has the data-aware AI brain with full DB access
-        responseContent = await _sendToServer(
-          message: content.trim(),
-          provider: provider,
-        );
-      } else {
-        // Client-side: gather local context and call LLM directly
-        final aiProvider =
-            provider == 'openai' ? AiProvider.openai : AiProvider.anthropic;
+      // Try each available provider, falling back on billing/auth errors
+      for (final provider in providers) {
+        final apiKey = await _tokenStorage.getApiKey(provider);
+        if (apiKey == null || apiKey.isEmpty) continue;
 
-        String? dataContext;
         try {
-          dataContext =
-              await _dataService.gatherQueryContext(content.trim());
-        } catch (e) {
-          debugPrint('[JarvisProvider] Failed to gather context: $e');
-        }
+          if (_needsServerRouting(content.trim())) {
+            responseContent = await _sendToServer(
+              message: content.trim(),
+              provider: provider,
+            );
+          } else {
+            final aiProvider = _toAiProvider(provider);
 
-        responseContent = await _apiService.sendMessage(
-          messages: state.messages
-              .where((m) => !m.isError && m.role != MessageRole.system)
-              .toList(),
-          apiKey: apiKey,
-          provider: aiProvider,
-          dataContext: dataContext,
-        );
+            String? dataContext;
+            try {
+              dataContext =
+                  await _dataService.gatherQueryContext(content.trim());
+            } catch (e) {
+              debugPrint('[JarvisProvider] Failed to gather context: $e');
+            }
+
+            responseContent = await _apiService.sendMessage(
+              messages: state.messages
+                  .where((m) => !m.isError && m.role != MessageRole.system)
+                  .toList(),
+              apiKey: apiKey,
+              provider: aiProvider,
+              dataContext: dataContext,
+            );
+          }
+
+          usedProvider = provider;
+
+          // Parse actions from response
+          final actions = _parseActions(responseContent);
+          final cleanedContent = _stripActionTags(responseContent);
+
+          final assistantMessage = ChatMessage.assistant(cleanedContent);
+          state = state.copyWith(
+            messages: [...state.messages, assistantMessage],
+            isLoading: false,
+            activeProvider: usedProvider,
+            pendingActions: actions,
+          );
+          return;
+        } catch (e) {
+          lastError = e;
+          debugPrint('[JarvisProvider] Provider $provider failed: $e');
+          if (_isBillingOrAuthError(e)) {
+            debugPrint('[JarvisProvider] Billing/auth error, trying next provider...');
+            continue;
+          }
+          // Non-billing error — don't try other providers
+          break;
+        }
       }
 
-      // Parse actions from response
-      final actions = _parseActions(responseContent);
-      final cleanedContent = _stripActionTags(responseContent);
-
-      final assistantMessage = ChatMessage.assistant(cleanedContent);
-      state = state.copyWith(
-        messages: [...state.messages, assistantMessage],
-        isLoading: false,
-        activeProvider: provider,
-        pendingActions: actions,
-      );
+      // All providers failed
+      throw lastError ?? Exception('All providers failed');
     } catch (e) {
       debugPrint('[JarvisProvider] sendMessage error: $e');
-      final errorMsg = ChatMessage.error(
-        'Sorry, I encountered an error. Please try again.\n\n'
-        '${_formatError(e)}',
-      );
+      final errorMsg = ChatMessage.error(_formatError(e));
       state = state.copyWith(
         messages: [...state.messages, errorMsg],
         isLoading: false,
@@ -297,8 +349,7 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
       // Fall back to client-side if server fails
       debugPrint(
           '[JarvisProvider] Server routing failed (${response.statusCode}), falling back to client');
-      final aiProvider =
-          provider == 'openai' ? AiProvider.openai : AiProvider.anthropic;
+      final aiProvider = _toAiProvider(provider);
       final apiKey = await _tokenStorage.getApiKey(provider);
 
       String? dataContext;
@@ -356,17 +407,40 @@ class JarvisNotifier extends StateNotifier<JarvisState> {
     );
   }
 
-  /// Format error for display
+  /// Format error into a user-friendly message
   String _formatError(Object error) {
-    final msg = error.toString();
-    if (msg.contains('API error')) {
-      final match = RegExp(r'API error: (.+)').firstMatch(msg);
-      return match?.group(1) ?? msg;
+    final msg = error.toString().toLowerCase();
+
+    if (msg.contains('billing') ||
+        msg.contains('credit') ||
+        msg.contains('insufficient') ||
+        msg.contains('quota')) {
+      return 'Insufficient credits on all configured providers. '
+          'Top up your account or add another provider key in Settings.';
     }
-    if (msg.contains('Failed to reach')) {
+
+    if (msg.contains('401') ||
+        msg.contains('403') ||
+        msg.contains('unauthorized') ||
+        msg.contains('authentication') ||
+        (msg.contains('invalid') && msg.contains('key'))) {
+      return 'API key appears invalid. Please check your key in Settings.';
+    }
+
+    if (msg.contains('rate limit') ||
+        msg.contains('rate_limit') ||
+        msg.contains('429')) {
+      return 'Rate limit reached. Please wait a moment and try again.';
+    }
+
+    if (msg.contains('failed to reach') ||
+        msg.contains('socketexception') ||
+        msg.contains('connection') ||
+        msg.contains('timeout')) {
       return 'Could not connect to the AI service. Check your internet connection.';
     }
-    return 'An unexpected error occurred.';
+
+    return 'Something went wrong. Please try again.';
   }
 }
 

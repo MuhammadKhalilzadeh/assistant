@@ -146,6 +146,8 @@ class CustomTodosCard extends StatelessWidget {
         // Title
         Text(
           title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: AppTheme.textPrimary,
             fontSize: titleFontSize,
@@ -156,6 +158,8 @@ class CustomTodosCard extends StatelessWidget {
         // Subtitle
         Text(
           _subtitleText,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: AppTheme.textSecondary,
             fontSize: subtitleFontSize,

@@ -144,14 +144,33 @@ class HealthConnectService {
     }
   }
 
-  /// Request Health Connect permissions
+  /// Request Health Connect permissions.
+  /// Requests types individually so unsupported types (e.g. SLEEP_IN_BED on
+  /// some Samsung Health versions) don't block the entire permission flow.
   Future<bool> requestPermissions() async {
     _configure();
     try {
-      return await _health.requestAuthorization(
+      // Try all at once first — fastest path
+      final ok = await _health.requestAuthorization(
         _readTypes,
         permissions: _permissions,
       );
+      if (ok) return true;
+
+      // Fall back to per-type requests so unsupported types are skipped
+      bool anyGranted = false;
+      for (final type in _readTypes) {
+        try {
+          final granted = await _health.requestAuthorization(
+            [type],
+            permissions: [HealthDataAccess.READ],
+          );
+          if (granted) anyGranted = true;
+        } catch (_) {
+          // Type not supported on this device — skip it
+        }
+      }
+      return anyGranted;
     } catch (_) {
       return false;
     }
@@ -270,6 +289,28 @@ class HealthConnectService {
     return _getHeartRateReadings(from, to);
   }
 
+  /// Get health data safely, skipping types that aren't available on the device.
+  Future<List<HealthDataPoint>> _safeGetHealthData({
+    required List<HealthDataType> types,
+    required DateTime startTime,
+    required DateTime endTime,
+  }) async {
+    final allData = <HealthDataPoint>[];
+    for (final type in types) {
+      try {
+        final data = await _health.getHealthDataFromTypes(
+          types: [type],
+          startTime: startTime,
+          endTime: endTime,
+        );
+        allData.addAll(data);
+      } catch (_) {
+        // Type not supported on this device (e.g. SLEEP_IN_BED) — skip it
+      }
+    }
+    return allData;
+  }
+
   /// Get last night's sleep session
   Future<SleepSessionData?> _getLastNightSleep(
       DateTime from, DateTime to) async {
@@ -282,7 +323,7 @@ class HealthConnectService {
         HealthDataType.SLEEP_REM,
       ];
 
-      final data = await _health.getHealthDataFromTypes(
+      final data = await _safeGetHealthData(
         types: sleepTypes,
         startTime: from,
         endTime: to,

@@ -106,6 +106,8 @@ class CustomFocusTimerCard extends StatelessWidget {
       children: [
         Text(
           _displayText,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: AppTheme.textPrimary,
             fontSize: titleFontSize,
@@ -115,6 +117,8 @@ class CustomFocusTimerCard extends StatelessWidget {
         SizedBox(height: spacing),
         Text(
           _subtitleText,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: AppTheme.textSecondary,
             fontSize: subtitleFontSize,

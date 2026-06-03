@@ -23,7 +23,7 @@ class TrendChartCard extends StatelessWidget {
             : Icons.trending_flat;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -40,7 +40,7 @@ class TrendChartCard extends StatelessWidget {
                 child: Text(
                   trend.label,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
                   ),
@@ -56,7 +56,7 @@ class TrendChartCard extends StatelessWidget {
                 child: Text(
                   trend.direction,
                   style: TextStyle(
-                    fontSize: 9,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
                     color: color,
                   ),
@@ -64,7 +64,7 @@ class TrendChartCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           // Sparkline
           if (trend.values.length >= 2)
             SizedBox(
@@ -77,13 +77,13 @@ class TrendChartCard extends StatelessWidget {
                 ),
               ),
             ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             trend.summary,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               color: AppTheme.textSecondary,
               height: 1.4,
             ),

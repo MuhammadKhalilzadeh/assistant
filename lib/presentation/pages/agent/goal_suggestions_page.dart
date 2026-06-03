@@ -73,23 +73,26 @@ class _GoalSuggestionsPageState extends State<GoalSuggestionsPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _suggestions.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.check_circle_outline,
-                            size: 48, color: AppTheme.successColor),
-                        const SizedBox(height: 12),
-                        const Text('All caught up!',
-                            style: TextStyle(
-                                fontSize: 14, color: AppTheme.textSecondary)),
-                        const SizedBox(height: 4),
-                        Text('No pending goal suggestions',
-                            style: TextStyle(
-                                fontSize: 12, color: AppTheme.textTertiary)),
-                      ],
+              ? SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check_circle_outline,
+                              size: 48, color: AppTheme.successColor),
+                          const SizedBox(height: 12),
+                          const Text('All caught up!',
+                              style: TextStyle(
+                                  fontSize: 14, color: AppTheme.textSecondary)),
+                          const SizedBox(height: 4),
+                          Text('No pending goal suggestions',
+                              style: TextStyle(
+                                  fontSize: 12, color: AppTheme.textTertiary)),
+                        ],
+                      ),
                     ),
                   ),
                 )
@@ -109,7 +112,7 @@ class _GoalSuggestionsPageState extends State<GoalSuggestionsPage> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -137,7 +140,7 @@ class _GoalSuggestionsPageState extends State<GoalSuggestionsPage> {
                     Text(
                       '${_domainLabel(suggestion.domain)} Goal',
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
                       ),
@@ -145,7 +148,7 @@ class _GoalSuggestionsPageState extends State<GoalSuggestionsPage> {
                     Text(
                       '${suggestion.currentGoal.round()} → ${suggestion.suggestedGoal.round()}',
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: color,
                       ),
@@ -163,12 +166,12 @@ class _GoalSuggestionsPageState extends State<GoalSuggestionsPage> {
                 child: Text(
                   '${(suggestion.confidence * 100).round()}%',
                   style: TextStyle(
-                      fontSize: 9, fontWeight: FontWeight.w700, color: color),
+                      fontSize: 10, fontWeight: FontWeight.w700, color: color),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             suggestion.reason,
             style: const TextStyle(

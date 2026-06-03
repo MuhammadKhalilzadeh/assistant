@@ -47,7 +47,7 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
             onTap: () => setState(() => _isExpanded = !_isExpanded),
             behavior: HitTestBehavior.opaque,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+              padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
               child: Row(
                 children: [
                   const Icon(Icons.bar_chart_rounded,
@@ -108,7 +108,7 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
 
             // Metrics grid
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 8, 14, 12),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   const spacing = 8.0;
@@ -141,7 +141,7 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
       ),
     );
   }
@@ -153,7 +153,7 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
     List<String> items,
   ) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -164,7 +164,7 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: color,
                 ),
@@ -204,7 +204,7 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textTertiary,
               ),
@@ -215,7 +215,7 @@ class _WeeklyReportCardState extends ConsumerState<WeeklyReportCard> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
               ),

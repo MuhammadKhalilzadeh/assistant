@@ -148,6 +148,8 @@ class CustomWaterIntakeCard extends StatelessWidget {
 
     return Text(
       _displayText,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: TextStyle(
         color: AppTheme.textPrimary,
         fontSize: fontSize,

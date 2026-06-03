@@ -99,7 +99,7 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
               children: [
                 // Explanation
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
@@ -178,7 +178,7 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
     ValueChanged<String> onChanged,
   ) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -189,15 +189,16 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
         children: [
           Text(title,
               style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary)),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(subtitle,
-              style: TextStyle(fontSize: 11, color: AppTheme.textTertiary)),
+              style: TextStyle(fontSize: 12, color: AppTheme.textTertiary)),
           const SizedBox(height: 10),
           DropdownButtonFormField<String>(
             initialValue: value,
+            isExpanded: true,
             decoration: InputDecoration(
               isDense: true,
               contentPadding:

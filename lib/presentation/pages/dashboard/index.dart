@@ -185,6 +185,8 @@ class _HomeTab extends ConsumerWidget {
               ..._buildInsights(ref, paddingValue),
 
               // Productivity Section
+              _buildSectionLabel('Productivity'),
+              SizedBox(height: paddingValue * 0.5),
               CustomTodosCard(
                 totalTodos: todoStats.total,
                 completedTodos: todoStats.completed,
@@ -226,6 +228,8 @@ class _HomeTab extends ConsumerWidget {
               SizedBox(height: paddingValue),
 
               // Health Section
+              _buildSectionLabel('Health'),
+              SizedBox(height: paddingValue * 0.5),
               CustomWeatherCard(
                 temperature: weather?.currentTemperature ?? 24,
                 condition: _mapWeatherCondition(weather?.currentCondition),
@@ -277,6 +281,8 @@ class _HomeTab extends ConsumerWidget {
               SizedBox(height: paddingValue),
 
               // Wellness Section
+              _buildSectionLabel('Wellness'),
+              SizedBox(height: paddingValue * 0.5),
               CustomMoodTrackerCard(
                 currentMood: _mapMoodScore(moodStats.weeklyAverageMood),
                 streak: moodStats.currentStreak,
@@ -301,6 +307,31 @@ class _HomeTab extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  static Widget _buildSectionLabel(String label) {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(height: 0.5, color: AppTheme.dividerColor),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textTertiary,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(height: 0.5, color: AppTheme.dividerColor),
+        ),
+      ],
     );
   }
 
@@ -333,13 +364,13 @@ class _HomeTab extends ConsumerWidget {
         child: Row(
           children: [
             const Icon(Icons.insights_outlined,
-                size: 14, color: AppTheme.primaryColor),
+                size: 16, color: AppTheme.primaryColor),
             const SizedBox(width: 6),
             const Expanded(
               child: Text(
                 'Smart Insights',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                   letterSpacing: -0.2,

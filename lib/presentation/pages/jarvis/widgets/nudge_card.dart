@@ -38,6 +38,8 @@ class NudgeCard extends StatelessWidget {
           Expanded(
             child: Text(
               nudge.message,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 12,
                 color: AppTheme.textPrimary,

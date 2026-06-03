@@ -273,7 +273,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               AppTheme.spacingMD,
               AppTheme.spacingMD,
               AppTheme.spacingMD,
-              AppTheme.spacingSM,
+              0,
             ),
             child: Text(
               'AI API Keys',
@@ -284,7 +284,36 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
           ),
-          ...aiProviders.map((provider) {
+          const Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppTheme.spacingMD,
+              4,
+              AppTheme.spacingMD,
+              AppTheme.spacingSM,
+            ),
+            child: Text(
+              'Add at least one key. Free options: Groq, OpenRouter, Cohere',
+              style: TextStyle(
+                fontSize: 11,
+                color: AppTheme.textTertiary,
+              ),
+            ),
+          ),
+          // Premium providers
+          _buildProviderGroupLabel('Premium'),
+          ...premiumProviders.map((provider) {
+            final maskedKey = apiKeys[provider];
+            final isConfigured = maskedKey != null && maskedKey.isNotEmpty;
+            return _buildApiKeyTile(
+              title: aiProviderNames[provider] ?? provider,
+              maskedKey: maskedKey,
+              isConfigured: isConfigured,
+              onTap: () => _showApiKeySheet(provider, isConfigured),
+            );
+          }),
+          // Free tier providers
+          _buildProviderGroupLabel('Free Tier Available'),
+          ...freeProviders.map((provider) {
             final maskedKey = apiKeys[provider];
             final isConfigured = maskedKey != null && maskedKey.isNotEmpty;
             return _buildApiKeyTile(
@@ -296,6 +325,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           }),
           const SizedBox(height: AppTheme.spacingSM),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProviderGroupLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppTheme.spacingMD,
+        AppTheme.spacingSM,
+        AppTheme.spacingMD,
+        2,
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: AppTheme.textTertiary,
+          letterSpacing: 0.8,
+        ),
       ),
     );
   }

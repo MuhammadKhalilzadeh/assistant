@@ -4,7 +4,18 @@ import 'package:http/http.dart' as http;
 import 'package:assistant/data/models/chat_message_model.dart';
 
 /// The AI provider being used for chat
-enum AiProvider { openai, anthropic }
+enum AiProvider {
+  openai,
+  anthropic,
+  googleai,
+  groq,
+  deepseek,
+  openrouter,
+  mistral,
+  cohere,
+  togetherai,
+  kimi,
+}
 
 /// Service that sends messages directly to LLM APIs using the user's own API keys.
 /// Supports OpenAI and Anthropic. No backend proxy needed.
@@ -53,6 +64,8 @@ Rules for actions:
       'https://api.openai.com/v1/chat/completions';
   static const String _anthropicUrl =
       'https://api.anthropic.com/v1/messages';
+  static const String _googleAiUrl =
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
   // Models
   static const String _openAiModel = 'gpt-4o-mini';
@@ -79,6 +92,46 @@ Rules for actions:
         return _sendOpenAi(messages, apiKey, dataContext);
       case AiProvider.anthropic:
         return _sendAnthropic(messages, apiKey, dataContext);
+      case AiProvider.googleai:
+        return _sendGoogleAi(messages, apiKey, dataContext);
+      case AiProvider.groq:
+        return _sendOpenAiCompatible(
+          messages: messages, apiKey: apiKey, dataContext: dataContext,
+          baseUrl: 'https://api.groq.com/openai/v1/chat/completions',
+          model: 'llama-3.3-70b-versatile', providerName: 'Groq',
+        );
+      case AiProvider.deepseek:
+        return _sendOpenAiCompatible(
+          messages: messages, apiKey: apiKey, dataContext: dataContext,
+          baseUrl: 'https://api.deepseek.com/v1/chat/completions',
+          model: 'deepseek-chat', providerName: 'DeepSeek',
+        );
+      case AiProvider.openrouter:
+        return _sendOpenAiCompatible(
+          messages: messages, apiKey: apiKey, dataContext: dataContext,
+          baseUrl: 'https://openrouter.ai/api/v1/chat/completions',
+          model: 'meta-llama/llama-3.3-70b-instruct:free', providerName: 'OpenRouter',
+        );
+      case AiProvider.mistral:
+        return _sendOpenAiCompatible(
+          messages: messages, apiKey: apiKey, dataContext: dataContext,
+          baseUrl: 'https://api.mistral.ai/v1/chat/completions',
+          model: 'mistral-small-latest', providerName: 'Mistral',
+        );
+      case AiProvider.cohere:
+        return _sendCohere(messages, apiKey, dataContext);
+      case AiProvider.togetherai:
+        return _sendOpenAiCompatible(
+          messages: messages, apiKey: apiKey, dataContext: dataContext,
+          baseUrl: 'https://api.together.xyz/v1/chat/completions',
+          model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', providerName: 'Together AI',
+        );
+      case AiProvider.kimi:
+        return _sendOpenAiCompatible(
+          messages: messages, apiKey: apiKey, dataContext: dataContext,
+          baseUrl: 'https://api.moonshot.cn/v1/chat/completions',
+          model: 'moonshot-v1-8k', providerName: 'Kimi',
+        );
     }
   }
 
@@ -199,6 +252,183 @@ Rules for actions:
       }
       debugPrint('[JarvisApi] Anthropic request failed: $e');
       throw Exception('Failed to reach Anthropic: $e');
+    }
+  }
+
+  /// Send messages to Google AI (Gemini) API
+  Future<String> _sendGoogleAi(
+      List<ChatMessage> messages, String apiKey, String? dataContext) async {
+    final systemPrompt = _buildSystemPrompt(dataContext);
+
+    final contents = <Map<String, dynamic>>[];
+
+    for (final m in messages.where((m) => m.role != MessageRole.system && !m.isError)) {
+      contents.add({
+        'role': m.role == MessageRole.user ? 'user' : 'model',
+        'parts': [{'text': m.content}],
+      });
+    }
+
+    final body = jsonEncode({
+      'system_instruction': {
+        'parts': [{'text': systemPrompt}],
+      },
+      'contents': contents,
+      'generationConfig': {
+        'maxOutputTokens': 1024,
+        'temperature': 0.7,
+      },
+    });
+
+    try {
+      final response = await _client
+          .post(
+            Uri.parse('$_googleAiUrl?key=$apiKey'),
+            headers: {'Content-Type': 'application/json'},
+            body: body,
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final candidates = data['candidates'] as List<dynamic>?;
+        if (candidates != null && candidates.isNotEmpty) {
+          final content = candidates[0]['content'] as Map<String, dynamic>;
+          final parts = content['parts'] as List<dynamic>;
+          if (parts.isNotEmpty) {
+            return parts[0]['text'] as String;
+          }
+        }
+        throw Exception('No response from Google AI');
+      } else {
+        final errorBody = _parseErrorBody(response.body);
+        debugPrint(
+            '[JarvisApi] Google AI error ${response.statusCode}: $errorBody');
+        throw Exception('Google AI API error: $errorBody');
+      }
+    } catch (e) {
+      if (e is Exception && e.toString().contains('Google AI API error')) {
+        rethrow;
+      }
+      debugPrint('[JarvisApi] Google AI request failed: $e');
+      throw Exception('Failed to reach Google AI: $e');
+    }
+  }
+
+  /// Generic sender for OpenAI-compatible APIs (Groq, DeepSeek, OpenRouter, etc.)
+  Future<String> _sendOpenAiCompatible({
+    required List<ChatMessage> messages,
+    required String apiKey,
+    required String baseUrl,
+    required String model,
+    required String providerName,
+    String? dataContext,
+  }) async {
+    final systemPrompt = _buildSystemPrompt(dataContext);
+    final requestMessages = <Map<String, String>>[
+      {'role': 'system', 'content': systemPrompt},
+      ...messages
+          .where((m) => m.role != MessageRole.system && !m.isError)
+          .map((m) => {
+                'role': m.role == MessageRole.user ? 'user' : 'assistant',
+                'content': m.content,
+              }),
+    ];
+
+    final body = jsonEncode({
+      'model': model,
+      'messages': requestMessages,
+      'max_tokens': 1024,
+      'temperature': 0.7,
+    });
+
+    try {
+      final response = await _client
+          .post(
+            Uri.parse(baseUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $apiKey',
+            },
+            body: body,
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final choices = data['choices'] as List<dynamic>;
+        if (choices.isNotEmpty) {
+          final message = choices[0]['message'] as Map<String, dynamic>;
+          return message['content'] as String;
+        }
+        throw Exception('No response from $providerName');
+      } else {
+        final errorBody = _parseErrorBody(response.body);
+        debugPrint('[JarvisApi] $providerName error ${response.statusCode}: $errorBody');
+        throw Exception('$providerName API error: $errorBody');
+      }
+    } catch (e) {
+      if (e is Exception && e.toString().contains('API error')) rethrow;
+      debugPrint('[JarvisApi] $providerName request failed: $e');
+      throw Exception('Failed to reach $providerName: $e');
+    }
+  }
+
+  /// Send messages to Cohere API (uses /v2/chat with its own format)
+  Future<String> _sendCohere(
+      List<ChatMessage> messages, String apiKey, String? dataContext) async {
+    final systemPrompt = _buildSystemPrompt(dataContext);
+
+    final chatHistory = messages
+        .where((m) => m.role != MessageRole.system && !m.isError)
+        .map((m) => {
+              'role': m.role == MessageRole.user ? 'user' : 'assistant',
+              'content': m.content,
+            })
+        .toList();
+
+    // Cohere v2 chat format
+    final body = jsonEncode({
+      'model': 'command-r-plus',
+      'messages': [
+        {'role': 'system', 'content': systemPrompt},
+        ...chatHistory,
+      ],
+      'max_tokens': 1024,
+      'temperature': 0.7,
+    });
+
+    try {
+      final response = await _client
+          .post(
+            Uri.parse('https://api.cohere.com/v2/chat'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $apiKey',
+            },
+            body: body,
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final message = data['message'] as Map<String, dynamic>?;
+        if (message != null) {
+          final content = message['content'] as List<dynamic>?;
+          if (content != null && content.isNotEmpty) {
+            return content[0]['text'] as String;
+          }
+        }
+        throw Exception('No response from Cohere');
+      } else {
+        final errorBody = _parseErrorBody(response.body);
+        debugPrint('[JarvisApi] Cohere error ${response.statusCode}: $errorBody');
+        throw Exception('Cohere API error: $errorBody');
+      }
+    } catch (e) {
+      if (e is Exception && e.toString().contains('Cohere API error')) rethrow;
+      debugPrint('[JarvisApi] Cohere request failed: $e');
+      throw Exception('Failed to reach Cohere: $e');
     }
   }
 

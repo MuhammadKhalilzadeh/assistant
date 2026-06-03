@@ -3,14 +3,38 @@ import 'package:assistant/services/token_storage_service.dart';
 import 'package:assistant/providers/auth_provider.dart';
 
 /// Supported AI API key providers
-const List<String> aiProviders = ['openai', 'anthropic', 'google_ai'];
+const List<String> aiProviders = [
+  'openai',
+  'anthropic',
+  'googleai',
+  'groq',
+  'deepseek',
+  'openrouter',
+  'mistral',
+  'cohere',
+  'togetherai',
+  'kimi',
+];
 
 /// Display names for each provider
 const Map<String, String> aiProviderNames = {
   'openai': 'OpenAI',
   'anthropic': 'Anthropic',
-  'google_ai': 'Google AI',
+  'googleai': 'Google AI (Gemini)',
+  'groq': 'Groq (Free)',
+  'deepseek': 'DeepSeek',
+  'openrouter': 'OpenRouter',
+  'mistral': 'Mistral AI',
+  'cohere': 'Cohere',
+  'togetherai': 'Together AI',
+  'kimi': 'Kimi (Moonshot)',
 };
+
+/// Providers with a generous free tier
+const List<String> freeProviders = ['groq', 'openrouter', 'cohere', 'togetherai'];
+
+/// Premium providers (paid / limited free)
+const List<String> premiumProviders = ['openai', 'anthropic', 'googleai', 'mistral', 'deepseek', 'kimi'];
 
 /// Provider to manage API keys state
 final apiKeysProvider =

@@ -66,37 +66,43 @@ class _WeeklyPlanPageState extends State<WeeklyPlanPage> {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: AppTheme.warningColor),
-            const SizedBox(height: 12),
-            Text('Failed to load plan', style: TextStyle(color: AppTheme.textSecondary)),
-            TextButton(onPressed: _load, child: const Text('Retry')),
-          ],
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: AppTheme.warningColor),
+              const SizedBox(height: 12),
+              Text('Failed to load plan', style: TextStyle(color: AppTheme.textSecondary)),
+              TextButton(onPressed: _load, child: const Text('Retry')),
+            ],
+          ),
         ),
       );
     }
 
     if (_plan == null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.calendar_month_outlined, size: 48, color: AppTheme.textTertiary),
-            const SizedBox(height: 12),
-            const Text('No active plan', style: TextStyle(color: AppTheme.textSecondary)),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: _generate,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.calendar_month_outlined, size: 48, color: AppTheme.textTertiary),
+              const SizedBox(height: 12),
+              const Text('No active plan', style: TextStyle(color: AppTheme.textSecondary)),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: _generate,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Generate Weekly Plan'),
               ),
-              child: const Text('Generate Weekly Plan'),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
@@ -106,7 +112,7 @@ class _WeeklyPlanPageState extends State<WeeklyPlanPage> {
       children: [
         // AI Summary
         Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppTheme.primaryColor.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
@@ -168,8 +174,8 @@ class _WeeklyPlanPageState extends State<WeeklyPlanPage> {
     final isToday = day.date == DateTime.now().toIso8601String().split('T')[0];
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -219,7 +225,7 @@ class _WeeklyPlanPageState extends State<WeeklyPlanPage> {
                       ? AppTheme.primaryColor
                       : AppTheme.textTertiary;
               return Padding(
-                padding: const EdgeInsets.only(bottom: 4),
+                padding: const EdgeInsets.only(bottom: 6),
                 child: Row(
                   children: [
                     Container(
@@ -233,7 +239,7 @@ class _WeeklyPlanPageState extends State<WeeklyPlanPage> {
                       child: Text(
                         '${rec.suggestedTime} - ${rec.activity}${rec.duration > 0 ? ' (${rec.duration}min)' : ''}',
                         style: const TextStyle(
-                            fontSize: 11, color: AppTheme.textSecondary),
+                            fontSize: 12, color: AppTheme.textSecondary),
                       ),
                     ),
                   ],
@@ -258,7 +264,7 @@ class _WeeklyPlanPageState extends State<WeeklyPlanPage> {
                   child: Text(
                     '${_domainLabel(target.domain)}: ${target.target.round()}',
                     style: TextStyle(
-                        fontSize: 9,
+                        fontSize: 10,
                         fontWeight: FontWeight.w500,
                         color: AppTheme.textTertiary),
                   ),
