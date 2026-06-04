@@ -143,13 +143,14 @@ export async function initializeDatabase(): Promise<void> {
 
     client = await pool.connect();
 
-    // Run pending migrations first (handles existing databases)
-    await runMigrations(client);
-
-    // Read and execute init.sql (idempotent CREATE TABLE IF NOT EXISTS)
+    // Read and execute init.sql first (idempotent CREATE TABLE IF NOT EXISTS)
+    // This must run before migrations so tables exist for ALTER statements
     const sqlPath = join(__dirname, '../../sql/init.sql');
     const initSql = readFileSync(sqlPath, 'utf-8');
     await client.query(initSql);
+
+    // Run pending migrations (handles schema changes to existing tables)
+    await runMigrations(client);
 
     logger.info('Database schema initialized successfully');
   } catch (err) {

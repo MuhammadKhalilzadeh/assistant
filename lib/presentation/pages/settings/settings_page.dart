@@ -13,6 +13,7 @@ import 'package:assistant/data/services/notifications_api_service.dart';
 import 'package:assistant/presentation/pages/agent/goal_suggestions_page.dart';
 import 'package:assistant/presentation/pages/agent/weekly_plan_page.dart';
 import 'package:assistant/presentation/pages/agent/agent_settings_page.dart';
+import 'package:assistant/presentation/widgets/sheets/demo_data_sheet.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -86,6 +87,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
             // AI Intelligence Section
             _buildAIIntelligenceSection(),
+            const SizedBox(height: AppTheme.spacingLG),
+
+            // Demo Data Section
+            _buildDemoDataSection(),
             const SizedBox(height: AppTheme.spacingLG),
 
             // About Section
@@ -1081,6 +1086,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   // ─── About Section ─────────────────────────────────────────────────
+
+  // ─── Demo Data Section ──────────────────────────────────────────────
+
+  Widget _buildDemoDataSection() {
+    return Container(
+      decoration: AppTheme.cardDecoration(),
+      child: _buildSettingsTile(
+        icon: Icons.science_outlined,
+        title: 'Demo Data',
+        subtitle: 'Generate or clear sample data',
+        onTap: () => DemoDataSheet.show(context),
+      ),
+    );
+  }
 
   Widget _buildAboutSection() {
     return Container(

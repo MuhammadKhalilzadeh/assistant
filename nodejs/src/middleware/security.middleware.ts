@@ -19,7 +19,7 @@ export const securityHeaders = helmet({
 // Rate limiter configuration
 export const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 1000, // Limit each IP to 1000 requests per windowMs
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: { error: 'Too many requests', code: 'RATE_LIMIT_EXCEEDED' },
@@ -35,7 +35,7 @@ export const rateLimiter = rateLimit({
 // Stricter rate limiter for mutation endpoints
 export const mutationRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Limit mutations to 50 per windowMs
+  max: 500, // Limit mutations to 500 per windowMs
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests', code: 'RATE_LIMIT_EXCEEDED' },

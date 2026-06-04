@@ -187,10 +187,10 @@ export const screenTimeModel = {
       if (input.appUsage && input.appUsage.length > 0) {
         for (const app of input.appUsage) {
           const appResult = await client.query<AppUsageRow>(
-            `INSERT INTO app_usage (screen_time_id, app_name, category, minutes_used, icon_name)
-             VALUES ($1, $2, $3, $4, $5)
+            `INSERT INTO app_usage (screen_time_id, user_id, app_name, category, minutes_used, icon_name)
+             VALUES ($1, $2, $3, $4, $5, $6)
              RETURNING id, screen_time_id, app_name, category, minutes_used, icon_name`,
-            [recordId, app.appName, app.category || 'other', app.minutesUsed, app.iconName || 'apps']
+            [recordId, userId, app.appName, app.category || 'other', app.minutesUsed, app.iconName || 'apps']
           );
           appUsageEntries.push(rowToAppUsage(appResult.rows[0]));
         }
@@ -247,9 +247,9 @@ export const screenTimeModel = {
         await client.query('DELETE FROM app_usage WHERE screen_time_id = $1', [id]);
         for (const app of input.appUsage) {
           await client.query(
-            `INSERT INTO app_usage (screen_time_id, app_name, category, minutes_used, icon_name)
-             VALUES ($1, $2, $3, $4, $5)`,
-            [id, app.appName, app.category || 'other', app.minutesUsed, app.iconName || 'apps']
+            `INSERT INTO app_usage (screen_time_id, user_id, app_name, category, minutes_used, icon_name)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [id, userId, app.appName, app.category || 'other', app.minutesUsed, app.iconName || 'apps']
           );
         }
       }
